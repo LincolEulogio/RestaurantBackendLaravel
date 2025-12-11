@@ -30,7 +30,7 @@
     <div class="flex flex-col flex-1 overflow-y-auto">
         <nav class="flex-1 px-2 py-4 space-y-1">
 
-            {{-- Dashboard: Everyone with dashboard permission --}}
+            {{-- DASHBOARD --}}
             @permission('dashboard')
                 <a href="{{ route('dashboard') }}"
                     class="flex items-center px-4 py-3 {{ request()->routeIs('dashboard') ? 'text-white bg-blue-600' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white' }} rounded-lg group">
@@ -39,12 +39,25 @@
                 </a>
             @endpermission
 
-            {{-- Orders: Everyone with orders permission --}}
+            {{-- SECCIÓN: OPERACIONES --}}
+            <div class="pt-4 pb-2">
+                <p class="px-4 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                    Operaciones</p>
+            </div>
+
             @permission('orders')
                 <a href="{{ route('orders.index') }}"
                     class="flex items-center px-4 py-3 {{ request()->routeIs('orders.index') ? 'text-white bg-blue-600' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white' }} rounded-lg group">
                     <i data-lucide="clipboard-list" class="w-5 h-5 mr-3"></i>
                     Pedidos
+                </a>
+            @endpermission
+
+            @permission('kitchen')
+                <a href="{{ route('kitchen.index') }}"
+                    class="flex items-center px-4 py-3 {{ request()->routeIs('kitchen.index') ? 'text-white bg-blue-600' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white' }} rounded-lg group">
+                    <i data-lucide="chef-hat" class="w-5 h-5 mr-3"></i>
+                    KDS - Cocina
                 </a>
             @endpermission
 
@@ -60,23 +73,13 @@
                 Mesas
             </a>
 
-            <a href="{{ route('blogs.index') }}"
-                class="flex items-center px-4 py-3 {{ request()->routeIs('blogs.*') ? 'text-white bg-blue-600' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white' }} rounded-lg group">
-                <i data-lucide="newspaper" class="w-5 h-5 mr-3"></i>
-                Blogs
-            </a>
-
-            {{-- Kitchen/KDS: Only with kitchen permission --}}
-            @permission('kitchen')
-                <a href="{{ route('kitchen.index') }}"
-                    class="flex items-center px-4 py-3 {{ request()->routeIs('kitchen.index') ? 'text-white bg-blue-600' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white' }} rounded-lg group">
-                    <i data-lucide="chef-hat" class="w-5 h-5 mr-3"></i>
-                    KDS - Cocina
-                </a>
-            @endpermission
-
-            {{-- Menu: Only with menu permission --}}
+            {{-- SECCIÓN: CONTENIDO --}}
             @permission('menu')
+                <div class="pt-4 pb-2">
+                    <p class="px-4 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                        Contenido</p>
+                </div>
+
                 <a href="{{ route('menu.index') }}"
                     class="flex items-center px-4 py-3 {{ request()->routeIs('menu.index') ? 'text-white bg-blue-600' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white' }} rounded-lg group">
                     <i data-lucide="utensils-crossed" class="w-5 h-5 mr-3"></i>
@@ -96,7 +99,18 @@
                 </a>
             @endpermission
 
-            {{-- Inventory: Only with inventory permission --}}
+            <a href="{{ route('blogs.index') }}"
+                class="flex items-center px-4 py-3 {{ request()->routeIs('blogs.*') ? 'text-white bg-blue-600' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white' }} rounded-lg group">
+                <i data-lucide="newspaper" class="w-5 h-5 mr-3"></i>
+                Blogs
+            </a>
+
+            {{-- SECCIÓN: GESTIÓN --}}
+            <div class="pt-4 pb-2">
+                <p class="px-4 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Gestión
+                </p>
+            </div>
+
             @permission('inventory')
                 <a href="{{ route('inventory.index') }}"
                     class="flex items-center px-4 py-3 {{ request()->routeIs('inventory.index') ? 'text-white bg-blue-600' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white' }} rounded-lg group">
@@ -105,7 +119,6 @@
                 </a>
             @endpermission
 
-            {{-- Billing: Only with billing permission --}}
             @permission('billing')
                 <a href="{{ route('billing.index') }}"
                     class="flex items-center px-4 py-3 {{ request()->routeIs('billing.index') ? 'text-white bg-blue-600' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white' }} rounded-lg group">
@@ -114,7 +127,6 @@
                 </a>
             @endpermission
 
-            {{-- Reports: Only with reports permission --}}
             @permission('reports')
                 <a href="{{ route('reports.index') }}"
                     class="flex items-center px-4 py-3 {{ request()->routeIs('reports.index') ? 'text-white bg-blue-600' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white' }} rounded-lg group">
@@ -123,8 +135,13 @@
                 </a>
             @endpermission
 
-            {{-- Settings: Only with settings permission or admin --}}
+            {{-- SECCIÓN: ADMINISTRACIÓN --}}
             @permission('settings')
+                <div class="pt-4 pb-2">
+                    <p class="px-4 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                        Administración</p>
+                </div>
+
                 <a href="{{ route('roles.index') }}"
                     class="flex items-center px-4 py-3 {{ request()->routeIs('roles.index') ? 'text-white bg-blue-600' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white' }} rounded-lg group">
                     <i data-lucide="shield-check" class="w-5 h-5 mr-3"></i>
@@ -158,7 +175,7 @@
     <div class="flex flex-col flex-1 overflow-y-auto">
         <nav class="flex-1 px-2 py-4 space-y-1">
 
-            {{-- Dashboard: Everyone with dashboard permission --}}
+            {{-- DASHBOARD --}}
             @permission('dashboard')
                 <a href="{{ route('dashboard') }}"
                     class="flex items-center px-4 py-3 {{ request()->routeIs('dashboard') ? 'text-white bg-blue-600' : 'text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:text-white dark:hover:text-white' }} rounded-lg group">
@@ -167,12 +184,25 @@
                 </a>
             @endpermission
 
-            {{-- Orders: Everyone with orders permission --}}
+            {{-- SECCIÓN: OPERACIONES --}}
+            <div class="pt-4 pb-2">
+                <p class="px-4 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                    Operaciones</p>
+            </div>
+
             @permission('orders')
                 <a href="{{ route('orders.index') }}"
                     class="flex items-center px-4 py-3 {{ request()->routeIs('orders.index') ? 'text-white bg-blue-600' : 'text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:text-white dark:hover:text-white' }} rounded-lg group">
                     <i data-lucide="clipboard-list" class="w-5 h-5 mr-3"></i>
                     Pedidos
+                </a>
+            @endpermission
+
+            @permission('kitchen')
+                <a href="{{ route('kitchen.index') }}"
+                    class="flex items-center px-4 py-3 {{ request()->routeIs('kitchen.index') ? 'text-white bg-blue-600' : 'text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:text-white dark:hover:text-white' }} rounded-lg group">
+                    <i data-lucide="chef-hat" class="w-5 h-5 mr-3"></i>
+                    KDS - Cocina
                 </a>
             @endpermission
 
@@ -188,23 +218,13 @@
                 Mesas
             </a>
 
-            <a href="{{ route('blogs.index') }}"
-                class="flex items-center px-4 py-3 {{ request()->routeIs('blogs.*') ? 'text-white bg-blue-600' : 'text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:text-white dark:hover:text-white' }} rounded-lg group">
-                <i data-lucide="newspaper" class="w-5 h-5 mr-3"></i>
-                Blogs
-            </a>
-
-            {{-- Kitchen/KDS: Only with kitchen permission --}}
-            @permission('kitchen')
-                <a href="{{ route('kitchen.index') }}"
-                    class="flex items-center px-4 py-3 {{ request()->routeIs('kitchen.index') ? 'text-white bg-blue-600' : 'text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:text-white dark:hover:text-white' }} rounded-lg group">
-                    <i data-lucide="chef-hat" class="w-5 h-5 mr-3"></i>
-                    KDS - Cocina
-                </a>
-            @endpermission
-
-            {{-- Menu: Only with menu permission --}}
+            {{-- SECCIÓN: CONTENIDO --}}
             @permission('menu')
+                <div class="pt-4 pb-2">
+                    <p class="px-4 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                        Contenido</p>
+                </div>
+
                 <a href="{{ route('menu.index') }}"
                     class="flex items-center px-4 py-3 {{ request()->routeIs('menu.index') ? 'text-white bg-blue-600' : 'text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:text-white dark:hover:text-white' }} rounded-lg group">
                     <i data-lucide="utensils-crossed" class="w-5 h-5 mr-3"></i>
@@ -224,7 +244,18 @@
                 </a>
             @endpermission
 
-            {{-- Inventory: Only with inventory permission --}}
+            <a href="{{ route('blogs.index') }}"
+                class="flex items-center px-4 py-3 {{ request()->routeIs('blogs.*') ? 'text-white bg-blue-600' : 'text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:text-white dark:hover:text-white' }} rounded-lg group">
+                <i data-lucide="newspaper" class="w-5 h-5 mr-3"></i>
+                Blogs
+            </a>
+
+            {{-- SECCIÓN: GESTIÓN --}}
+            <div class="pt-4 pb-2">
+                <p class="px-4 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Gestión
+                </p>
+            </div>
+
             @permission('inventory')
                 <a href="{{ route('inventory.index') }}"
                     class="flex items-center px-4 py-3 {{ request()->routeIs('inventory.index') ? 'text-white bg-blue-600' : 'text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:text-white dark:hover:text-white' }} rounded-lg group">
@@ -233,7 +264,6 @@
                 </a>
             @endpermission
 
-            {{-- Billing: Only with billing permission --}}
             @permission('billing')
                 <a href="{{ route('billing.index') }}"
                     class="flex items-center px-4 py-3 {{ request()->routeIs('billing.index') ? 'text-white bg-blue-600' : 'text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:text-white dark:hover:text-white' }} rounded-lg group">
@@ -242,7 +272,6 @@
                 </a>
             @endpermission
 
-            {{-- Reports: Only with reports permission --}}
             @permission('reports')
                 <a href="{{ route('reports.index') }}"
                     class="flex items-center px-4 py-3 {{ request()->routeIs('reports.index') ? 'text-white bg-blue-600' : 'text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:text-white dark:hover:text-white' }} rounded-lg group">
@@ -251,8 +280,13 @@
                 </a>
             @endpermission
 
-            {{-- Settings: Only with settings permission or admin --}}
+            {{-- SECCIÓN: ADMINISTRACIÓN --}}
             @permission('settings')
+                <div class="pt-4 pb-2">
+                    <p class="px-4 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                        Administración</p>
+                </div>
+
                 <a href="{{ route('roles.index') }}"
                     class="flex items-center px-4 py-3 {{ request()->routeIs('roles.index') ? 'text-white bg-blue-600' : 'text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:text-white dark:hover:text-white' }} rounded-lg group">
                     <i data-lucide="shield-check" class="w-5 h-5 mr-3"></i>
