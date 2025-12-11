@@ -182,10 +182,21 @@
                                     {{ $order->order_number }}
                                 </td>
                                 <td class="px-6 py-4">
-                                    <div class="font-medium text-gray-900 dark:text-white">{{ $order->customer_name }}
-                                    </div>
-                                    <div class="text-xs text-gray-500 dark:text-gray-400">{{ $order->customer_phone }}
-                                    </div>
+                                    @if ($order->order_source === 'waiter')
+                                        <div class="font-medium text-gray-900 dark:text-white">
+                                            Mesa {{ $order->table ? $order->table->table_number : 'N/A' }}
+                                        </div>
+                                        <div class="text-xs text-gray-500 dark:text-gray-400">
+                                            Mesero: {{ $order->waiter->name ?? 'N/A' }}
+                                        </div>
+                                    @else
+                                        <div class="font-medium text-gray-900 dark:text-white">
+                                            {{ $order->customer_name }}
+                                        </div>
+                                        <div class="text-xs text-gray-500 dark:text-gray-400">
+                                            {{ $order->customer_phone }}
+                                        </div>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4">
                                     <span
