@@ -44,20 +44,35 @@
                         Información del Cliente
                     </h2>
                     <div class="grid grid-cols-2 gap-4">
-                        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
-                            <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Nombre</p>
-                            <p class="font-semibold text-gray-900 dark:text-white">{{ $order->customer_name }}</p>
-                        </div>
-                        <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
-                            <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Teléfono</p>
-                            <p class="font-semibold text-gray-900 dark:text-white">{{ $order->customer_phone }}</p>
-                        </div>
-                        @if ($order->customer_email)
+                        @if ($order->order_source === 'waiter')
                             <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
-                                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Email</p>
-                                <p class="font-semibold text-gray-900 dark:text-white">{{ $order->customer_email }}</p>
+                                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Mesero</p>
+                                <p class="font-semibold text-gray-900 dark:text-white">
+                                    {{ $order->waiter->name ?? 'N/A' }}</p>
                             </div>
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
+                                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Mesa</p>
+                                <p class="font-semibold text-gray-900 dark:text-white">
+                                    {{ $order->table ? $order->table->table_number : 'N/A' }}</p>
+                            </div>
+                        @else
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
+                                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Nombre</p>
+                                <p class="font-semibold text-gray-900 dark:text-white">{{ $order->customer_name }}</p>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
+                                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Teléfono</p>
+                                <p class="font-semibold text-gray-900 dark:text-white">{{ $order->customer_phone }}</p>
+                            </div>
+                            @if ($order->customer_email)
+                                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
+                                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Email</p>
+                                    <p class="font-semibold text-gray-900 dark:text-white">{{ $order->customer_email }}
+                                    </p>
+                                </div>
+                            @endif
                         @endif
+
                         <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
                             <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Tipo de Pedido</p>
                             <p class="font-semibold text-gray-900 dark:text-white capitalize">{{ $order->order_type }}
@@ -122,23 +137,12 @@
                     </div>
 
                     <!-- Totals -->
-                    <div class="mt-6 space-y-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <div class="mt-6 space-y-2 pt-4 border-gray-200 dark:border-gray-700">
                         <div class="flex justify-between text-sm text-gray-600 dark:text-gray-300">
                             <span>Subtotal:</span>
                             <span class="font-medium">{{ formatMoney($order->subtotal) }}</span>
                         </div>
-                        @if ($order->tax > 0)
-                            <div class="flex justify-between text-sm text-gray-600 dark:text-gray-300">
-                                <span>Impuestos:</span>
-                                <span class="font-medium">{{ formatMoney($order->tax) }}</span>
-                            </div>
-                        @endif
-                        @if ($order->delivery_fee > 0)
-                            <div class="flex justify-between text-sm text-gray-600 dark:text-gray-300">
-                                <span>Envío:</span>
-                                <span class="font-medium">{{ formatMoney($order->delivery_fee) }}</span>
-                            </div>
-                        @endif
+
                         <div
                             class="flex justify-between text-lg font-bold text-gray-900 dark:text-white pt-2 border-t border-gray-200 dark:border-gray-700">
                             <span>Total:</span>

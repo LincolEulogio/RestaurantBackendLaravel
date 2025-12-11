@@ -127,9 +127,7 @@ class WaiterOrderController extends Controller
             }
 
             $order->subtotal = $subtotal;
-            // Assuming tax is included or calculated separately (keeping it simple for now)
-            // You might want to use a helper or config for tax rate
-            $order->tax = $subtotal * 0.18; 
+            $order->tax = 0; 
             $order->total = $subtotal + $order->tax;
             $order->save();
 
