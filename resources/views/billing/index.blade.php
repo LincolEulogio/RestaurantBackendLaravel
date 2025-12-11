@@ -30,8 +30,8 @@
                 @forelse($readyOrders as $order)
                     <div @click="selectOrder({{ $order->id }}, '{{ $order->payment_status }}')"
                         :class="selectedOrderId === {{ $order->id }} ?
-                            'border-blue-500 ring-1 ring-blue-500 bg-blue-50/50 dark:bg-blue-900/20' :
-                            'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-500'"
+                            'border-slate-800 ring-1 ring-slate-800 bg-slate-50/50 dark:bg-slate-900/20' :
+                            'border-gray-200 dark:border-gray-700 hover:border-slate-800 dark:hover:border-slate-800'"
                         class="bg-white dark:bg-gray-800 rounded-2xl border-2 shadow-sm p-4 transition-all cursor-pointer relative overflow-hidden group">
 
                         <!-- Status Strip -->
