@@ -12,9 +12,11 @@ class BillingController extends Controller
      */
     public function index()
     {
-        // Get orders that are ready to be billed (ready status)
-        $readyOrders = Order::with(['items.product'])
+        // Get ALL ready orders (Paid and Unpaid) so cashier has full visibility
+        // Sort by Payment Status (Pending first) -> Then by Time
+        $readyOrders = Order::with(['items.product', 'waiter', 'table'])
             ->where('status', 'ready')
+            ->orderByRaw("FIELD(payment_status, 'pending', 'failed', 'paid')")
             ->orderBy('created_at', 'asc')
             ->get();
 

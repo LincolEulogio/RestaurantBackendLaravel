@@ -34,6 +34,8 @@ class Order extends Model
         'waiter_id',
         'order_source', // online, waiter, qr_self_service
         'session_token',
+        'payment_status',
+        'payment_method',
     ];
 
     protected $casts = [
