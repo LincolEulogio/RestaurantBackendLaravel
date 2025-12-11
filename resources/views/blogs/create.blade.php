@@ -19,14 +19,14 @@
                     <div class="mb-4">
                         <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">Título</label>
                         <input type="text" name="title" id="title"
-                            class="appearance-none rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 dark:bg-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:ring-blue-500 focus:border-blue-500 border  border-gray-300 dark:border-gray-600"
+                            class="appearance-none rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 dark:bg-gray-700 leading-tight focus:outline-none focus:ring-blue-500 focus:border-blue-500 border  border-gray-300 dark:border-gray-600"
                             required>
                     </div>
 
                     <div class="mb-4">
                         <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">Slug</label>
                         <input type="text" name="slug" id="slug"
-                            class="appearance-none rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 dark:bg-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:ring-blue-500 focus:border-blue-500 border  border-gray-300 dark:border-gray-600"
+                            class="appearance-none rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 dark:bg-gray-700 leading-tight focus:outline-none focus:ring-blue-500 focus:border-blue-500 border  border-gray-300 dark:border-gray-600"
                             required>
                     </div>
 
@@ -61,14 +61,14 @@
                     <div class="mb-4">
                         <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">Contenido</label>
                         <textarea name="content" rows="10"
-                            class="appearance-none rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 dark:bg-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:ring-blue-500 focus:border-blue-500 border  border-gray-300 dark:border-gray-600"
+                            class="appearance-none rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 dark:bg-gray-700 leading-tight focus:outline-none focus:ring-blue-500 focus:border-blue-500 border  border-gray-300 dark:border-gray-600"
                             required></textarea>
                     </div>
 
                     <div class="mb-4">
                         <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2">Estado</label>
                         <select name="status"
-                            class="appearance-none rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 dark:bg-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:ring-blue-500 focus:border-blue-500 border  border-gray-300 dark:border-gray-600">
+                            class="appearance-none rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 dark:bg-gray-700 leading-tight focus:outline-none focus:ring-blue-500 focus:border-blue-500 border  border-gray-300 dark:border-gray-600">
                             <option value="draft">Borrador (Draft)</option>
                             <option value="published">Publicado</option>
                         </select>
@@ -76,7 +76,7 @@
 
                     <div class="flex items-center justify-end">
                         <button type="submit"
-                            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                             Guardar
                         </button>
                     </div>
