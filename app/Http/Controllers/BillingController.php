@@ -34,7 +34,7 @@ class BillingController extends Controller
     public function processPayment(Request $request, Order $order)
     {
         $request->validate([
-            'payment_method' => 'required|in:cash,card,transfer',
+            'payment_method' => 'required|in:cash,card,yape,plin,transfer,online',
             'amount_received' => 'required|numeric|min:0',
         ]);
 
