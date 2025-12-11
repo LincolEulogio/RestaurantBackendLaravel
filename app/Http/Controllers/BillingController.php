@@ -12,11 +12,23 @@ class BillingController extends Controller
      */
     public function index()
     {
-        // Get ALL ready orders (Paid and Unpaid) so cashier has full visibility
+        // Get ALL ready orders (Paid and Unpaid)
         // Sort by Payment Status (Pending first) -> Then by Time
-        $readyOrders = Order::with(['items.product', 'waiter', 'table'])
-            ->where('status', 'ready')
-            ->orderByRaw("FIELD(payment_status, 'pending', 'failed', 'paid')")
+        $query = Order::with(['items.product', 'waiter', 'table'])
+            ->where('status', 'ready');
+
+        // Contextual Filter based on Role
+        $user = auth()->user();
+
+        if ($user->hasRole('cashier')) {
+            // Cashier: Sees everything EXCEPT Online orders (so they see Waiter, QR, Null, etc.)
+            $query->whereNotIn('order_source', ['web', 'online']);
+        } elseif ($user->hasRole('delivery')) {
+            // Delivery: Only sees orders from Web/Online
+            $query->whereIn('order_source', ['web', 'online']);
+        }
+
+        $readyOrders = $query->orderByRaw("FIELD(payment_status, 'pending', 'failed', 'paid')")
             ->orderBy('created_at', 'asc')
             ->get();
 
