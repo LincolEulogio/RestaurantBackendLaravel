@@ -27,6 +27,27 @@ class WaiterOrderController extends Controller
     }
 
     /**
+     * Update table status
+     */
+    public function updateTableStatus(Request $request, Table $table)
+    {
+        $validated = $request->validate([
+            'status' => 'required|in:available,occupied,reserved,cleaning,maintenance'
+        ]);
+
+        $table->update([
+            'status' => $validated['status']
+        ]);
+
+        // If making available, we might want to ensure there is no active session or close it?
+        // For now, just updating status is enough as requested. 
+        // If the table is made 'available', the active session effectively becomes history 
+        // normally, but let's keep it simple and just update the status field.
+
+        return response()->json($table);
+    }
+
+    /**
      * Start a new session for a table
      */
     public function startSession(Request $request, Table $table)

@@ -46,6 +46,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Waiter Routes
     Route::prefix('waiter')->group(function () {
         Route::get('/tables', [\App\Http\Controllers\Api\WaiterOrderController::class, 'tables']);
+        Route::patch('/tables/{table}/status', [\App\Http\Controllers\Api\WaiterOrderController::class, 'updateTableStatus']);
         Route::post('/tables/{table}/start-session', [\App\Http\Controllers\Api\WaiterOrderController::class, 'startSession']);
         Route::post('/orders', [\App\Http\Controllers\Api\WaiterOrderController::class, 'storeOrder']);
         Route::get('/my-orders', [\App\Http\Controllers\Api\WaiterOrderController::class, 'myOrders']);
