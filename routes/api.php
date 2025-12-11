@@ -1,0 +1,42 @@
+<?php
+
+use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\BlogController;
+use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| API Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register API routes for your application. These
+| routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "api" middleware group. Make something great!
+|
+*/
+
+// Public API routes for frontend
+Route::get('/products', [ProductController::class, 'apiIndex']);
+Route::get('/categories', [CategoryController::class, 'apiIndex']);
+
+// Public order creation (no auth required for customers)
+Route::post('/orders', [OrderController::class, 'store']);
+
+// Public reservation routes
+Route::get('/reservations/availability', [\App\Http\Controllers\Api\ReservationController::class, 'checkAvailability']);
+Route::get('/reservations/available-tables', [\App\Http\Controllers\Api\ReservationController::class, 'getAvailableTables']);
+Route::get('/blogs', [BlogController::class, 'apiIndex']);
+Route::get('/blogs/{slug}', [BlogController::class, 'apiShow']);
+Route::get('/promotions', [\App\Http\Controllers\PromotionController::class, 'apiIndex']);
+Route::post('/reservations', [\App\Http\Controllers\Api\ReservationController::class, 'store']);
+
+
+// Protected routes (require authentication)
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/orders', [OrderController::class, 'index']);
+    Route::get('/orders/{order}', [OrderController::class, 'show']);
+    Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus']);
+    Route::delete('/orders/{order}', [OrderController::class, 'destroy']);
+});
