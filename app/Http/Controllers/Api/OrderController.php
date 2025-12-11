@@ -89,7 +89,7 @@ class OrderController extends Controller
                 'status' => 'pending',
                 'subtotal' => 0,
                 'tax' => 0,
-                'delivery_fee' => $request->order_type === 'delivery' ? 5.00 : 0,
+                'delivery_fee' => 0,
                 'total' => 0,
             ]);
 
