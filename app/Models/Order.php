@@ -12,6 +12,7 @@ class Order extends Model
 
     protected $fillable = [
         'order_number',
+        'order_date',
         'customer_name',
         'customer_lastname',
         'customer_dni',
@@ -36,6 +37,7 @@ class Order extends Model
         'tax' => 'decimal:2',
         'delivery_fee' => 'decimal:2',
         'total' => 'decimal:2',
+        'order_date' => 'datetime',
         'confirmed_at' => 'datetime',
         'ready_at' => 'datetime',
         'delivered_at' => 'datetime',
@@ -48,6 +50,11 @@ class Order extends Model
         static::creating(function ($order) {
             if (empty($order->order_number)) {
                 $order->order_number = self::generateOrderNumber();
+            }
+            
+            // Set order_date to current timestamp if not already set
+            if (empty($order->order_date)) {
+                $order->order_date = now();
             }
         });
     }

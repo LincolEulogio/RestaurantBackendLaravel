@@ -207,7 +207,7 @@
                                     {{ formatMoney($order->total) }}
                                 </td>
                                 <td class="px-6 py-4 text-gray-500 dark:text-gray-400">
-                                    {{ formatDateTimeFull($order->created_at) }}
+                                    {{ formatDateTimeFull($order->order_date) }}
                                 </td>
                                 <td class="px-6 py-4 text-right">
                                     <a href="{{ route('orders.show', $order) }}"

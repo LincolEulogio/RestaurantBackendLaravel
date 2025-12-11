@@ -250,9 +250,9 @@
                     </h2>
                     <div class="space-y-2">
                         <div class="flex justify-between text-sm">
-                            <span class="text-gray-500 dark:text-gray-400">Creado:</span>
+                            <span class="text-gray-500 dark:text-gray-400">Fecha del Pedido:</span>
                             <span
-                                class="font-medium text-gray-900 dark:text-white">{{ formatDateTimeFull($order->created_at) }}</span>
+                                class="font-medium text-gray-900 dark:text-white">{{ formatDateTimeFull($order->order_date) }}</span>
                         </div>
                         @if ($order->confirmed_at)
                             <div class="flex justify-between text-sm">
