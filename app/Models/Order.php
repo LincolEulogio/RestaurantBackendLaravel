@@ -30,6 +30,10 @@ class Order extends Model
         'confirmed_at',
         'ready_at',
         'delivered_at',
+        'table_id',
+        'waiter_id',
+        'order_source', // online, waiter, qr_self_service
+        'session_token',
     ];
 
     protected $casts = [
@@ -63,6 +67,21 @@ class Order extends Model
     public function items()
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function table()
+    {
+        return $this->belongsTo(Table::class);
+    }
+
+    public function waiter()
+    {
+        return $this->belongsTo(User::class, 'waiter_id');
+    }
+
+    public function scopePresencial($query)
+    {
+        return $query->whereIn('order_source', ['waiter', 'qr_self_service']);
     }
 
     public function statusHistory()

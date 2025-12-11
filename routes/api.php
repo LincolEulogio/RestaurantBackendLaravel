@@ -21,6 +21,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('/products', [ProductController::class, 'apiIndex']);
 Route::get('/categories', [CategoryController::class, 'apiIndex']);
 
+Route::post('/login', [\App\Http\Controllers\Api\AuthController::class, 'login']);
+
 // Public order creation (no auth required for customers)
 Route::post('/orders', [OrderController::class, 'store']);
 
@@ -34,9 +36,26 @@ Route::post('/reservations', [\App\Http\Controllers\Api\ReservationController::c
 
 
 // Protected routes (require authentication)
+// Protected routes (require authentication)
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/orders', [OrderController::class, 'index']);
     Route::get('/orders/{order}', [OrderController::class, 'show']);
     Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus']);
     Route::delete('/orders/{order}', [OrderController::class, 'destroy']);
+
+    // Waiter Routes
+    Route::prefix('waiter')->group(function () {
+        Route::get('/tables', [\App\Http\Controllers\Api\WaiterOrderController::class, 'tables']);
+        Route::post('/tables/{table}/start-session', [\App\Http\Controllers\Api\WaiterOrderController::class, 'startSession']);
+        Route::post('/orders', [\App\Http\Controllers\Api\WaiterOrderController::class, 'storeOrder']);
+        Route::get('/my-orders', [\App\Http\Controllers\Api\WaiterOrderController::class, 'myOrders']);
+    });
+});
+
+// QR Self-Service Routes
+Route::prefix('qr')->group(function () {
+    Route::get('/table/{qrCode}', [\App\Http\Controllers\Api\QROrderController::class, 'checkTable']);
+    Route::post('/orders', [\App\Http\Controllers\Api\QROrderController::class, 'storeOrder']);
+    Route::post('/call-waiter', [\App\Http\Controllers\Api\QROrderController::class, 'callWaiter']);
+    Route::post('/request-bill', [\App\Http\Controllers\Api\QROrderController::class, 'requestBill']);
 });

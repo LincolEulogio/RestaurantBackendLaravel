@@ -52,10 +52,13 @@
                                 @elseif($order->status == 'confirmed') text-blue-700 dark:text-blue-100
                                 @elseif($order->status == 'preparing') text-blue-700 dark:text-blue-100
                                 @elseif($order->status == 'ready') text-green-700 dark:text-green-100 @endif">
-                                @if ($order->table_number)
-                                    Mesa {{ $order->table_number }}
+                                @if ($order->table)
+                                    Mesa {{ $order->table->table_number }}
+                                    <span class="block text-[10px] opacity-75">
+                                        {{ $order->order_source == 'waiter' ? '🛎️ Mesero' : '📱 QR' }}
+                                    </span>
                                 @else
-                                    {{ ucfirst($order->order_type) }}
+                                    {{ ucfirst($order->order_type ?? 'Web') }}
                                 @endif
                             </span>
                             <p class="text-sm font-bold text-gray-900 dark:text-gray-100">{{ $order->order_number }}</p>
