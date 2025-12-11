@@ -3,6 +3,7 @@ import "./bootstrap";
 
 import Alpine from "alpinejs";
 import Chart from "chart.js/auto";
+import { createIcons, icons } from "lucide";
 
 // Libs
 import "./libs/sweetalert";
@@ -36,6 +37,9 @@ Alpine.data("billingManager", billingManager);
 Alpine.data("reportsManager", reportsManager);
 
 Alpine.start();
+
+// Initialize Lucide Icons
+createIcons({ icons });
 
 // Initialize Global Handlers
 initDeleteConfirmation();

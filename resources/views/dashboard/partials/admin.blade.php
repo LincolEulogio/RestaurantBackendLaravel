@@ -6,11 +6,7 @@
     <div class="bg-white dark:bg-gray-800  rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
         <div class="flex justify-between items-start">
             <div class="p-2 bg-blue-50 rounded-lg text-blue-600">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
-                    </path>
-                </svg>
+                <i data-lucide="circle-dollar-sign" class="w-8 h-8"></i>
             </div>
             <span
                 class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $salesChange >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
@@ -28,10 +24,7 @@
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
         <div class="flex justify-between items-start">
             <div class="p-2 bg-orange-50 rounded-lg text-orange-600">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
+                <i data-lucide="clock" class="w-8 h-8"></i>
             </div>
             <span
                 class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800">
@@ -49,11 +42,7 @@
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
         <div class="flex justify-between items-start">
             <div class="p-2 bg-purple-50 rounded-lg text-purple-600">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
-                    </path>
-                </svg>
+                <i data-lucide="armchair" class="w-8 h-8"></i>
             </div>
             <span
                 class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
@@ -73,11 +62,7 @@
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
         <div class="flex justify-between items-start">
             <div class="p-2 bg-red-50 rounded-lg text-red-600">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
-                    </path>
-                </svg>
+                <i data-lucide="alert-triangle" class="w-8 h-8"></i>
             </div>
             @if ($lowStockCount > 0)
                 <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
@@ -104,11 +89,7 @@
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
         <div class="flex justify-between items-start">
             <div class="p-2 bg-emerald-50 rounded-lg text-emerald-600">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
-                    </path>
-                </svg>
+                <i data-lucide="trending-up" class="w-8 h-8"></i>
             </div>
             <span
                 class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $monthlyChange >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
@@ -126,10 +107,7 @@
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
         <div class="flex justify-between items-start">
             <div class="p-2 bg-cyan-50 rounded-lg text-cyan-600">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                </svg>
+                <i data-lucide="receipt" class="w-8 h-8"></i>
             </div>
         </div>
         <div class="mt-4">
@@ -143,11 +121,7 @@
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
         <div class="flex justify-between items-start">
             <div class="p-2 bg-indigo-50 rounded-lg text-indigo-600">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
-                    </path>
-                </svg>
+                <i data-lucide="users" class="w-8 h-8"></i>
             </div>
         </div>
         <div class="mt-4">
@@ -157,15 +131,11 @@
         </div>
     </div>
 
-    <!-- Metric 8: Products Sold Today -->
+    <!-- Metric 8: Platos Vendidos Today -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
         <div class="flex justify-between items-start">
             <div class="p-2 bg-pink-50 rounded-lg text-pink-600">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4">
-                    </path>
-                </svg>
+                <i data-lucide="utensils-crossed" class="w-8 h-8"></i>
             </div>
             @if ($pendingOrders > 0)
                 <span
@@ -175,7 +145,7 @@
             @endif
         </div>
         <div class="mt-4">
-            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Productos Vendidos</h3>
+            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Platos Vendidos</h3>
             <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($productsSoldToday) }}</p>
             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Unidades hoy</p>
         </div>
@@ -185,7 +155,8 @@
 <!-- Charts Section -->
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <!-- Weekly Sales Chart -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700 lg:col-span-2">
+    <div
+        class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700 lg:col-span-2">
         <div class="flex justify-between items-center mb-6">
             <h3 class="font-bold text-gray-800 dark:text-gray-100">Ventas Semanales</h3>
             <span class="text-sm text-gray-500 dark:text-gray-400">Últimos 7 días</span>
@@ -207,13 +178,15 @@
                 <div>
                     <div class="flex justify-between text-sm mb-1">
                         <span class="text-gray-700 dark:text-gray-200">{{ $product->name }}</span>
-                        <span class="text-gray-900 dark:text-white font-semibold">{{ $product->total_quantity }} vendidos</span>
+                        <span class="text-gray-900 dark:text-white font-semibold">{{ $product->total_quantity }}
+                            vendidos</span>
                     </div>
                     <div class="w-full bg-gray-100 rounded-full h-2.5">
                         <div class="bg-gradient-to-r from-blue-500 to-purple-500 h-2.5 rounded-full"
                             style="width: {{ ($product->total_quantity / $maxQuantity) * 100 }}%"></div>
                     </div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ formatMoney($product->total_revenue) }} en ventas</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        {{ formatMoney($product->total_revenue) }} en ventas</div>
                 </div>
             @empty
                 <p class="text-gray-500 dark:text-gray-400 text-center py-8">No hay datos disponibles</p>
@@ -250,7 +223,8 @@
                 <div>
                     <div class="flex justify-between text-sm mb-1">
                         <span class="{{ $color['text'] }} font-medium">{{ $color['label'] }}</span>
-                        <span class="text-gray-900 dark:text-white font-semibold">{{ formatMoney($type->revenue) }}</span>
+                        <span
+                            class="text-gray-900 dark:text-white font-semibold">{{ formatMoney($type->revenue) }}</span>
                     </div>
                     <div class="flex items-center gap-2">
                         <div class="flex-1 bg-gray-100 rounded-full h-2.5">
@@ -269,7 +243,8 @@
     </div>
 
     <!-- Recent Activity -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden lg:col-span-2">
+    <div
+        class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden lg:col-span-2">
         <div class="flex justify-between items-center p-6 border-b border-gray-100 dark:border-gray-700">
             <h3 class="font-bold text-gray-800 dark:text-gray-100">Actividad Reciente</h3>
             <a href="{{ route('orders.index') }}" class="text-sm text-blue-600 hover:text-blue-700 font-medium">Ver
@@ -278,7 +253,8 @@
         <div class="overflow-x-auto">
             <table class="w-full text-left">
                 <thead>
-                    <tr class="bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-300 text-xs uppercase tracking-wider">
+                    <tr
+                        class="bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-300 text-xs uppercase tracking-wider">
                         <th class="px-6 py-3 font-semibold">Pedido</th>
                         <th class="px-6 py-3 font-semibold">Mesa/Tipo</th>
                         <th class="px-6 py-3 font-semibold">Cliente</th>
@@ -322,7 +298,8 @@
                                     {{ $statusLabels[$order->status] ?? $order->status }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4 text-sm font-bold text-gray-900 dark:text-white">{{ formatMoney($order->total) }}
+                            <td class="px-6 py-4 text-sm font-bold text-gray-900 dark:text-white">
+                                {{ formatMoney($order->total) }}
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
                                 <div>{{ $order->created_at->format('d/m/Y') }}</div>
@@ -439,4 +416,3 @@
         });
     </script>
 @endpush
-
