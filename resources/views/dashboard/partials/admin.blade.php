@@ -50,8 +50,11 @@
             </span>
         </div>
         <div class="mt-4">
-            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Mesas ocupadas</h3>
-            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $occupiedTables }}/{{ $totalTables }}</p>
+            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Mesas</h3>
+            <div class="flex items-baseline gap-1">
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $occupiedTables }}</p>
+                <p class="text-sm text-gray-400">de {{ $totalTables }} ocupadas</p>
+            </div>
             <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
                 <div class="bg-purple-600 h-2 rounded-full" style="width: {{ $tableOccupancy }}%"></div>
             </div>
@@ -117,17 +120,17 @@
         </div>
     </div>
 
-    <!-- Metric 7: Total Customers -->
+    <!-- Metric 7: Today's Reservations -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
         <div class="flex justify-between items-start">
             <div class="p-2 bg-indigo-50 rounded-lg text-indigo-600">
-                <i data-lucide="users" class="w-8 h-8"></i>
+                <i data-lucide="calendar-clock" class="w-8 h-8"></i>
             </div>
         </div>
         <div class="mt-4">
-            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Clientes</h3>
-            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($totalCustomers) }}</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Clientes únicos</p>
+            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Reservaciones</h3>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($todayReservations) }}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Para el día de hoy</p>
         </div>
     </div>
 

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\InventoryItem;
 use App\Models\Order;
+use App\Models\Table;
+use App\Models\Reservation;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -75,10 +77,15 @@ class DashboardController extends Controller
             ->whereNotIn('status', ['delivered', 'cancelled'])
             ->count();
 
-        // Simulated table data (you can adjust this based on your needs)
-        $totalTables = 24;
-        $occupiedTables = min($dineInOrders, $totalTables); // Approximate based on dine-in orders
+        // Real table data
+        $totalTables = Table::count();
+        $occupiedTables = Table::where('status', 'occupied')->count();
         $tableOccupancy = $totalTables > 0 ? ($occupiedTables / $totalTables) * 100 : 0;
+
+        // Today's Reservations
+        $todayReservations = Reservation::whereDate('reservation_date', Carbon::today())
+            ->where('status', '!=', 'cancelled')
+            ->count();
 
         // Low stock items (stock_current < 10)
         $lowStockCount = InventoryItem::where('stock_current', '<', 10)->count();
@@ -222,7 +229,8 @@ class DashboardController extends Controller
             'inventoryValue',
             'topCategoryToday',
             'revenueByType',
-            'paymentMethodsToday'
+            'paymentMethodsToday',
+            'todayReservations'
         ))->with('userRole', 'admin');
     }
 
