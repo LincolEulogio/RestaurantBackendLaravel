@@ -12,7 +12,20 @@ class OrderController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Order::with(['items.product'])->orderBy('created_at', 'desc');
+        // 1. Base Query with Role Restrictions
+        $baseQuery = Order::query();
+        $user = auth()->user();
+
+        if ($user->hasRole('cashier')) {
+            // Cashier: Sees everything EXCEPT Online orders
+            $baseQuery->whereNotIn('order_source', ['web', 'online']);
+        } elseif ($user->hasRole('delivery')) {
+            // Delivery: Only sees orders from Web/Online
+            $baseQuery->whereIn('order_source', ['web', 'online']);
+        }
+
+        // 2. Main List Query (Clone base to avoid polluting stats)
+        $query = (clone $baseQuery)->with(['items.product'])->orderBy('created_at', 'desc');
 
         // Filter by status
         if ($request->has('status') && $request->status !== 'all') {
@@ -31,13 +44,13 @@ class OrderController extends Controller
 
         $orders = $query->paginate(20);
 
-        // Calculate real statistics from all orders (not just current page)
-        $totalOrders = Order::count();
-        $pendingOrders = Order::where('status', 'pending')->count();
-        $inProgressOrders = Order::whereIn('status', ['confirmed', 'preparing'])->count();
-        $completedOrders = Order::whereIn('status', ['ready', 'delivered'])->count();
-        $deliveredOrders = Order::where('status', 'delivered')->count();
-        $cancelledOrders = Order::where('status', 'cancelled')->count();
+        // 3. Statistics (Clone base for each to keep role filters)
+        $totalOrders = (clone $baseQuery)->count();
+        $pendingOrders = (clone $baseQuery)->where('status', 'pending')->count();
+        $inProgressOrders = (clone $baseQuery)->whereIn('status', ['confirmed', 'preparing'])->count();
+        $completedOrders = (clone $baseQuery)->whereIn('status', ['ready', 'delivered'])->count();
+        $deliveredOrders = (clone $baseQuery)->where('status', 'delivered')->count();
+        $cancelledOrders = (clone $baseQuery)->where('status', 'cancelled')->count();
 
         return view('orders.index', compact('orders', 'totalOrders', 'pendingOrders', 'inProgressOrders', 'completedOrders', 'deliveredOrders', 'cancelledOrders'));
     }
