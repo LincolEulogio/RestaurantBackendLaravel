@@ -22,10 +22,13 @@ import reportsManager from "./components/reports-manager";
 window.Chart = Chart;
 window.Alpine = Alpine;
 window.formatMoney = formatMoney;
+import promotionsManager from "./components/promotions-manager";
+
 window.menuManager = menuManager;
 window.inventoryManager = inventoryManager;
 window.billingManager = billingManager;
 window.reportsManager = reportsManager;
+window.promotionsManager = promotionsManager;
 window.createIcons = createIcons;
 window.icons = icons;
 
@@ -39,6 +42,7 @@ Alpine.data("categoryManager", categoryManager);
 Alpine.data("inventoryManager", inventoryManager);
 Alpine.data("billingManager", billingManager);
 Alpine.data("reportsManager", reportsManager);
+Alpine.data("promotionsManager", promotionsManager);
 
 Alpine.start();
 

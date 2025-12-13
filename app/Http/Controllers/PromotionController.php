@@ -16,9 +16,13 @@ class PromotionController extends Controller
      */
     public function index()
     {
-        $promotions = Promotion::latest()->get();
+        if (request()->wantsJson()) {
+            return response()->json(Promotion::with('products')->latest()->get());
+        }
 
-        return view('promotions.index', compact('promotions'));
+        return view('promotions.index', [
+            'promotions' => Promotion::with('products')->latest()->get()
+        ]);
     }
 
     /**
@@ -65,6 +69,10 @@ class PromotionController extends Controller
 
         if ($request->has('products')) {
             $promotion->products()->attach($request->products);
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true]);
         }
 
         return redirect()->route('promotions.index')
@@ -123,6 +131,10 @@ class PromotionController extends Controller
             $promotion->products()->detach();
         }
 
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
+
         return redirect()->route('promotions.index')
             ->with('success', 'Promoción actualizada exitosamente.');
     }
@@ -137,6 +149,10 @@ class PromotionController extends Controller
         }
 
         $promotion->delete();
+
+        if (request()->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
 
         return redirect()->route('promotions.index')
             ->with('success', 'Promoción eliminada exitosamente.');
