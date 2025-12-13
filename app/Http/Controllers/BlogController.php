@@ -8,29 +8,23 @@ use Illuminate\Http\Request;
 
 class BlogController extends Controller
 {
-    public function __construct(public CloudinaryService $cloudinary) {}
+    public function __construct(private readonly CloudinaryService $cloudinary) {}
 
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        $blogs = Blog::latest()->get();
-
+        if (request()->wantsJson()) {
+            return Blog::latest()->get();
+        }
+        
+        $blogs = Blog::latest()->paginate(12);
         return view('blogs.index', compact('blogs'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         return view('blogs.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -38,15 +32,11 @@ class BlogController extends Controller
             'slug' => 'required|string|max:255|unique:blogs',
             'content' => 'required|string',
             'status' => 'required|in:draft,published',
-            'image' => 'nullable|image|max:5120', // Max 5MB
+            'image' => 'nullable|image|max:10240', // Max 10MB
         ]);
 
         if ($request->hasFile('image')) {
-            $image = $this->cloudinary->uploadImage(
-                $request->file('image'),
-                'blogs'
-            );
-
+            $image = $this->cloudinary->uploadImage($request->file('image'), 'blogs');
             $validated['image_url'] = $image['url'];
             $validated['image_public_id'] = $image['public_id'];
         }
@@ -57,73 +47,69 @@ class BlogController extends Controller
 
         Blog::create($validated);
 
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'Blog creado exitosamente'], 201);
+        }
+
         return redirect()->route('blogs.index')->with('success', 'Blog creado correctamente.');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Blog $blog)
     {
         return view('blogs.show', compact('blog'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Blog $blog)
     {
         return view('blogs.edit', compact('blog'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Blog $blog)
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:blogs,slug,'.$blog->id,
+            'slug' => 'required|string|max:255|unique:blogs,slug,' . $blog->id,
             'content' => 'required|string',
             'status' => 'required|in:draft,published',
-            'image' => 'nullable|image|max:5120', // Max 5MB
+            'image' => 'nullable|image|max:10240', // Max 10MB
         ]);
 
         if ($request->hasFile('image')) {
-            // Delete old image from Cloudinary if exists
+            // Delete old image
             if ($blog->image_public_id) {
                 $this->cloudinary->deleteImage($blog->image_public_id);
             }
 
-            $image = $this->cloudinary->uploadImage(
-                $request->file('image'),
-                'blogs'
-            );
-
+            // Upload new image
+            $image = $this->cloudinary->uploadImage($request->file('image'), 'blogs');
             $validated['image_url'] = $image['url'];
             $validated['image_public_id'] = $image['public_id'];
         }
 
-        if ($validated['status'] === 'published' && ! $blog->published_at) {
+        if ($validated['status'] === 'published' && !$blog->published_at) {
             $validated['published_at'] = now();
         }
 
         $blog->update($validated);
 
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'Blog actualizado exitosamente']);
+        }
+
         return redirect()->route('blogs.index')->with('success', 'Blog actualizado correctamente.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Blog $blog)
     {
-        // Delete image from Cloudinary if exists
         if ($blog->image_public_id) {
             $this->cloudinary->deleteImage($blog->image_public_id);
         }
 
         $blog->delete();
+
+        if (request()->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'Blog eliminado exitosamente']);
+        }
 
         return redirect()->route('blogs.index')->with('success', 'Blog eliminado correctamente.');
     }
@@ -131,13 +117,38 @@ class BlogController extends Controller
     // API Methods
     public function apiIndex()
     {
-        return response()->json(Blog::where('status', 'published')->latest()->get());
+        return Blog::where('status', 'published')
+            ->latest()
+            ->get()
+            ->map(fn($blog) => [
+                'id' => $blog->id,
+                'title' => $blog->title,
+                'slug' => $blog->slug,
+                'content' => $blog->content,
+                'image' => $blog->image_url,
+                'status' => $blog->status,
+                'published_at' => $blog->published_at,
+                'created_at' => $blog->created_at,
+                'updated_at' => $blog->updated_at,
+            ]);
     }
 
     public function apiShow($slug)
     {
-        $blog = Blog::where('slug', $slug)->where('status', 'published')->firstOrFail();
+        $blog = Blog::where('slug', $slug)
+            ->where('status', 'published')
+            ->firstOrFail();
 
-        return response()->json($blog);
+        return response()->json([
+            'id' => $blog->id,
+            'title' => $blog->title,
+            'slug' => $blog->slug,
+            'content' => $blog->content,
+            'image' => $blog->image_url,
+            'status' => $blog->status,
+            'published_at' => $blog->published_at,
+            'created_at' => $blog->created_at,
+            'updated_at' => $blog->updated_at,
+        ]);
     }
 }
