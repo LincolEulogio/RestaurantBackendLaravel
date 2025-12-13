@@ -9,6 +9,8 @@ export default () => ({
         category_id: "",
         description: "",
         image: null,
+        image_url: null,
+        image_preview: null,
         is_available: true,
     },
     isEdit: false,
@@ -69,6 +71,8 @@ export default () => ({
             category_id: product.category_id,
             description: product.description,
             image: null,
+            image_url: product.image_url,
+            image_preview: null,
             is_available: product.is_available,
         };
         this.isEdit = true;
@@ -77,7 +81,7 @@ export default () => ({
 
     closeModal() {
         this.openModal = false;
-        this.resetForm();
+        setTimeout(() => this.resetForm(), 300);
     },
 
     resetForm() {
@@ -88,6 +92,8 @@ export default () => ({
             category_id: "",
             description: "",
             image: null,
+            image_url: null,
+            image_preview: null,
             is_available: true,
         };
         const fileInput = document.getElementById("dropzone-file");
@@ -95,7 +101,17 @@ export default () => ({
     },
 
     handleFileUpload(event) {
-        this.form.image = event.target.files[0];
+        const file = event.target.files[0];
+        if (!file) return;
+
+        this.form.image = file;
+
+        // Create preview
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            this.form.image_preview = e.target.result;
+        };
+        reader.readAsDataURL(file);
     },
 
     async saveProduct() {
