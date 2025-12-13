@@ -71,9 +71,27 @@ class User extends Authenticatable
      */
     public function hasPermission(string $permission): bool
     {
+        // Superadmin has all permissions
+        if ($this->role === 'superadmin') {
+            return true;
+        }
+
         $permissions = $this->getRolePermissions();
 
-        return ($permissions[$permission] ?? false) === true;
+        // Check if permission exists and is truthy (handles true, "1", 1, etc.)
+        if (!isset($permissions[$permission])) {
+            return false;
+        }
+
+        $value = $permissions[$permission];
+        
+        // Handle different types: boolean, string, integer
+        if (is_bool($value)) {
+            return $value;
+        }
+        
+        // Convert string/int to boolean
+        return filter_var($value, FILTER_VALIDATE_BOOLEAN);
     }
 
     /**
@@ -81,6 +99,11 @@ class User extends Authenticatable
      */
     public function hasAnyPermission(array $permissions): bool
     {
+        // Superadmin has all permissions
+        if ($this->role === 'superadmin') {
+            return true;
+        }
+
         foreach ($permissions as $permission) {
             if ($this->hasPermission($permission)) {
                 return true;
@@ -95,6 +118,11 @@ class User extends Authenticatable
      */
     public function hasAllPermissions(array $permissions): bool
     {
+        // Superadmin has all permissions
+        if ($this->role === 'superadmin') {
+            return true;
+        }
+
         foreach ($permissions as $permission) {
             if (! $this->hasPermission($permission)) {
                 return false;
@@ -113,10 +141,18 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if user is admin
+     * Check if user is admin or superadmin
      */
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return in_array($this->role, ['admin', 'superadmin']);
+    }
+
+    /**
+     * Check if user is superadmin
+     */
+    public function isSuperAdmin(): bool
+    {
+        return $this->role === 'superadmin';
     }
 }

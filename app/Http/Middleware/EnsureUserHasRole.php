@@ -15,6 +15,11 @@ class EnsureUserHasRole
      */
     public function handle(Request $request, Closure $next, ...$roles): Response
     {
+        // Superadmin has access to everything
+        if ($request->user() && $request->user()->role === 'superadmin') {
+            return $next($request);
+        }
+
         if (! $request->user() || ! in_array($request->user()->role, $roles)) {
             // Redirect based on role or to limited dashboard
             if ($request->user()) {

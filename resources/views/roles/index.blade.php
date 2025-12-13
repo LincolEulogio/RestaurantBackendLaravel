@@ -44,7 +44,7 @@
                     <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                         @foreach ($roles as $role)
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                                x-data="roleRow({{ $role->id }}, {{ json_encode($role->permissions ?? []) }})">
+                                x-data="roleRow({{ $role->id }}, {{ json_encode($role->permissions ?? []) }}, '{{ $role->slug }}')">
                                 <td class="px-6 py-4">
                                     <div class="flex items-start gap-3">
                                         <div

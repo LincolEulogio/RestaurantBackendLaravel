@@ -9,11 +9,45 @@ export default () => ({
 });
 
 // Role row component for managing individual role permissions
-export const roleRow = (roleId, permissions) => ({
+export const roleRow = (roleId, permissions, roleSlug) => ({
     permissions: permissions || {},
+    roleSlug: roleSlug || "",
     hasChanges: false,
 
+    init() {
+        // If superadmin, enable all permissions and mark as readonly
+        if (this.roleSlug === "superadmin") {
+            const allPermissions = [
+                "dashboard",
+                "orders",
+                "kitchen",
+                "billing",
+                "reservations",
+                "tables",
+                "menu",
+                "categories",
+                "promotions",
+                "blogs",
+                "inventory",
+                "billing_reports",
+                "reports",
+                "users",
+                "roles",
+                "settings",
+            ];
+
+            allPermissions.forEach((perm) => {
+                this.permissions[perm] = true;
+            });
+        }
+    },
+
     togglePermission(perm) {
+        // Prevent editing superadmin permissions
+        if (this.roleSlug === "superadmin") {
+            return;
+        }
+
         // Toggle the permission locally
         this.permissions[perm] = !this.permissions[perm];
         this.hasChanges = true;

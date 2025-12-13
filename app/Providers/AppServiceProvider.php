@@ -24,7 +24,16 @@ class AppServiceProvider extends ServiceProvider
 
         // Custom Blade directive for permission checking
         Blade::if('permission', function ($permission) {
-            return auth()->check() && auth()->user()->hasPermission($permission);
+            if (!auth()->check()) {
+                return false;
+            }
+            
+            // Superadmin has all permissions
+            if (auth()->user()->role === 'superadmin') {
+                return true;
+            }
+            
+            return auth()->user()->hasPermission($permission);
         });
 
         // Custom Blade directive for role checking
