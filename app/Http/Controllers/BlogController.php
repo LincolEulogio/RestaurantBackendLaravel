@@ -32,7 +32,7 @@ class BlogController extends Controller
             'slug' => 'required|string|max:255|unique:blogs',
             'content' => 'required|string',
             'status' => 'required|in:draft,published',
-            'image' => 'nullable|image|max:10240', // Max 10MB
+            'image' => 'nullable|image|max:6144', // Max 6MB
         ]);
 
         if ($request->hasFile('image')) {
@@ -71,7 +71,7 @@ class BlogController extends Controller
             'slug' => 'required|string|max:255|unique:blogs,slug,' . $blog->id,
             'content' => 'required|string',
             'status' => 'required|in:draft,published',
-            'image' => 'nullable|image|max:10240', // Max 10MB
+            'image' => 'nullable|image|max:6144', // Max 6MB
         ]);
 
         if ($request->hasFile('image')) {
