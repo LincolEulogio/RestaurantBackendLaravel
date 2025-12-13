@@ -44,7 +44,7 @@ class PromotionController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'discount_percent' => 'nullable|integer|min:0|max:100',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'badge_label' => 'nullable|string|max:50',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
