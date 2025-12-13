@@ -1,33 +1,31 @@
-<!-- Admin Dashboard - Full Access -->
-
-<!-- Metrics Overview - Row 1 -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-    <!-- Metric 1: Ventas del día -->
-    <div class="bg-white dark:bg-gray-800  rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+<!-- 1. KPIs Row (Existing) -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+    <!-- Ventas del día -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
         <div class="flex justify-between items-start">
-            <div class="p-2 bg-blue-50 rounded-lg text-blue-600">
+            <div class="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-blue-600 dark:text-blue-400">
                 <i data-lucide="circle-dollar-sign" class="w-8 h-8"></i>
             </div>
             <span
-                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $salesChange >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $salesChange >= 0 ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' }}">
                 {{ $salesChange >= 0 ? '+' : '' }}{{ number_format($salesChange, 1) }}%
             </span>
         </div>
         <div class="mt-4">
             <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Ventas del día</h3>
             <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ formatMoney($todaySales) }}</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $todayOrders }} órdenes completadas</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $todayOrders }} órdenes</p>
         </div>
     </div>
 
-    <!-- Metric 2: Pedidos activos -->
+    <!-- Pedidos Activos -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
         <div class="flex justify-between items-start">
-            <div class="p-2 bg-orange-50 rounded-lg text-orange-600">
+            <div class="p-2 bg-orange-50 dark:bg-orange-900/20 rounded-lg text-orange-600 dark:text-orange-400">
                 <i data-lucide="clock" class="w-8 h-8"></i>
             </div>
             <span
-                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800">
+                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300">
                 {{ $kitchenOrders }} en cocina
             </span>
         </div>
@@ -38,14 +36,14 @@
         </div>
     </div>
 
-    <!-- Metric 3: Mesas ocupadas -->
+    <!-- Mesas Ocupadas -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
         <div class="flex justify-between items-start">
-            <div class="p-2 bg-purple-50 rounded-lg text-purple-600">
+            <div class="p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-purple-600 dark:text-purple-400">
                 <i data-lucide="armchair" class="w-8 h-8"></i>
             </div>
             <span
-                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
+                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300">
                 {{ number_format($tableOccupancy, 0) }}%
             </span>
         </div>
@@ -55,108 +53,83 @@
                 <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $occupiedTables }}</p>
                 <p class="text-sm text-gray-400">de {{ $totalTables }} ocupadas</p>
             </div>
-            <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-2">
                 <div class="bg-purple-600 h-2 rounded-full" style="width: {{ $tableOccupancy }}%"></div>
             </div>
         </div>
     </div>
 
-    <!-- Metric 4: Stock bajo -->
+    <!-- Stock / Inventario -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
         <div class="flex justify-between items-start">
-            <div class="p-2 bg-red-50 rounded-lg text-red-600">
-                <i data-lucide="alert-triangle" class="w-8 h-8"></i>
+            <div class="p-2 bg-red-50 dark:bg-red-900/20 rounded-lg text-red-600 dark:text-red-400">
+                <i data-lucide="package" class="w-8 h-8"></i>
             </div>
             @if ($lowStockCount > 0)
-                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
-                    Crítico
-                </span>
+                <span
+                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300">Crítico</span>
             @else
                 <span
-                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                    OK
-                </span>
+                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">OK</span>
             @endif
         </div>
         <div class="mt-4">
-            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Stock bajo</h3>
+            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Stock Bajo</h3>
             <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $lowStockCount }}</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Productos con stock < 10</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Productos < 10</p>
         </div>
     </div>
 </div>
 
-<!-- Additional Metrics Row 2 -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-    <!-- Metric 5: Monthly Revenue -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
-        <div class="flex justify-between items-start">
-            <div class="p-2 bg-emerald-50 rounded-lg text-emerald-600">
-                <i data-lucide="trending-up" class="w-8 h-8"></i>
-            </div>
-            <span
-                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $monthlyChange >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                {{ $monthlyChange >= 0 ? '+' : '' }}{{ number_format($monthlyChange, 1) }}%
-            </span>
+<!-- 2. Order Status Overview (NEW) -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    @php
+        $statsMap = $orderStatusStats->pluck('count', 'status')->toArray();
+        $pending = $statsMap['pending'] ?? 0;
+        $inKitchen = ($statsMap['confirmed'] ?? 0) + ($statsMap['preparing'] ?? 0);
+        $ready = $statsMap['ready'] ?? 0;
+        $cancelled = $statsMap['cancelled'] ?? 0;
+    @endphp
+
+    <div
+        class="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-xl border border-yellow-100 dark:border-yellow-900/30 flex items-center justify-between">
+        <div>
+            <p class="text-xs font-medium text-yellow-800 dark:text-yellow-200 uppercase">Pendientes</p>
+            <p class="text-2xl font-bold text-yellow-900 dark:text-yellow-100">{{ $pending }}</p>
         </div>
-        <div class="mt-4">
-            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Ingresos del Mes</h3>
-            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ formatMoney($thisMonthSales) }}</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">vs mes anterior</p>
-        </div>
+        <i data-lucide="clipboard-list" class="w-8 h-8 text-yellow-500 opacity-50"></i>
     </div>
 
-    <!-- Metric 6: Average Order Value -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
-        <div class="flex justify-between items-start">
-            <div class="p-2 bg-cyan-50 rounded-lg text-cyan-600">
-                <i data-lucide="receipt" class="w-8 h-8"></i>
-            </div>
+    <div
+        class="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-xl border border-orange-100 dark:border-orange-900/30 flex items-center justify-between">
+        <div>
+            <p class="text-xs font-medium text-orange-800 dark:text-orange-200 uppercase">En Cocina</p>
+            <p class="text-2xl font-bold text-orange-900 dark:text-orange-100">{{ $inKitchen }}</p>
         </div>
-        <div class="mt-4">
-            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Ticket Promedio</h3>
-            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ formatMoney($averageOrderValue) }}</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Por orden hoy</p>
-        </div>
+        <i data-lucide="chef-hat" class="w-8 h-8 text-orange-500 opacity-50"></i>
     </div>
 
-    <!-- Metric 7: Today's Reservations -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
-        <div class="flex justify-between items-start">
-            <div class="p-2 bg-indigo-50 rounded-lg text-indigo-600">
-                <i data-lucide="calendar-clock" class="w-8 h-8"></i>
-            </div>
+    <div
+        class="bg-green-50 dark:bg-green-900/20 p-4 rounded-xl border border-green-100 dark:border-green-900/30 flex items-center justify-between">
+        <div>
+            <p class="text-xs font-medium text-green-800 dark:text-green-200 uppercase">Listos</p>
+            <p class="text-2xl font-bold text-green-900 dark:text-green-100">{{ $ready }}</p>
         </div>
-        <div class="mt-4">
-            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Reservaciones</h3>
-            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($todayReservations) }}</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Para el día de hoy</p>
-        </div>
+        <i data-lucide="check-circle" class="w-8 h-8 text-green-500 opacity-50"></i>
     </div>
 
-    <!-- Metric 8: Platos Vendidos Today -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
-        <div class="flex justify-between items-start">
-            <div class="p-2 bg-pink-50 rounded-lg text-pink-600">
-                <i data-lucide="utensils-crossed" class="w-8 h-8"></i>
-            </div>
-            @if ($pendingOrders > 0)
-                <span
-                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
-                    {{ $pendingOrders }} pendientes
-                </span>
-            @endif
+    <div
+        class="bg-red-50 dark:bg-red-900/20 p-4 rounded-xl border border-red-100 dark:border-red-900/30 flex items-center justify-between">
+        <div>
+            <p class="text-xs font-medium text-red-800 dark:text-red-200 uppercase">Cancelados</p>
+            <p class="text-2xl font-bold text-red-900 dark:text-red-100">{{ $cancelled }}</p>
         </div>
-        <div class="mt-4">
-            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Platos Vendidos</h3>
-            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($productsSoldToday) }}</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Unidades hoy</p>
-        </div>
+        <i data-lucide="x-circle" class="w-8 h-8 text-red-500 opacity-50"></i>
     </div>
 </div>
 
-<!-- Charts Section -->
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- 3. Weekly Sales & AI Insights -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
     <!-- Weekly Sales Chart -->
     <div
         class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700 lg:col-span-2">
@@ -169,6 +142,77 @@
         </div>
     </div>
 
+    <!-- AI Insights (Responsive) -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+        <div class="flex items-center gap-2 mb-6">
+            <i data-lucide="sparkles" class="w-6 h-6 text-yellow-500 dark:text-yellow-400"></i>
+            <h3 class="font-bold text-lg text-gray-800 dark:text-gray-100">Insights de Hoy</h3>
+        </div>
+
+        <div class="space-y-4">
+            @forelse($aiInsights as $insight)
+                <div
+                    class="bg-gray-50 dark:bg-gray-700/30 rounded-lg p-3 border border-gray-100 dark:border-gray-700 flex gap-3 items-start">
+                    <div class="p-1.5 bg-white dark:bg-gray-600 rounded-md shrink-0 shadow-sm">
+                        <i data-lucide="{{ $insight['icon'] }}"
+                            class="w-4 h-4 text-indigo-500 dark:text-indigo-300"></i>
+                    </div>
+                    <p class="text-sm font-medium leading-tight text-gray-600 dark:text-gray-300">
+                        {{ $insight['text'] }}</p>
+                </div>
+            @empty
+                <div class="text-center py-8 text-gray-400 dark:text-gray-500">
+                    <p>Analizando datos...</p>
+                </div>
+            @endforelse
+
+            <!-- Daily Reco -->
+            @if ($topProducts->count() > 0)
+                <div class="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider font-semibold mb-2">
+                        Recomendación del Día</p>
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-gray-800 dark:text-white">{{ $topProducts->first()->name }}</span>
+                        <span
+                            class="text-xs bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 px-2 py-1 rounded">Promocionar</span>
+                    </div>
+                </div>
+            @endif
+        </div>
+    </div>
+</div>
+
+<!-- 4. Peak Hours & Payment Methods (NEW) -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+    <!-- Peak Hours -->
+    <div
+        class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700 lg:col-span-2">
+        <h3 class="font-bold text-gray-800 dark:text-gray-100 mb-6">Horas Pico de Venta</h3>
+        <div class="h-60 w-full">
+            <canvas id="peakHoursChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Payment Methods -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+        <h3 class="font-bold text-gray-800 dark:text-gray-100 mb-6">Ingresos por Método de Pago</h3>
+        <div class="h-48 w-full relative flex justify-center">
+            <canvas id="paymentMethodsChart"></canvas>
+        </div>
+        <div class="mt-4 space-y-2">
+            @foreach ($paymentMethodsToday as $method)
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-600 dark:text-gray-400 capitalize">{{ $method->payment_method }}</span>
+                    <span
+                        class="font-semibold text-gray-900 dark:text-white">{{ formatMoney($method->revenue) }}</span>
+                </div>
+            @endforeach
+        </div>
+    </div>
+</div>
+
+<!-- 5. Bottom Row: Top Dishes, Inventory, Top Waiters -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
     <!-- Top Dishes -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
         <div class="flex justify-between items-center mb-6">
@@ -181,190 +225,275 @@
                 <div>
                     <div class="flex justify-between text-sm mb-1">
                         <span class="text-gray-700 dark:text-gray-200">{{ $product->name }}</span>
-                        <span class="text-gray-900 dark:text-white font-semibold">{{ $product->total_quantity }}
-                            vendidos</span>
+                        <span
+                            class="text-gray-900 dark:text-white font-semibold">{{ $product->total_quantity }}</span>
                     </div>
-                    <div class="w-full bg-gray-100 rounded-full h-2.5">
-                        <div class="bg-gradient-to-r from-blue-500 to-purple-500 h-2.5 rounded-full"
+                    <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2">
+                        <div class="bg-blue-500 h-2 rounded-full"
                             style="width: {{ ($product->total_quantity / $maxQuantity) * 100 }}%"></div>
                     </div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        {{ formatMoney($product->total_revenue) }} en ventas</div>
                 </div>
             @empty
-                <p class="text-gray-500 dark:text-gray-400 text-center py-8">No hay datos disponibles</p>
+                <p class="text-gray-500 text-center">Sin datos</p>
+            @endforelse
+        </div>
+    </div>
+
+    <!-- Smart Inventory (NEW) -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+        <h3 class="font-bold text-gray-800 dark:text-gray-100 mb-6">Estado del Inventario</h3>
+        <div class="grid grid-cols-3 gap-4 text-center mb-6">
+            <div class="p-3 bg-green-50 dark:bg-green-900/20 rounded-xl">
+                <p class="text-2xl font-bold text-green-700 dark:text-green-400">{{ $inventoryStats['normal'] }}</p>
+                <p class="text-xs text-green-600 dark:text-green-500 uppercase font-bold mt-1">Normal</p>
+            </div>
+            <div class="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl">
+                <p class="text-2xl font-bold text-yellow-700 dark:text-yellow-400">{{ $inventoryStats['low'] }}</p>
+                <p class="text-xs text-yellow-600 dark:text-yellow-500 uppercase font-bold mt-1">Bajo</p>
+            </div>
+            <div class="p-3 bg-red-50 dark:bg-red-900/20 rounded-xl">
+                <p class="text-2xl font-bold text-red-700 dark:text-red-400">{{ $inventoryStats['critical'] }}</p>
+                <p class="text-xs text-red-600 dark:text-red-500 uppercase font-bold mt-1">Crítico</p>
+            </div>
+        </div>
+        @if ($inventoryStats['critical'] > 0)
+            <div class="flex items-start gap-3 p-3 bg-red-50 border border-red-100 rounded-lg">
+                <i data-lucide="alert-triangle" class="w-5 h-5 text-red-600 shrink-0"></i>
+                <div>
+                    <p class="text-sm font-medium text-red-800">Acción requerida</p>
+                    <p class="text-xs text-red-600 mt-1">Hay {{ $inventoryStats['critical'] }} productos que requieren
+                        reabastecimiento urgente.</p>
+                </div>
+            </div>
+        @endif
+    </div>
+
+    <!-- Top Waiters -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+        <h3 class="font-bold text-gray-800 dark:text-gray-100 mb-6">Top Meseros (Hoy)</h3>
+        <div class="space-y-4">
+            @forelse($topWaiters as $index => $waiter)
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <span
+                            class="w-6 h-6 flex items-center justify-center rounded-full {{ $index == 0 ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-600' }} text-xs font-bold">
+                            {{ $index + 1 }}
+                        </span>
+                        <div>
+                            <p class="text-sm font-medium text-gray-900 dark:text-white">
+                                {{ Str::limit($waiter->name, 15) }}</p>
+                            <p class="text-xs text-gray-500">{{ $waiter->order_count }} órdenes</p>
+                        </div>
+                    </div>
+                    <span
+                        class="text-sm font-bold text-gray-900 dark:text-white">{{ formatMoney($waiter->total_sales) }}</span>
+                </div>
+            @empty
+                <p class="text-gray-500 text-center">Sin actividad hoy</p>
             @endforelse
         </div>
     </div>
 </div>
 
-<!-- Order Types & Recent Activity -->
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <!-- Order Types Breakdown -->
+<!-- 6. Advanced Efficiency & Quality Metrics (NEW) -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+    <!-- Dead Dishes -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
         <div class="flex justify-between items-center mb-6">
-            <h3 class="font-bold text-gray-800 dark:text-gray-100">Tipos de Pedido (Hoy)</h3>
+            <h3 class="font-bold text-gray-800 dark:text-gray-100">Platos "Muertos" (30 días)</h3>
+            <span class="text-xs text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">Rotación urgente</span>
         </div>
-        <div class="space-y-4">
-            @php
-                $totalTypeRevenue = $revenueByType->sum('revenue');
-                $typeColors = [
-                    'dine_in' => ['bg' => 'bg-blue-500', 'text' => 'text-blue-600', 'label' => 'En Mesa'],
-                    'delivery' => ['bg' => 'bg-green-500', 'text' => 'text-green-600', 'label' => 'Delivery'],
-                    'pickup' => ['bg' => 'bg-purple-500', 'text' => 'text-purple-600', 'label' => 'Para Llevar'],
-                ];
-            @endphp
-            @forelse($revenueByType as $type)
-                @php
-                    $percentage = $totalTypeRevenue > 0 ? ($type->revenue / $totalTypeRevenue) * 100 : 0;
-                    $color = $typeColors[$type->order_type] ?? [
-                        'bg' => 'bg-gray-500',
-                        'text' => 'text-gray-600 dark:text-gray-300',
-                        'label' => ucfirst($type->order_type),
-                    ];
-                @endphp
-                <div>
-                    <div class="flex justify-between text-sm mb-1">
-                        <span class="{{ $color['text'] }} font-medium">{{ $color['label'] }}</span>
-                        <span
-                            class="text-gray-900 dark:text-white font-semibold">{{ formatMoney($type->revenue) }}</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <div class="flex-1 bg-gray-100 rounded-full h-2.5">
-                            <div class="{{ $color['bg'] }} h-2.5 rounded-full" style="width: {{ $percentage }}%">
-                            </div>
+        <div class="space-y-3">
+            @forelse($deadDishes as $dish)
+                <div
+                    class="flex items-center justify-between p-2 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg transition-colors">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 bg-red-50 dark:bg-red-900/20 rounded-lg text-red-500">
+                            <i data-lucide="alert-circle" class="w-4 h-4"></i>
                         </div>
-                        <span
-                            class="text-xs text-gray-500 dark:text-gray-400 min-w-[3rem] text-right">{{ number_format($percentage, 1) }}%</span>
+                        <p class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            {{ Str::limit($dish->name, 20) }}</p>
                     </div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $type->count }} órdenes</div>
+                    <span class="text-xs text-red-500 font-semibold">0 ventas</span>
                 </div>
             @empty
-                <p class="text-gray-500 dark:text-gray-400 text-center py-8">No hay datos disponibles</p>
+                <div class="text-center py-4">
+                    <i data-lucide="check-circle" class="w-8 h-8 text-green-500 mx-auto mb-2"></i>
+                    <p class="text-sm text-gray-500">¡Todo el menú se mueve!</p>
+                </div>
             @endforelse
         </div>
     </div>
 
-    <!-- Recent Activity -->
-    <div
-        class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden lg:col-span-2">
-        <div class="flex justify-between items-center p-6 border-b border-gray-100 dark:border-gray-700">
-            <h3 class="font-bold text-gray-800 dark:text-gray-100">Actividad Reciente</h3>
-            <a href="{{ route('orders.index') }}" class="text-sm text-blue-600 hover:text-blue-700 font-medium">Ver
-                todo</a>
+    <!-- Efficiency KPIs -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+        <h3 class="font-bold text-gray-800 dark:text-gray-100 mb-6">Eficiencia Operativa</h3>
+        <div class="grid grid-cols-2 gap-4">
+            <div class="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl text-center">
+                <p class="text-xs text-indigo-600 dark:text-indigo-400 uppercase font-bold mb-1">Mesa más usada</p>
+                <p class="text-xl font-bold text-indigo-700 dark:text-indigo-300">{{ $mostUsedTableName }}</p>
+            </div>
+            <div
+                class="p-4 {{ $delayedOrdersCount > 0 ? 'bg-red-50 dark:bg-red-900/20' : 'bg-green-50 dark:bg-green-900/20' }} rounded-xl text-center">
+                <p
+                    class="text-xs {{ $delayedOrdersCount > 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400' }} uppercase font-bold mb-1">
+                    Retrasos >40m</p>
+                <p
+                    class="text-xl font-bold {{ $delayedOrdersCount > 0 ? 'text-red-700 dark:text-red-300' : 'text-green-700 dark:text-green-300' }}">
+                    {{ $delayedOrdersCount }}</p>
+            </div>
         </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-left">
-                <thead>
-                    <tr
-                        class="bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-300 text-xs uppercase tracking-wider">
-                        <th class="px-6 py-3 font-semibold">Pedido</th>
-                        <th class="px-6 py-3 font-semibold">Mesa/Tipo</th>
-                        <th class="px-6 py-3 font-semibold">Cliente</th>
-                        <th class="px-6 py-3 font-semibold">Estado</th>
-                        <th class="px-6 py-3 font-semibold">Total</th>
-                        <th class="px-6 py-3 font-semibold">Fecha/Hora</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-                    @forelse($recentOrders as $order)
-                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 dark:bg-gray-900 transition-colors">
-                            <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
-                                #{{ str_pad($order->id, 4, '0', STR_PAD_LEFT) }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
-                                {{ ucfirst($order->order_type) }}
-                            </td>
-                            <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
-                                {{ $order->customer_name ?? 'Cliente' }}
-                            </td>
-                            <td class="px-6 py-4">
-                                @php
-                                    $statusColors = [
-                                        'pending' => 'bg-yellow-100 text-yellow-800',
-                                        'confirmed' => 'bg-blue-100 text-blue-800',
-                                        'preparing' => 'bg-orange-100 text-orange-800',
-                                        'ready' => 'bg-purple-100 text-purple-800',
-                                        'delivered' => 'bg-green-100 text-green-800',
-                                        'cancelled' => 'bg-red-100 text-red-800',
-                                    ];
-                                    $statusLabels = [
-                                        'pending' => 'Pendiente',
-                                        'confirmed' => 'Confirmado',
-                                        'preparing' => 'En cocina',
-                                        'ready' => 'Listo',
-                                        'delivered' => 'Entregado',
-                                        'cancelled' => 'Cancelado',
-                                    ];
-                                @endphp
-                                <span
-                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusColors[$order->status] ?? 'bg-gray-100 text-gray-800 dark:text-gray-100' }}">
-                                    {{ $statusLabels[$order->status] ?? $order->status }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 text-sm font-bold text-gray-900 dark:text-white">
-                                {{ formatMoney($order->total) }}
-                            </td>
-                            <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                <div>{{ $order->created_at->format('d/m/Y') }}</div>
-                                <div class="text-xs text-gray-400">{{ $order->created_at->format('g:i A') }}</div>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="6" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
-                                No hay órdenes recientes
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+        <div class="mt-6">
+            <h4 class="text-xs font-semibold text-gray-500 uppercase mb-3">Ticket Promedio por Canal</h4>
+            <div class="space-y-3">
+                @forelse($avgTicketByChannel as $channel)
+                    <div class="flex justify-between items-center text-sm">
+                        <span
+                            class="text-gray-600 dark:text-gray-400 capitalize">{{ str_replace('_', ' ', $channel->order_type) }}</span>
+                        <div class="flex items-center gap-2">
+                            <div class="w-24 h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                                <div class="h-full bg-blue-500"
+                                    style="width: {{ min(($channel->avg_ticket / 100) * 100, 100) }}%"></div>
+                            </div>
+                            <span
+                                class="font-bold text-gray-900 dark:text-white w-16 text-right">{{ formatMoney($channel->avg_ticket) }}</span>
+                        </div>
+                    </div>
+                @empty
+                    <p class="text-xs text-gray-400 text-center">Sin datos hoy</p>
+                @endforelse
+            </div>
+        </div>
+    </div>
+
+    <!-- System Health (Operational Summary) -->
+    <div
+        class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700 flex flex-col justify-between relative overflow-hidden">
+        <div class="relative z-10">
+            <h3 class="font-bold text-lg text-gray-800 dark:text-gray-100 mb-2">Resumen Gerencial</h3>
+            <p class="text-gray-500 dark:text-gray-400 text-sm mb-6">Estado global del restaurante hoy.</p>
+
+            <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                    <span class="text-sm text-gray-600 dark:text-gray-300">Satisfacción (Est.)</span>
+                    <div class="flex text-yellow-400 gap-0.5">
+                        <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                        <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                        <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                        <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                        <i data-lucide="star-half" class="w-4 h-4 fill-current"></i>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-sm text-gray-600 dark:text-gray-300">Carga Cocina</span>
+                    <span
+                        class="text-sm font-bold {{ $kitchenOrders > 5 ? 'text-red-500 dark:text-red-400' : 'text-green-500 dark:text-green-400' }}">
+                        {{ $kitchenOrders > 5 ? 'Alta' : 'Normal' }}
+                    </span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-sm text-gray-600 dark:text-gray-300">Total Descuentos</span>
+                    <span class="text-sm font-bold text-gray-900 dark:text-white">S/ 0.00</span>
+                </div>
+            </div>
+        </div>
+        <!-- Decorative bg kept but subtle -->
+        <div class="absolute -bottom-6 -right-6 w-32 h-32 bg-indigo-50 dark:bg-indigo-900/20 rounded-full blur-3xl">
         </div>
     </div>
 </div>
 
 @push('scripts')
     <script>
-        // Pass data to JavaScript
         window.dashboardData = {
             weeklySales: @json($weeklyData),
+            hourlySales: @json($hourlySales),
+            paymentMethods: @json($paymentMethodsToday)
         };
 
-        // Initialize Chart.js
         document.addEventListener('DOMContentLoaded', function() {
-            // Weekly Sales Chart
-            const weeklySalesCanvas = document.getElementById('weeklySalesChart');
-            if (weeklySalesCanvas) {
-                const ctx = weeklySalesCanvas.getContext('2d');
-
-                const labels = window.dashboardData.weeklySales.map(item => {
-                    const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-                    const date = new Date(item.date);
-                    return days[date.getDay()];
-                });
-
-                const data = window.dashboardData.weeklySales.map(item => parseFloat(item.revenue));
-
-                let gradient = ctx.createLinearGradient(0, 0, 0, 300);
-                gradient.addColorStop(0, "rgba(59, 130, 246, 0.3)");
-                gradient.addColorStop(1, "rgba(59, 130, 246, 0)");
-
-                new Chart(ctx, {
+            // 1. Weekly Sales Chart
+            const weeklyCtx = document.getElementById('weeklySalesChart')?.getContext('2d');
+            if (weeklyCtx) {
+                new Chart(weeklyCtx, {
                     type: 'line',
                     data: {
-                        labels: labels,
+                        labels: window.dashboardData.weeklySales.map(d => {
+                            const date = new Date(d.date);
+                            return date.toLocaleDateString('es-ES', {
+                                weekday: 'short'
+                            });
+                        }),
+                        datasets: [{
+                            label: 'Ventas',
+                            data: window.dashboardData.weeklySales.map(d => d.revenue),
+                            borderColor: '#6366f1', // Indigo 500
+                            backgroundColor: (ctx) => {
+                                const grad = ctx.chart.ctx.createLinearGradient(0, 0, 0, 300);
+                                grad.addColorStop(0, 'rgba(99, 102, 241, 0.2)');
+                                grad.addColorStop(1, 'rgba(99, 102, 241, 0)');
+                                return grad;
+                            },
+                            borderWidth: 3,
+                            pointBackgroundColor: '#fff',
+                            pointBorderColor: '#6366f1',
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(107, 114, 128, 0.1)' // Gray-500 with opacity
+                                },
+                                ticks: {
+                                    color: '#9ca3af'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    color: '#9ca3af'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // 2. Peak Hours Chart (Bar)
+            const peakCtx = document.getElementById('peakHoursChart')?.getContext('2d');
+            if (peakCtx) {
+                // Fill 0-23 hours
+                const hours = Array.from({
+                    length: 24
+                }, (_, i) => i);
+                const salesByHour = window.dashboardData.hourlySales.reduce((acc, curr) => {
+                    acc[curr.hour] = curr.revenue;
+                    return acc;
+                }, {});
+                const data = hours.map(h => salesByHour[h] || 0);
+
+                new Chart(peakCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: hours.map(h => h + ':00'),
                         datasets: [{
                             label: 'Ventas',
                             data: data,
-                            borderColor: '#3b82f6',
-                            backgroundColor: gradient,
-                            borderWidth: 3,
-                            tension: 0.4,
-                            fill: true,
-                            pointBackgroundColor: '#ffffff',
-                            pointBorderColor: '#3b82f6',
-                            pointBorderWidth: 2,
-                            pointRadius: 4,
-                            pointHoverRadius: 6,
+                            backgroundColor: '#f59e0b', // Amber 500
+                            borderRadius: 4
                         }]
                     },
                     options: {
@@ -375,44 +504,48 @@
                                 display: false
                             },
                             tooltip: {
-                                backgroundColor: '#1e293b',
-                                padding: 12,
-                                cornerRadius: 8,
-                                displayColors: false,
-                                callbacks: {
-                                    label: function(context) {
-                                        return 'Ventas: S/ ' + context.parsed.y.toLocaleString(
-                                            'es-PE', {
-                                                minimumFractionDigits: 2,
-                                                maximumFractionDigits: 2
-                                            });
-                                    }
-                                }
+                                backgroundColor: '#1f2937'
                             }
                         },
                         scales: {
                             y: {
-                                beginAtZero: true,
-                                grid: {
-                                    color: '#f1f5f9',
-                                    drawBorder: false
-                                },
-                                ticks: {
-                                    callback: (value) => {
-                                        if (value >= 1000) {
-                                            return 'S/ ' + (value / 1000).toFixed(0) + 'k';
-                                        }
-                                        return 'S/ ' + value;
-                                    }
-                                }
+                                display: false
                             },
                             x: {
                                 grid: {
-                                    display: false,
-                                    drawBorder: false
+                                    display: false
                                 }
                             }
                         }
+                    }
+                });
+            }
+
+            // 3. Payment Methods (Doughnut)
+            const payCtx = document.getElementById('paymentMethodsChart')?.getContext('2d');
+            if (payCtx) {
+                const labels = window.dashboardData.paymentMethods.map(p => p.payment_method);
+                const data = window.dashboardData.paymentMethods.map(p => p.revenue);
+
+                new Chart(payCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: data,
+                            backgroundColor: ['#10b981', '#3b82f6', '#8b5cf6', '#ef4444'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }, // Custom legend used in HTML
+                        cutout: '75%'
                     }
                 });
             }

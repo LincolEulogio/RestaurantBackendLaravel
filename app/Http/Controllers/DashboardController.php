@@ -206,6 +206,136 @@ class DashboardController extends Controller
             ->groupBy('payment_method')
             ->get();
 
+        // 2. Top Waiters (by revenue today)
+        $topWaiters = DB::table('orders')
+            ->join('users', 'orders.waiter_id', '=', 'users.id')
+            ->whereDate('orders.created_at', Carbon::today())
+            ->whereIn('orders.status', ['delivered', 'ready', 'confirmed']) // Count active succesful orders
+            ->select(
+                'users.name',
+                DB::raw('COUNT(orders.id) as order_count'),
+                DB::raw('SUM(orders.total) as total_sales')
+            )
+            ->groupBy('users.id', 'users.name')
+            ->orderByDesc('total_sales')
+            ->limit(5)
+            ->get();
+
+        // 3. Sales by Category (distribution)
+        $salesByCategory = DB::table('order_items')
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->join('products', 'order_items.product_id', '=', 'products.id')
+            ->join('categories', 'products.category_id', '=', 'categories.id')
+            ->where('orders.status', 'delivered')
+            ->whereBetween('orders.delivered_at', [$todayStart, $todayEnd])
+            ->select('categories.name', DB::raw('SUM(order_items.subtotal) as revenue'))
+            ->groupBy('categories.id', 'categories.name')
+            ->get();
+
+        // 4. Order Status Distribution (Active)
+        $orderStatusStats = Order::whereDate('created_at', Carbon::today())
+            ->select('status', DB::raw('COUNT(*) as count'))
+            ->groupBy('status')
+            ->get();
+
+        // 5. Peak Hours (Hourly Sales Today)
+        $hourlySales = Order::where('status', 'delivered')
+            ->whereDate('delivered_at', Carbon::today())
+            ->select(
+                DB::raw('HOUR(delivered_at) as hour'),
+                DB::raw('SUM(total) as revenue'),
+                DB::raw('COUNT(*) as count')
+            )
+            ->groupBy('hour')
+            ->orderBy('hour')
+            ->get();
+
+        // 6. Detailed Inventory Stats
+        $inventoryStats = [
+            'critical' => InventoryItem::where('stock_current', '<', 5)->count(),
+            'low' => InventoryItem::whereBetween('stock_current', [5, 10])->count(),
+            'normal' => InventoryItem::where('stock_current', '>', 10)->count(),
+        ];
+
+        // 7. AI Insights (Rule-based)
+        $aiInsights = [];
+        
+        // Sales Insight
+        if ($salesChange > 10) $aiInsights[] = ['type' => 'good', 'icon' => 'trending-up', 'text' => "Ventas subieron {$salesChange}% vs ayer. ¡Buen trabajo!"];
+        elseif ($salesChange < -10) $aiInsights[] = ['type' => 'bad', 'icon' => 'trending-down', 'text' => "Ventas bajaron " . abs(round($salesChange,1)) . "% vs ayer. Revisa promociones."];
+        
+        // Product Insight
+        if ($topProducts->isNotEmpty()) {
+            $bestDish = $topProducts->first();
+            $aiInsights[] = ['type' => 'info', 'icon' => 'star', 'text' => "El plato estrella hoy es {$bestDish->name} con {$bestDish->total_quantity} ventas."];
+        }
+
+        // Staff Insight - Restore Real Kitchen Time Calculation
+        $kitchenTimeData = Order::whereNotNull('confirmed_at')
+            ->whereNotNull('ready_at')
+            ->whereDate('created_at', Carbon::today())
+            ->get();
+
+        $kitchenTimeAvg = $kitchenTimeData->count() > 0
+            ? $kitchenTimeData->average(function ($order) {
+                return $order->ready_at->diffInMinutes($order->confirmed_at);
+            })
+            : 0;
+
+        if ($kitchenTimeAvg > 20) $aiInsights[] = ['type' => 'warning', 'icon' => 'clock', 'text' => "Tiempo de cocina alto (" . round($kitchenTimeAvg, 1) . " min). Considera reforzar turno."];
+        
+        // Stock Insight
+        if ($inventoryStats['critical'] > 0) $aiInsights[] = ['type' => 'danger', 'icon' => 'alert-triangle', 'text' => "¡Atención! {$inventoryStats['critical']} productos con stock crítico."];
+
+        // --- NEW EXECUTIVE METRICS ---
+        
+        // 8. Dead Dishes (No sales in 30 days)
+        // Find products that are NOT in order_items of orders from last 30 days
+        $soldProductIds = DB::table('order_items')
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->where('orders.created_at', '>=', Carbon::now()->subDays(30))
+            ->pluck('product_id');
+            
+        $deadDishes = DB::table('products')
+            ->whereNotIn('id', $soldProductIds)
+            ->where('is_available', true) // Only count active products
+            ->limit(5)
+            ->get();
+            
+        // 9. Delayed Orders (> 40 mins from confirmed to delivered)
+        $delayedOrdersCount = Order::where('status', 'delivered')
+            ->whereDate('created_at', Carbon::today())
+            ->whereRaw('TIMESTAMPDIFF(MINUTE, confirmed_at, delivered_at) > 40')
+            ->count();
+
+        // 10. Most Used Table
+        $mostUsedTable = DB::table('orders')
+            ->whereNotNull('table_id')
+            ->where('created_at', '>=', Carbon::now()->subDays(30)) // Monthly stats
+            ->select('table_id', DB::raw('COUNT(*) as use_count'))
+            ->groupBy('table_id')
+            ->orderByDesc('use_count')
+            ->first();
+            
+        $mostUsedTableName = $mostUsedTable 
+            ? Table::find($mostUsedTable->table_id)->table_number ?? 'Mesa ' . $mostUsedTable->table_id
+            : 'N/A';
+
+        // 11. Average Ticket by Channel (Dine-in vs Online)
+        $avgTicketByChannel = Order::where('status', 'delivered')
+             ->whereDate('created_at', Carbon::today())
+             ->select('order_type', DB::raw('AVG(total) as avg_ticket'))
+             ->groupBy('order_type')
+             ->get();
+
+        // Add Insights for these new metrics
+        if ($delayedOrdersCount > 2) {
+             $aiInsights[] = ['type' => 'bad', 'icon' => 'alert-circle', 'text' => "{$delayedOrdersCount} pedidos demoraron más de 40 min hoy. Revisa procesos."];
+        }
+        if ($deadDishes->count() > 0) {
+             $aiInsights[] = ['type' => 'info', 'icon' => 'archive', 'text' => "Tienes " . $deadDishes->count() . " platos sin ventas en 30 días (ej. {$deadDishes->first()->name}). Considera rotarlos."];
+        }
+
         return view('dashboard', compact(
             'todaySales',
             'todayOrders',
@@ -230,7 +360,18 @@ class DashboardController extends Controller
             'topCategoryToday',
             'revenueByType',
             'paymentMethodsToday',
-            'todayReservations'
+            'todayReservations',
+            'kitchenTimeAvg',
+            'topWaiters',
+            'salesByCategory',
+            'orderStatusStats',
+            'hourlySales',
+            'inventoryStats',
+            'aiInsights',
+            'deadDishes',
+            'delayedOrdersCount',
+            'mostUsedTableName',
+            'avgTicketByChannel'
         ))->with('userRole', 'admin');
     }
 
