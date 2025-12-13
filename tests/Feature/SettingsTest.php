@@ -6,8 +6,7 @@ use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
+use App\Models\Role;
 
 class SettingsTest extends TestCase
 {
@@ -21,12 +20,12 @@ class SettingsTest extends TestCase
         // For simplicity, we create a user and give them a role/permission if used.
         // The router middleware checks 'permission:settings'.
         
-        $role = Role::firstOrCreate(['name' => 'admin']);
-        $permission = Permission::firstOrCreate(['name' => 'settings']);
-        $role->givePermissionTo($permission);
+        $role = Role::firstOrCreate(['slug' => 'admin'], [
+            'name' => 'Admin',
+            'permissions' => ['settings' => true]
+        ]);
 
-        $this->user = User::factory()->create();
-        $this->user->assignRole($role);
+        $this->user = User::factory()->create(['role' => 'admin']);
     }
 
     public function test_settings_page_can_be_rendered()

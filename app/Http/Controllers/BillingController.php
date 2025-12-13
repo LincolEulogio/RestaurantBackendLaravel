@@ -28,7 +28,13 @@ class BillingController extends Controller
             $query->whereIn('order_source', ['web', 'online']);
         }
 
-        $readyOrders = $query->orderByRaw("FIELD(payment_status, 'pending', 'failed', 'paid')")
+        // Sort by Payment Status (Pending first) -> Then by Time
+        $readyOrders = $query->orderByRaw("CASE payment_status 
+            WHEN 'pending' THEN 1 
+            WHEN 'failed' THEN 2 
+            WHEN 'paid' THEN 3 
+            ELSE 4 
+        END")
             ->orderBy('created_at', 'asc')
             ->get();
 

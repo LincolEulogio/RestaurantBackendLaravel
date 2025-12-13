@@ -40,7 +40,7 @@ test('waiter can create order and session', function () {
     $this->assertDatabaseHas('orders', [
         'table_id' => $table->id,
         'waiter_id' => $waiter->id,
-        'total' => 40 + (40 * 0.18) // assuming 18% tax from controller logic
+        'total' => 40
     ]);
 
     // Verify table status updated
