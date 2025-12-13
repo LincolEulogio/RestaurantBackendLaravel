@@ -13,17 +13,17 @@ class StaffSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Super Admin (Único)
+        // 1. Super Admin
         User::updateOrCreate(
             ['email' => 'superadmin@example.com'],
             [
                 'name' => 'Super Admin',
                 'password' => Hash::make('password'),
-                'role' => 'super_admin',
+                'role' => 'superadmin',
             ]
         );
 
-        // 2. Admin (Único)
+        // 2. Admin
         User::updateOrCreate(
             ['email' => 'admin@example.com'],
             [
@@ -33,37 +33,7 @@ class StaffSeeder extends Seeder
             ]
         );
 
-        // 3. Gerente (Único)
-        User::updateOrCreate(
-            ['email' => 'gerente@example.com'],
-            [
-                'name' => 'Gerente General',
-                'password' => Hash::make('password'),
-                'role' => 'manager',
-            ]
-        );
-
-        // 4. Content Manager (Único)
-        User::updateOrCreate(
-            ['email' => 'content@example.com'],
-            [
-                'name' => 'Gestor Contenidos',
-                'password' => Hash::make('password'),
-                'role' => 'content_manager',
-            ]
-        );
-
-        // 5. Encargado de Inventario (Único en este caso)
-        User::updateOrCreate(
-            ['email' => 'inventario@example.com'],
-            [
-                'name' => 'Jefe de Almacén',
-                'password' => Hash::make('password'),
-                'role' => 'inventory_manager',
-            ]
-        );
-
-        // 6. Chefs (3 Personas)
+        // 3. Cocineros (3 personas)
         $chefs = [
             ['name' => 'Chef Principal', 'email' => 'chef1@example.com'],
             ['name' => 'Ayudante Cocina 1', 'email' => 'chef2@example.com'],
@@ -76,24 +46,24 @@ class StaffSeeder extends Seeder
                 [
                     'name' => $chef['name'],
                     'password' => Hash::make('password'),
-                    'role' => 'chef',
+                    'role' => 'cocinero',
                 ]
             );
         }
 
-        // 7. Meseros (5 Personas)
+        // 4. Meseros (5 personas)
         for ($i = 1; $i <= 5; $i++) {
             User::updateOrCreate(
                 ['email' => "mesero{$i}@example.com"],
                 [
                     'name' => "Mesero {$i}",
                     'password' => Hash::make('password'),
-                    'role' => 'waiter',
+                    'role' => 'mesero',
                 ]
             );
         }
 
-        // 8. Cajeros (2 Personas)
+        // 5. Cajeros (2 personas)
         $cashiers = [
             ['name' => 'Cajero Principal', 'email' => 'cajero1@example.com'],
             ['name' => 'Cajero Turno Tarde', 'email' => 'cajero2@example.com'],
@@ -105,7 +75,24 @@ class StaffSeeder extends Seeder
                 [
                     'name' => $cashier['name'],
                     'password' => Hash::make('password'),
-                    'role' => 'cashier',
+                    'role' => 'cajero',
+                ]
+            );
+        }
+
+        // 6. Delivery (2 personas)
+        $delivery = [
+            ['name' => 'Repartidor 1', 'email' => 'delivery1@example.com'],
+            ['name' => 'Repartidor 2', 'email' => 'delivery2@example.com'],
+        ];
+
+        foreach ($delivery as $person) {
+            User::updateOrCreate(
+                ['email' => $person['email']],
+                [
+                    'name' => $person['name'],
+                    'password' => Hash::make('password'),
+                    'role' => 'delivery',
                 ]
             );
         }

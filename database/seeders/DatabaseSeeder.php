@@ -15,6 +15,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->command->info('🌱 Seeding database...');
+
         // User::factory(10)->create();
 
         // User::factory()->create([
@@ -24,14 +26,17 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             RoleSeeder::class,
-            // RolesTableSeeder::class, // Parece duplicado o antiguo
+            StaffSeeder::class,
             SettingsSeeder::class,
             CategorySeeder::class,
             ProductSeeder::class,
+            PromotionsSeeder::class,
+            BlogSeeder::class,
             InventorySeeder::class,
             TableSeeder::class,
-            StaffSeeder::class,
-            BlogSeeder::class,
+            FillReservationsSeeder::class,
         ]);
+
+        $this->command->info('✅ Database seeded successfully!');
     }
 }
