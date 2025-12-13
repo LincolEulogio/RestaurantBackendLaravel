@@ -37,7 +37,7 @@ class BillingController extends Controller
         $todayRevenue = Order::where('status', 'delivered')
             ->whereDate('delivered_at', today())
             ->sum('total');
-        $pendingPayments = Order::where('status', 'ready')->sum('total');
+        $pendingPayments = $readyOrders->sum('total');
 
         return view('billing.index', compact('readyOrders', 'totalRevenue', 'todayRevenue', 'pendingPayments'));
     }
