@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-
 class NotificationController extends Controller
 {
     public function index()
@@ -15,7 +13,7 @@ class NotificationController extends Controller
 
         return response()->json([
             'notifications' => $notifications,
-            'unread_count' => auth()->user()->unreadNotifications()->count()
+            'unread_count' => auth()->user()->unreadNotifications()->count(),
         ]);
     }
 
@@ -23,14 +21,14 @@ class NotificationController extends Controller
     {
         $notification = auth()->user()->notifications()->findOrFail($id);
         $notification->markAsRead();
-        
+
         return response()->json(['success' => true]);
     }
 
     public function markAllAsRead()
     {
         auth()->user()->unreadNotifications->markAsRead();
-        
+
         return response()->json(['success' => true]);
     }
 }

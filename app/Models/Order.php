@@ -57,7 +57,7 @@ class Order extends Model
             if (empty($order->order_number)) {
                 $order->order_number = self::generateOrderNumber();
             }
-            
+
             // Set order_date to current timestamp if not already set
             if (empty($order->order_date)) {
                 $order->order_date = now();
@@ -128,25 +128,25 @@ class Order extends Model
         $prefix = 'ORD';
         $date = now()->format('Ymd');
         $random = strtoupper(substr(md5(uniqid(rand(), true)), 0, 4));
-        
+
         return "{$prefix}-{$date}-{$random}";
     }
 
     public function updateStatus($newStatus, $userId = null, $notes = null)
     {
         $oldStatus = $this->status;
-        
+
         $this->status = $newStatus;
-        
+
         // Update timestamps based on status
-        if ($newStatus === 'confirmed' && !$this->confirmed_at) {
+        if ($newStatus === 'confirmed' && ! $this->confirmed_at) {
             $this->confirmed_at = now();
-        } elseif ($newStatus === 'ready' && !$this->ready_at) {
+        } elseif ($newStatus === 'ready' && ! $this->ready_at) {
             $this->ready_at = now();
-        } elseif ($newStatus === 'delivered' && !$this->delivered_at) {
+        } elseif ($newStatus === 'delivered' && ! $this->delivered_at) {
             $this->delivered_at = now();
         }
-        
+
         $this->save();
 
         // Record status change in history

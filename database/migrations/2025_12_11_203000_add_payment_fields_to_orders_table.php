@@ -12,10 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('orders', function (Blueprint $table) {
-            if (!Schema::hasColumn('orders', 'payment_status')) {
+            if (! Schema::hasColumn('orders', 'payment_status')) {
                 $table->enum('payment_status', ['pending', 'paid', 'failed'])->default('pending')->after('status');
             }
-            if (!Schema::hasColumn('orders', 'payment_method')) {
+            if (! Schema::hasColumn('orders', 'payment_method')) {
                 $table->string('payment_method')->nullable()->after('payment_status');
             }
         });

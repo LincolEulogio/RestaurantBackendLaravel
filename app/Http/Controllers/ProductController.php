@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Services\CloudinaryService;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
+    public function __construct(public CloudinaryService $cloudinary) {}
+
     /**
      * Display a listing of the resource.
      */
@@ -15,8 +18,9 @@ class ProductController extends Controller
         if (request()->wantsJson()) {
             return response()->json(Product::with('category')->latest()->get());
         }
+
         return view('menu.index', [
-            'products' => Product::with('category')->latest()->get()
+            'products' => Product::with('category')->latest()->get(),
         ]);
     }
 
@@ -40,7 +44,7 @@ class ProductController extends Controller
                         'id' => $product->category->id,
                         'name' => $product->category->name,
                     ] : null,
-                    'image' => $product->image ? asset('storage/' . $product->image) : null,
+                    'image' => $product->image_url,
                     'is_available' => $product->is_available,
                     'created_at' => $product->created_at,
                     'updated_at' => $product->updated_at,
@@ -59,13 +63,18 @@ class ProductController extends Controller
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'category_id' => 'required|exists:categories,id',
-            'image' => 'nullable|image|max:2048', // 2MB Max
+            'image' => 'nullable|image|max:2048',
             'is_available' => 'boolean',
         ]);
 
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('products', 'public');
-            $validated['image'] = $path;
+            $image = $this->cloudinary->uploadImage(
+                $request->file('image'),
+                'products'
+            );
+
+            $validated['image_url'] = $image['url'];
+            $validated['image_public_id'] = $image['public_id'];
         }
 
         Product::create($validated);
@@ -84,20 +93,27 @@ class ProductController extends Controller
         $product = Product::findOrFail($id);
 
         $validated = $request->validate([
-            'name' => 'sometimes|required|string|max:255',
+            'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'price' => 'sometimes|required|numeric|min:0',
-            'category_id' => 'sometimes|required|exists:categories,id',
+            'price' => 'required|numeric|min:0',
+            'category_id' => 'required|exists:categories,id',
             'image' => 'nullable|image|max:2048',
             'is_available' => 'boolean',
         ]);
 
         if ($request->hasFile('image')) {
-            // Optional: Delete old image if exists
-            // if ($product->image) { Storage::disk('public')->delete($product->image); }
-            
-            $path = $request->file('image')->store('products', 'public');
-            $validated['image'] = $path;
+            // Delete old image from Cloudinary if exists
+            if ($product->image_public_id) {
+                $this->cloudinary->deleteImage($product->image_public_id);
+            }
+
+            $image = $this->cloudinary->uploadImage(
+                $request->file('image'),
+                'products'
+            );
+
+            $validated['image_url'] = $image['url'];
+            $validated['image_public_id'] = $image['public_id'];
         }
 
         $product->update($validated);
@@ -115,6 +131,12 @@ class ProductController extends Controller
     public function destroy(string $id)
     {
         $product = Product::findOrFail($id);
+
+        // Delete image from Cloudinary if exists
+        if ($product->image_public_id) {
+            $this->cloudinary->deleteImage($product->image_public_id);
+        }
+
         $product->delete();
 
         if (request()->wantsJson()) {

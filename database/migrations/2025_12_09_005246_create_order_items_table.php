@@ -21,7 +21,7 @@ return new class extends Migration
             $table->decimal('subtotal', 10, 2);
             $table->text('special_instructions')->nullable();
             $table->timestamps();
-            
+
             $table->index('order_id');
             $table->index('product_id');
         });

@@ -3,17 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Models\Promotion;
+use App\Services\CloudinaryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class PromotionController extends Controller
 {
+    public function __construct(public CloudinaryService $cloudinary) {}
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
         $promotions = Promotion::latest()->get();
+
         return view('promotions.index', compact('promotions'));
     }
 
@@ -23,6 +27,7 @@ class PromotionController extends Controller
     public function create()
     {
         $products = \App\Models\Product::where('is_available', true)->get();
+
         return view('promotions.create', compact('products'));
     }
 
@@ -47,8 +52,13 @@ class PromotionController extends Controller
         $data['status'] = $request->has('status'); // Boolean checkbox
 
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('promotions', 'public');
-            $data['image'] = $path;
+            $image = $this->cloudinary->uploadImage(
+                $request->file('image'),
+                'promotions'
+            );
+
+            $data['image_url'] = $image['url'];
+            $data['image_public_id'] = $image['public_id'];
         }
 
         $promotion = Promotion::create($data);
@@ -67,6 +77,7 @@ class PromotionController extends Controller
     public function edit(Promotion $promotion)
     {
         $products = \App\Models\Product::where('is_available', true)->get();
+
         return view('promotions.edit', compact('promotion', 'products'));
     }
 
@@ -91,12 +102,17 @@ class PromotionController extends Controller
         $data['status'] = $request->has('status');
 
         if ($request->hasFile('image')) {
-            // Delete old image
-            if ($promotion->image) {
-                Storage::disk('public')->delete($promotion->image);
+            // Delete old image from Cloudinary
+            if ($promotion->image_public_id) {
+                $this->cloudinary->deleteImage($promotion->image_public_id);
             }
-            $path = $request->file('image')->store('promotions', 'public');
-            $data['image'] = $path;
+            $image = $this->cloudinary->uploadImage(
+                $request->file('image'),
+                'promotions'
+            );
+
+            $data['image_url'] = $image['url'];
+            $data['image_public_id'] = $image['public_id'];
         }
 
         $promotion->update($data);
@@ -116,15 +132,16 @@ class PromotionController extends Controller
      */
     public function destroy(Promotion $promotion)
     {
-        if ($promotion->image) {
-            Storage::disk('public')->delete($promotion->image);
+        if ($promotion->image_public_id) {
+            $this->cloudinary->deleteImage($promotion->image_public_id);
         }
-        
+
         $promotion->delete();
 
         return redirect()->route('promotions.index')
             ->with('success', 'Promoción eliminada exitosamente.');
     }
+
     /**
      * API: Get active promotions
      */
@@ -147,17 +164,17 @@ class PromotionController extends Controller
                     'id' => $promo->id,
                     'title' => $promo->title,
                     'description' => $promo->description,
-                    'discount' => $promo->discount_percent ? $promo->discount_percent . '%' : null,
+                    'discount' => $promo->discount_percent ? $promo->discount_percent.'%' : null,
                     'validUntil' => $promo->end_date ? $promo->end_date->format('d M Y') : 'Indefinido',
-                    'image' => $promo->image ? asset('storage/' . $promo->image) : null,
+                    'image' => $promo->image_url,
                     'badge' => $promo->badge_label,
                     'color' => $this->getBadgeColor($promo->badge_label),
-                    'products' => $promo->products->map(function($product) {
+                    'products' => $promo->products->map(function ($product) {
                         return [
                             'id' => $product->id,
                             'name' => $product->name,
-                            'price' => (float)$product->price,
-                            'image' => $product->image ? asset('storage/' . $product->image) : null, 
+                            'price' => (float) $product->price,
+                            'image' => $product->image_url,
                         ];
                     }),
                 ];

@@ -15,7 +15,7 @@ class Reservation extends Model
         'reservation_time',
         'party_size',
         'status',
-        'special_request'
+        'special_request',
     ];
 
     public function table()

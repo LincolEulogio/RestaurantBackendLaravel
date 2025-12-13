@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Role;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class RoleController extends Controller
 {
@@ -14,12 +13,12 @@ class RoleController extends Controller
     public function index()
     {
         $roles = Role::all();
-        
+
         // Add user count to each role
         foreach ($roles as $role) {
             $role->user_count = $role->getUserCountAttribute();
         }
-        
+
         return view('roles.index', compact('roles'));
     }
 
@@ -36,19 +35,19 @@ class RoleController extends Controller
 
         // Normalize permissions to booleans
         $permissions = [];
-        if (!empty($validated['permissions'])) {
+        if (! empty($validated['permissions'])) {
             foreach ($validated['permissions'] as $key => $value) {
                 $permissions[$key] = filter_var($value, FILTER_VALIDATE_BOOLEAN);
             }
         }
-        
+
         // Ensure all available permissions are set (false if not provided)
         foreach (Role::availablePermissions() as $key => $description) {
-            if (!isset($permissions[$key])) {
+            if (! isset($permissions[$key])) {
                 $permissions[$key] = false;
             }
         }
-        
+
         $validated['permissions'] = $permissions;
 
         Role::create($validated);
@@ -65,13 +64,13 @@ class RoleController extends Controller
         if ($request->wantsJson() && $request->has('permissions')) {
             try {
                 $permissions = $request->input('permissions');
-                
-                \Log::info('Updating permissions for role: ' . $role->name, [
+
+                \Log::info('Updating permissions for role: '.$role->name, [
                     'role_id' => $role->id,
                     'received_permissions' => $permissions,
-                    'current_permissions' => $role->permissions
+                    'current_permissions' => $role->permissions,
                 ]);
-                
+
                 // Normalize permissions to booleans
                 $normalizedPermissions = [];
                 foreach ($permissions as $key => $value) {
@@ -82,36 +81,36 @@ class RoleController extends Controller
                         $normalizedPermissions[$key] = filter_var($value, FILTER_VALIDATE_BOOLEAN);
                     }
                 }
-                
+
                 \Log::info('Normalized permissions', ['normalized' => $normalizedPermissions]);
-                
+
                 // Direct assignment and save
                 $role->permissions = $normalizedPermissions;
                 $saved = $role->save();
-                
+
                 // Refresh from database to confirm
                 $role->refresh();
-                
+
                 \Log::info('Save result', [
                     'saved' => $saved,
-                    'after_refresh_permissions' => $role->permissions
+                    'after_refresh_permissions' => $role->permissions,
                 ]);
-                
+
                 return response()->json([
                     'success' => true,
                     'message' => 'Permisos actualizados correctamente',
                     'permissions' => $role->permissions,
-                    'saved' => $saved
+                    'saved' => $saved,
                 ]);
             } catch (\Exception $e) {
                 \Log::error('Error updating permissions', [
                     'error' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString()
+                    'trace' => $e->getTraceAsString(),
                 ]);
-                
+
                 return response()->json([
                     'success' => false,
-                    'message' => 'Error al actualizar permisos: ' . $e->getMessage()
+                    'message' => 'Error al actualizar permisos: '.$e->getMessage(),
                 ], 500);
             }
         }
@@ -119,10 +118,10 @@ class RoleController extends Controller
         // Standard form update (name/slug)
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|alpha_dash|unique:roles,slug,' . $role->id,
+            'slug' => 'required|string|max:255|alpha_dash|unique:roles,slug,'.$role->id,
             'permissions' => 'nullable|array',
         ]);
-        
+
         // Normalize permissions if provided
         if ($request->has('permissions')) {
             $permissions = [];
@@ -147,16 +146,16 @@ class RoleController extends Controller
             return redirect()->route('roles.index')
                 ->with('error', 'No se puede eliminar el rol de administrador.');
         }
-        
+
         // Check if role has users
         $userCount = \App\Models\User::where('role', $role->slug)->count();
         if ($userCount > 0) {
             return redirect()->route('roles.index')
                 ->with('error', "No se puede eliminar el rol porque tiene {$userCount} usuario(s) asignado(s).");
         }
-        
+
         $role->delete();
-        
+
         return redirect()->route('roles.index')
             ->with('success', 'Rol eliminado correctamente.');
     }

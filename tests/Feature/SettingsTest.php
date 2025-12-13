@@ -2,11 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Models\Role;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use App\Models\Role;
 
 class SettingsTest extends TestCase
 {
@@ -19,10 +19,10 @@ class SettingsTest extends TestCase
         // Assuming 'settings' permission exists or we can mock it.
         // For simplicity, we create a user and give them a role/permission if used.
         // The router middleware checks 'permission:settings'.
-        
+
         $role = Role::firstOrCreate(['slug' => 'admin'], [
             'name' => 'Admin',
-            'permissions' => ['settings' => true]
+            'permissions' => ['settings' => true],
         ]);
 
         $this->user = User::factory()->create(['role' => 'admin']);
@@ -47,7 +47,7 @@ class SettingsTest extends TestCase
         ]);
 
         $response->assertRedirect();
-        
+
         $this->assertEquals('New Name', Setting::get('restaurant_name'));
         // If I didn't send payment_cash, it would be 0.
         // Wait, my controller logic for booleans: if !$request->has(key), set to 0.
@@ -57,7 +57,7 @@ class SettingsTest extends TestCase
     public function test_boolean_settings_toggle_off()
     {
         Setting::set('payment_cash', '1', 'payment', 'boolean');
-        
+
         // Update without sending payment_cash
         $response = $this->actingAs($this->user)->put(route('settings.update'), [
             'restaurant_name' => 'Name',

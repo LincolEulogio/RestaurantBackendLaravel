@@ -13,13 +13,13 @@ class TableSession extends Model
         'started_at',
         'ended_at',
         'total_amount',
-        'waiter_id'
+        'waiter_id',
     ];
 
     protected $casts = [
         'started_at' => 'datetime',
         'ended_at' => 'datetime',
-        'total_amount' => 'decimal:2'
+        'total_amount' => 'decimal:2',
     ];
 
     public function table()

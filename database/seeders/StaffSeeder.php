@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\User;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 class StaffSeeder extends Seeder
@@ -52,7 +52,7 @@ class StaffSeeder extends Seeder
                 'role' => 'content_manager',
             ]
         );
-        
+
         // 5. Encargado de Inventario (Único en este caso)
         User::updateOrCreate(
             ['email' => 'inventario@example.com'],

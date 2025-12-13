@@ -12,7 +12,7 @@ class Printer extends Model
         'connection_type',
         'ip_address',
         'port',
-        'is_active'
+        'is_active',
     ];
 
     protected $casts = [

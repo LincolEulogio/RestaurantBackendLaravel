@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Category;
+use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
@@ -12,6 +12,7 @@ class CategoryController extends Controller
         if (request()->wantsJson()) {
             return response()->json(Category::where('is_active', true)->get());
         }
+
         return view('categories.index');
     }
 
@@ -53,7 +54,7 @@ class CategoryController extends Controller
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
             'description' => 'nullable|string',
-            'slug' => 'sometimes|required|string|unique:categories,slug,' . $category->id,
+            'slug' => 'sometimes|required|string|unique:categories,slug,'.$category->id,
             'is_active' => 'boolean',
         ]);
 
@@ -65,6 +66,7 @@ class CategoryController extends Controller
     public function destroy(Category $category)
     {
         $category->delete();
+
         return response()->json(['success' => true]);
     }
 }

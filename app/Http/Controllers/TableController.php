@@ -13,6 +13,7 @@ class TableController extends Controller
     public function index()
     {
         $tables = Table::orderBy('table_number')->paginate(10);
+
         return view('tables.index', compact('tables'));
     }
 
@@ -56,7 +57,7 @@ class TableController extends Controller
     public function update(Request $request, Table $table)
     {
         $validated = $request->validate([
-            'table_number' => 'required|string|unique:tables,table_number,' . $table->id,
+            'table_number' => 'required|string|unique:tables,table_number,'.$table->id,
             'capacity' => 'required|integer|min:1',
             'status' => 'required|in:available,reserved,maintenance',
             'location' => 'required|in:Indoor,Outdoor',

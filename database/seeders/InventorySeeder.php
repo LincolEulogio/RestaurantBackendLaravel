@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 use App\Models\InventoryItem;
+use Illuminate\Database\Seeder;
 
 class InventorySeeder extends Seeder
 {

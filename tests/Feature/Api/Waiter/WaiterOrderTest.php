@@ -3,8 +3,8 @@
 use App\Models\Product;
 use App\Models\Table;
 use App\Models\User;
-use Laravel\Sanctum\Sanctum;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Sanctum\Sanctum;
 
 uses(RefreshDatabase::class);
 
@@ -22,25 +22,25 @@ test('waiter can create order and session', function () {
     $response = $this->postJson('/api/waiter/orders', [
         'table_id' => $table->id,
         'items' => [
-            ['product_id' => $product->id, 'quantity' => 2]
-        ]
+            ['product_id' => $product->id, 'quantity' => 2],
+        ],
     ]);
 
     $response->dump();
     $response->assertCreated();
-    
+
     // Verify session created
     $this->assertDatabaseHas('table_sessions', [
         'table_id' => $table->id,
         'status' => 'active',
-        'waiter_id' => $waiter->id
+        'waiter_id' => $waiter->id,
     ]);
 
     // Verify order created
     $this->assertDatabaseHas('orders', [
         'table_id' => $table->id,
         'waiter_id' => $waiter->id,
-        'total' => 40
+        'total' => 40,
     ]);
 
     // Verify table status updated

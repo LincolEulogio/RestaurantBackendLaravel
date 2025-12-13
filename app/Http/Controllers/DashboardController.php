@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Order;
-use App\Models\Product;
 use App\Models\InventoryItem;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
+use App\Models\Order;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -18,7 +17,7 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        
+
         // Determine user role and get appropriate data
         if ($user->hasRole('admin') || $user->hasRole('gerente')) {
             return $this->getAdminDashboard();
@@ -29,7 +28,7 @@ class DashboardController extends Controller
         } elseif ($user->hasRole('cashier')) {
             return $this->getCashierDashboard();
         }
-        
+
         // Default fallback
         return $this->getAdminDashboard();
     }
@@ -54,13 +53,13 @@ class DashboardController extends Controller
         // Yesterday's sales for comparison
         $yesterdayStart = Carbon::yesterday();
         $yesterdayEnd = Carbon::yesterday()->endOfDay();
-        
+
         $yesterdaySales = Order::where('status', 'delivered')
             ->whereBetween('delivered_at', [$yesterdayStart, $yesterdayEnd])
             ->sum('total');
 
-        $salesChange = $yesterdaySales > 0 
-            ? (($todaySales - $yesterdaySales) / $yesterdaySales) * 100 
+        $salesChange = $yesterdaySales > 0
+            ? (($todaySales - $yesterdaySales) / $yesterdaySales) * 100
             : 0;
 
         // Active orders (pending, confirmed, preparing, ready)
@@ -101,12 +100,12 @@ class DashboardController extends Controller
         for ($i = 6; $i >= 0; $i--) {
             $date = Carbon::now()->subDays($i)->format('Y-m-d');
             $dayName = Carbon::now()->subDays($i)->locale('es')->dayName;
-            
+
             $existing = $weeklySales->firstWhere('date', $date);
             $weeklyData->push([
                 'date' => $date,
                 'day_name' => $dayName,
-                'revenue' => $existing ? $existing->revenue : 0
+                'revenue' => $existing ? $existing->revenue : 0,
             ]);
         }
 
@@ -145,35 +144,35 @@ class DashboardController extends Controller
             ->whereYear('delivered_at', Carbon::now()->subMonth()->year)
             ->sum('total');
 
-        $monthlyChange = $lastMonthSales > 0 
-            ? (($thisMonthSales - $lastMonthSales) / $lastMonthSales) * 100 
+        $monthlyChange = $lastMonthSales > 0
+            ? (($thisMonthSales - $lastMonthSales) / $lastMonthSales) * 100
             : 0;
 
         // Additional Statistics
-        
+
         // Average Order Value (today)
         $averageOrderValue = $todayOrders > 0 ? $todaySales / $todayOrders : 0;
-        
+
         // Total Customers (unique customer names)
         $totalCustomers = Order::distinct('customer_name')
             ->whereNotNull('customer_name')
             ->count('customer_name');
-        
+
         // Products sold today
         $productsSoldToday = DB::table('order_items')
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
             ->where('orders.status', 'delivered')
             ->whereBetween('orders.delivered_at', [$todayStart, $todayEnd])
             ->sum('order_items.quantity');
-        
+
         // Pending orders (need attention)
         $pendingOrders = Order::where('status', 'pending')->count();
-        
+
         // Total inventory value
         $inventoryValue = InventoryItem::where('is_active', true)
             ->selectRaw('SUM(stock_current * price_unit) as total_value')
             ->value('total_value') ?? 0;
-        
+
         // Top category today (by revenue)
         $topCategoryToday = DB::table('order_items')
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
@@ -185,14 +184,14 @@ class DashboardController extends Controller
             ->groupBy('categories.id', 'categories.name')
             ->orderByDesc('revenue')
             ->first();
-        
+
         // Revenue by order type
         $revenueByType = Order::where('status', 'delivered')
             ->whereBetween('delivered_at', [$todayStart, $todayEnd])
             ->select('order_type', DB::raw('SUM(total) as revenue'), DB::raw('COUNT(*) as count'))
             ->groupBy('order_type')
             ->get();
-        
+
         // Payment methods breakdown (today)
         $paymentMethodsToday = Order::where('status', 'delivered')
             ->whereBetween('delivered_at', [$todayStart, $todayEnd])
@@ -270,16 +269,16 @@ class DashboardController extends Controller
             $date = Carbon::now()->subDays($i)->format('Y-m-d');
             $dayStart = Carbon::now()->subDays($i)->startOfDay();
             $dayEnd = Carbon::now()->subDays($i)->endOfDay();
-            
+
             $revenue = Order::where('user_id', $user->id)
                 ->where('status', 'delivered')
                 ->whereBetween('delivered_at', [$dayStart, $dayEnd])
                 ->sum('total');
-            
+
             $weeklyData->push([
                 'date' => $date,
                 'day_name' => Carbon::now()->subDays($i)->locale('es')->dayName,
-                'revenue' => $revenue
+                'revenue' => $revenue,
             ]);
         }
 

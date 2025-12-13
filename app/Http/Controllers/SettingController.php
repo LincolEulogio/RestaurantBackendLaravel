@@ -13,6 +13,7 @@ class SettingController extends Controller
     {
         $settings = \App\Models\Setting::all()->pluck('value', 'key');
         $printers = \App\Models\Printer::all();
+
         return view('settings.index', compact('settings', 'printers'));
     }
 
@@ -25,8 +26,8 @@ class SettingController extends Controller
 
         // Handle Logo Upload
         if ($request->hasFile('logo')) {
-             $path = $request->file('logo')->store('settings', 'public');
-             \App\Models\Setting::set('logo', $path, 'general', 'file');
+            $path = $request->file('logo')->store('settings', 'public');
+            \App\Models\Setting::set('logo', $path, 'general', 'file');
         }
 
         // Update provided values
@@ -41,7 +42,7 @@ class SettingController extends Controller
         // Our x-toggle sends hidden input, but standard checkboxes might not.
         $booleanKeys = \App\Models\Setting::where('type', 'boolean')->pluck('key');
         foreach ($booleanKeys as $key) {
-            if (!$request->has($key)) {
+            if (! $request->has($key)) {
                 \App\Models\Setting::where('key', $key)->update(['value' => '0']);
             }
         }

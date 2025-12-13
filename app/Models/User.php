@@ -62,6 +62,7 @@ class User extends Authenticatable
     public function getRolePermissions(): array
     {
         $roleModel = Role::where('slug', $this->role)->first();
+
         return $roleModel ? ($roleModel->permissions ?? []) : [];
     }
 
@@ -71,6 +72,7 @@ class User extends Authenticatable
     public function hasPermission(string $permission): bool
     {
         $permissions = $this->getRolePermissions();
+
         return ($permissions[$permission] ?? false) === true;
     }
 
@@ -84,6 +86,7 @@ class User extends Authenticatable
                 return true;
             }
         }
+
         return false;
     }
 
@@ -93,10 +96,11 @@ class User extends Authenticatable
     public function hasAllPermissions(array $permissions): bool
     {
         foreach ($permissions as $permission) {
-            if (!$this->hasPermission($permission)) {
+            if (! $this->hasPermission($permission)) {
                 return false;
             }
         }
+
         return true;
     }
 

@@ -1,17 +1,17 @@
 <?php
 
-use App\Models\User;
 use App\Models\Order;
 use App\Models\Role;
+use App\Models\User;
 
 beforeEach(function () {
     Role::firstOrCreate(['slug' => 'cashier'], [
-        'name' => 'Cashier', 
-        'permissions' => ['billing' => true]
+        'name' => 'Cashier',
+        'permissions' => ['billing' => true],
     ]);
     Role::firstOrCreate(['slug' => 'delivery'], [
-        'name' => 'Delivery', 
-        'permissions' => ['billing' => true]
+        'name' => 'Delivery',
+        'permissions' => ['billing' => true],
     ]);
 });
 
@@ -23,7 +23,7 @@ test('billing page shows filtered orders and correct pending amount for cashier'
         'order_source' => 'waiter',
         'status' => 'ready',
         'payment_status' => 'pending',
-        'total' => 50.00
+        'total' => 50.00,
     ]);
 
     // Create a ready order for Web (Hidden from Cashier) worth 30.00
@@ -31,7 +31,7 @@ test('billing page shows filtered orders and correct pending amount for cashier'
         'order_source' => 'web',
         'status' => 'ready',
         'payment_status' => 'pending',
-        'total' => 30.00
+        'total' => 30.00,
     ]);
 
     $response = $this->actingAs($cashier)->get(route('billing.index'));
@@ -41,7 +41,7 @@ test('billing page shows filtered orders and correct pending amount for cashier'
     $response->assertDontSee($webOrder->order_number);
 
     // Verify Pending Payments Sum (Should only be 50.00)
-    $response->assertViewHas('pendingPayments', 50.00); 
+    $response->assertViewHas('pendingPayments', 50.00);
     // It should NOT be 80.00
 });
 
@@ -53,7 +53,7 @@ test('billing page shows filtered orders and correct pending amount for delivery
         'order_source' => 'waiter',
         'status' => 'ready',
         'payment_status' => 'pending',
-        'total' => 50.00
+        'total' => 50.00,
     ]);
 
     // Create a ready order for Web (Visible to Delivery) worth 30.00
@@ -61,7 +61,7 @@ test('billing page shows filtered orders and correct pending amount for delivery
         'order_source' => 'web',
         'status' => 'ready',
         'payment_status' => 'pending',
-        'total' => 30.00
+        'total' => 30.00,
     ]);
 
     $response = $this->actingAs($delivery)->get(route('billing.index'));
@@ -81,12 +81,12 @@ test('process payment successfully', function () {
         'order_source' => 'waiter',
         'status' => 'ready',
         'payment_status' => 'pending',
-        'total' => 100.00
+        'total' => 100.00,
     ]);
 
     $response = $this->actingAs($cashier)->post(route('billing.process-payment', $order), [
         'payment_method' => 'cash',
-        'amount_received' => 120.00
+        'amount_received' => 120.00,
     ]);
 
     $response->assertRedirect(route('billing.index'));
@@ -98,7 +98,7 @@ test('process payment successfully', function () {
         'status' => 'delivered',
         // 'payment_status' => 'paid' // Assuming updateStatus handles this, explicitly checked below
     ]);
-    
+
     // Refresh order to check status if logic is inside updateStatus (which we can't see fully here but assume it sets delivered)
     $order->refresh();
     expect($order->status)->toBe('delivered');

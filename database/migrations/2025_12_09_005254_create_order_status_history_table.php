@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('to_status');
             $table->text('notes')->nullable();
             $table->timestamps();
-            
+
             $table->index('order_id');
             $table->index('created_at');
         });

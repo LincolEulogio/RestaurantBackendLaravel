@@ -3,8 +3,6 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class NewOrderAlert extends Notification
@@ -44,7 +42,7 @@ class NewOrderAlert extends Notification
             'amount' => $this->order->total,
             'customer' => $this->order->customer_name,
             'type' => 'new_order',
-            'message' => 'Nuevo pedido recibido: #' . ($this->order->order_number ?? $this->order->id),
+            'message' => 'Nuevo pedido recibido: #'.($this->order->order_number ?? $this->order->id),
         ];
     }
 }

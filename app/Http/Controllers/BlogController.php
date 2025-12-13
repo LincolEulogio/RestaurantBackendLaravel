@@ -3,16 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Models\Blog;
+use App\Services\CloudinaryService;
 use Illuminate\Http\Request;
 
 class BlogController extends Controller
 {
+    public function __construct(public CloudinaryService $cloudinary) {}
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
         $blogs = Blog::latest()->get();
+
         return view('blogs.index', compact('blogs'));
     }
 
@@ -38,8 +42,13 @@ class BlogController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('blogs', 'public');
-            $validated['image'] = 'storage/' . $path;
+            $image = $this->cloudinary->uploadImage(
+                $request->file('image'),
+                'blogs'
+            );
+
+            $validated['image_url'] = $image['url'];
+            $validated['image_public_id'] = $image['public_id'];
         }
 
         if ($validated['status'] === 'published') {
@@ -74,24 +83,28 @@ class BlogController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:blogs,slug,' . $blog->id,
+            'slug' => 'required|string|max:255|unique:blogs,slug,'.$blog->id,
             'content' => 'required|string',
             'status' => 'required|in:draft,published',
             'image' => 'nullable|image|max:5120', // Max 5MB
         ]);
 
         if ($request->hasFile('image')) {
-            // Delete old image if exists
-            if ($blog->image && file_exists(public_path($blog->image))) {
-               // Optional: unlink(public_path($blog->image)); 
-               // Storage::disk('public')->delete(str_replace('storage/', '', $blog->image));
+            // Delete old image from Cloudinary if exists
+            if ($blog->image_public_id) {
+                $this->cloudinary->deleteImage($blog->image_public_id);
             }
 
-            $path = $request->file('image')->store('blogs', 'public');
-            $validated['image'] = 'storage/' . $path;
+            $image = $this->cloudinary->uploadImage(
+                $request->file('image'),
+                'blogs'
+            );
+
+            $validated['image_url'] = $image['url'];
+            $validated['image_public_id'] = $image['public_id'];
         }
 
-        if ($validated['status'] === 'published' && !$blog->published_at) {
+        if ($validated['status'] === 'published' && ! $blog->published_at) {
             $validated['published_at'] = now();
         }
 
@@ -105,7 +118,13 @@ class BlogController extends Controller
      */
     public function destroy(Blog $blog)
     {
+        // Delete image from Cloudinary if exists
+        if ($blog->image_public_id) {
+            $this->cloudinary->deleteImage($blog->image_public_id);
+        }
+
         $blog->delete();
+
         return redirect()->route('blogs.index')->with('success', 'Blog eliminado correctamente.');
     }
 
@@ -118,6 +137,7 @@ class BlogController extends Controller
     public function apiShow($slug)
     {
         $blog = Blog::where('slug', $slug)->where('status', 'published')->firstOrFail();
+
         return response()->json($blog);
     }
 }

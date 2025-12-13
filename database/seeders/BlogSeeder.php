@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Blog;
-use Illuminate\Support\Str;
 use Faker\Factory as Faker;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class BlogSeeder extends Seeder
 {
@@ -37,7 +37,7 @@ class BlogSeeder extends Seeder
             'Conoce a nuestro equipo de cocina',
             'Promociones de Happy Hour',
             'La fusión de sabores andinos',
-            'Detrás de escena: Un día en el restaurante'
+            'Detrás de escena: Un día en el restaurante',
         ];
 
         foreach ($topics as $index => $topic) {
@@ -45,7 +45,7 @@ class BlogSeeder extends Seeder
 
             Blog::create([
                 'title' => $topic,
-                'slug' => Str::slug($topic) . '-' . ($index + 1), // Ensure unique slug
+                'slug' => Str::slug($topic).'-'.($index + 1), // Ensure unique slug
                 'content' => $this->generateContent($faker),
                 'image' => null, // We leave image null or could use a placeholder URL if requested
                 'status' => $isPublished ? 'published' : 'draft',
@@ -61,6 +61,7 @@ class BlogSeeder extends Seeder
         foreach ($paragraphs as $paragraph) {
             $content .= "<p>{$paragraph}</p>";
         }
+
         return $content;
     }
 }

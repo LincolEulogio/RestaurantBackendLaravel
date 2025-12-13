@@ -134,20 +134,36 @@ export default () => ({
                 });
             }
         } catch (error) {
-            console.error("Error saving product:", error);
-            if (error.response && error.response.status === 422) {
-                // Validation errors are handled globally or we can show them specific here
-                Toast.fire({
-                    icon: "error",
-                    title: "Error de validación",
-                    text: Object.values(error.response.data.errors)
+            if (error.response) {
+                console.error(error.response.data);
+                console.error(error.response.data.errors);
+
+                // Show validation errors
+                if (
+                    error.response.status === 422 &&
+                    error.response.data.errors
+                ) {
+                    const errorMessages = Object.values(
+                        error.response.data.errors
+                    )
                         .flat()
-                        .join("\n"),
-                });
+                        .join("\n");
+                    Toast.fire({
+                        icon: "error",
+                        title: "Error de validación",
+                        text: errorMessages,
+                    });
+                } else {
+                    Toast.fire({
+                        icon: "error",
+                        title: "Error al guardar producto",
+                    });
+                }
             } else {
+                console.error(error);
                 Toast.fire({
                     icon: "error",
-                    title: "Error al guardar",
+                    title: "Error al guardar producto",
                 });
             }
         }

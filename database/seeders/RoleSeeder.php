@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Role;
+use Illuminate\Database\Seeder;
 
 class RoleSeeder extends Seeder
 {
@@ -29,7 +29,7 @@ class RoleSeeder extends Seeder
                     'billing' => true,
                     'blogs' => true,
                     'settings' => true,
-                ]
+                ],
             ]
         );
 
@@ -50,7 +50,7 @@ class RoleSeeder extends Seeder
                     'billing' => true,
                     'blogs' => true,
                     'settings' => true,
-                ]
+                ],
             ]
         );
 
@@ -71,7 +71,7 @@ class RoleSeeder extends Seeder
                     'billing' => true,
                     'blogs' => true,
                     'settings' => false, // No accede a config del sistema
-                ]
+                ],
             ]
         );
 
@@ -92,7 +92,7 @@ class RoleSeeder extends Seeder
                     'billing' => false,
                     'blogs' => false,
                     'settings' => false,
-                ]
+                ],
             ]
         );
 
@@ -113,7 +113,7 @@ class RoleSeeder extends Seeder
                     'billing' => false, // No cobra, solo pide (o true si cobra en mesa)
                     'blogs' => false,
                     'settings' => false,
-                ]
+                ],
             ]
         );
 
@@ -134,10 +134,10 @@ class RoleSeeder extends Seeder
                     'billing' => true,
                     'blogs' => false,
                     'settings' => false,
-                ]
+                ],
             ]
         );
-        
+
         // 6. Inventariador: Solo inventario
         Role::updateOrCreate(
             ['slug' => 'inventory_manager'],
@@ -155,7 +155,7 @@ class RoleSeeder extends Seeder
                     'billing' => false,
                     'blogs' => false,
                     'settings' => false,
-                ]
+                ],
             ]
         );
         // 7. Content Manager: Blogs y Contenido Web
@@ -175,7 +175,7 @@ class RoleSeeder extends Seeder
                     'billing' => false,
                     'blogs' => true,   // Principal funcion
                     'settings' => false,
-                ]
+                ],
             ]
         );
     }

@@ -130,7 +130,7 @@
                         class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden group hover:shadow-md transition-all relative flex flex-col h-full">
                         <div class="h-48 bg-gray-200 dark:bg-gray-700 relative overflow-hidden shrink-0">
                             <!-- Image handling -->
-                            <img :src="product.image ? '/storage/' + product.image : 'https://placehold.co/800x600?text=No+Image'"
+                            <img :src="product.image_url"
                                 :alt="product.name"
                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
 
@@ -236,7 +236,8 @@
                                                         </p>
                                                     </div>
                                                     <input id="dropzone-file" type="file" class="hidden"
-                                                        @change="handleFileUpload" accept="image/*" />
+                                                        name="image" accept="image/*" @change="handleFileUpload" />
+
                                                 </label>
                                             </div>
                                             <!-- Image Preview Text -->

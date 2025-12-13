@@ -5,12 +5,12 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Product;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Notification;
 use App\Models\User;
 use App\Notifications\NewOrderAlert;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Validator;
 
 class OrderController extends Controller
 {
@@ -32,8 +32,8 @@ class OrderController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('order_number', 'like', "%{$search}%")
-                  ->orWhere('customer_name', 'like', "%{$search}%")
-                  ->orWhere('customer_phone', 'like', "%{$search}%");
+                    ->orWhere('customer_name', 'like', "%{$search}%")
+                    ->orWhere('customer_phone', 'like', "%{$search}%");
             });
         }
 
@@ -68,7 +68,7 @@ class OrderController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -96,7 +96,7 @@ class OrderController extends Controller
             // Create order items
             foreach ($request->items as $item) {
                 $product = Product::findOrFail($item['product_id']);
-                
+
                 $order->items()->create([
                     'product_id' => $product->id,
                     'product_name' => $product->name,
@@ -127,26 +127,26 @@ class OrderController extends Controller
                 $usersToNotify = User::all()->filter(function ($user) {
                     return $user->hasPermission('orders');
                 });
-                
+
                 if ($usersToNotify->count() > 0) {
                     Notification::send($usersToNotify, new NewOrderAlert($order));
                 }
             } catch (\Exception $e) {
                 // Log error but don't fail the request
-                \Log::error('Failed to send notification: ' . $e->getMessage());
+                \Log::error('Failed to send notification: '.$e->getMessage());
             }
 
             return response()->json([
                 'message' => 'Order created successfully',
-                'order' => $order
+                'order' => $order,
             ], 201);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             return response()->json([
                 'message' => 'Failed to create order',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -157,7 +157,7 @@ class OrderController extends Controller
     public function show(Order $order)
     {
         $order->load(['items.product', 'statusHistory.user']);
-        
+
         return response()->json($order);
     }
 
@@ -174,7 +174,7 @@ class OrderController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Validation failed',
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -186,13 +186,13 @@ class OrderController extends Controller
 
             return response()->json([
                 'message' => 'Order status updated successfully',
-                'order' => $order
+                'order' => $order,
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Failed to update order status',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -206,13 +206,13 @@ class OrderController extends Controller
             $order->delete();
 
             return response()->json([
-                'message' => 'Order deleted successfully'
+                'message' => 'Order deleted successfully',
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Failed to delete order',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }

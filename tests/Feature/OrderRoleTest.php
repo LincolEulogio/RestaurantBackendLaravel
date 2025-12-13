@@ -1,18 +1,18 @@
 <?php
 
-use App\Models\User;
 use App\Models\Order;
 use App\Models\Role;
+use App\Models\User;
 
 beforeEach(function () {
     // Ensure roles exist with permissions
     Role::firstOrCreate(['slug' => 'cashier'], [
-        'name' => 'Cashier', 
-        'permissions' => ['orders' => true]
+        'name' => 'Cashier',
+        'permissions' => ['orders' => true],
     ]);
     Role::firstOrCreate(['slug' => 'delivery'], [
-        'name' => 'Delivery', 
-        'permissions' => ['orders' => true]
+        'name' => 'Delivery',
+        'permissions' => ['orders' => true],
     ]);
     Role::firstOrCreate(['slug' => 'admin'], ['name' => 'Admin', 'permissions' => []]);
 });
@@ -27,7 +27,7 @@ test('cashier only sees non-web orders and correct stats', function () {
     $response = $this->actingAs($cashier)->get(route('orders.index'));
 
     $response->assertStatus(200);
-    
+
     // Check List Visibility
     $response->assertSee($waiterOrder->order_number);
     $response->assertDontSee($webOrder->order_number);
@@ -61,10 +61,10 @@ test('delivery only sees web orders and correct stats', function () {
 });
 
 test('admin sees all orders', function () {
-    // Admin usually has 'admin' user role or similar logic. 
+    // Admin usually has 'admin' user role or similar logic.
     // Assuming 'admin' role sees all.
     $admin = User::factory()->create(['role' => 'admin']);
-    
+
     $waiterOrder = Order::factory()->create(['order_source' => 'waiter']);
     $webOrder = Order::factory()->create(['order_source' => 'web']);
 

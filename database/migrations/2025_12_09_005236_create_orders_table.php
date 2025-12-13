@@ -19,13 +19,13 @@ return new class extends Migration
             $table->string('customer_phone')->nullable(); // Made nullable
             $table->text('delivery_address')->nullable();
             $table->enum('order_type', ['delivery', 'pickup', 'dine-in'])->default('pickup');
-            
+
             // New fields for Dine-in
             $table->foreignId('table_id')->nullable(); // Removed constrained() to avoid migration order issues
             $table->foreignId('waiter_id')->nullable(); // Removed constrained()
             $table->string('order_source')->default('web'); // web, waiter, qr
             $table->string('session_token')->nullable(); // Link to table session
-            
+
             $table->enum('status', ['pending', 'confirmed', 'preparing', 'ready', 'delivered', 'cancelled', 'served', 'paid'])->default('pending');
             $table->decimal('subtotal', 10, 2);
             $table->decimal('tax', 10, 2)->default(0);
@@ -37,7 +37,7 @@ return new class extends Migration
             $table->timestamp('delivered_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
-            
+
             $table->index('order_number');
             $table->index('status');
             $table->index('created_at');

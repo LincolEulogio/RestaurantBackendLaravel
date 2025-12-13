@@ -16,7 +16,7 @@ class CheckPermission
     public function handle(Request $request, Closure $next, string $permission): Response
     {
         // Check if user is authenticated
-        if (!auth()->check()) {
+        if (! auth()->check()) {
             return redirect()->route('login')->with('error', 'Debes iniciar sesión.');
         }
 
@@ -26,7 +26,7 @@ class CheckPermission
         }
 
         // Check if user has the required permission
-        if (!auth()->user()->hasPermission($permission)) {
+        if (! auth()->user()->hasPermission($permission)) {
             abort(403, 'No tienes permiso para acceder a esta sección.');
         }
 

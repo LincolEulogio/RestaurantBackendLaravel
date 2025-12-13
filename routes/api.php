@@ -1,9 +1,9 @@
 <?php
 
 use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
-use App\Http\Controllers\BlogController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -33,7 +33,6 @@ Route::get('/blogs', [BlogController::class, 'apiIndex']);
 Route::get('/blogs/{slug}', [BlogController::class, 'apiShow']);
 Route::get('/promotions', [\App\Http\Controllers\PromotionController::class, 'apiIndex']);
 Route::post('/reservations', [\App\Http\Controllers\Api\ReservationController::class, 'store']);
-
 
 // Protected routes (require authentication)
 // Protected routes (require authentication)

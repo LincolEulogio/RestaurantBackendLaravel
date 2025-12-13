@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Order;
-use App\Models\Product;
 use App\Models\Category;
+use App\Models\Order;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class ReportController extends Controller
 {
@@ -131,6 +130,7 @@ class ReportController extends Controller
         // Calculate margins (simplified - assuming 30% cost)
         $categoryPerformance = $categoryPerformance->map(function ($category) {
             $category->margin = 70; // Simplified margin calculation
+
             return $category;
         });
 
@@ -191,7 +191,7 @@ class ReportController extends Controller
         $cancelledOrders = Order::where('status', 'cancelled')
             ->whereBetween('updated_at', [$startDate, $endDate])
             ->count();
-            
+
         $cancelledAmount = Order::where('status', 'cancelled')
             ->whereBetween('updated_at', [$startDate, $endDate])
             ->sum('total');
@@ -207,7 +207,7 @@ class ReportController extends Controller
         // Net Profit = Subtotal * 0.30 (Conservative/Example) OR Subtotal * 0.70 (Optimistic)
         // Let's use 20% Net Profit on Total Revenue for safety/realism or stick to the category logic.
         // Given the category report uses 70% margin, I'll calculate Net Profit as 20% of Total Revenue for a realistic "Bottom Line" estimate.
-        $netProfit = $totalRevenue * 0.20; 
+        $netProfit = $totalRevenue * 0.20;
 
         return view('reports.index', compact(
             'totalRevenue',

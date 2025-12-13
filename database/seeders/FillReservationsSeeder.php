@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Reservation;
 use App\Models\Table;
+use Illuminate\Database\Seeder;
 
 class FillReservationsSeeder extends Seeder
 {
@@ -23,7 +23,7 @@ class FillReservationsSeeder extends Seeder
                 'reservation_time' => '11:00:00',
                 'party_size' => 2,
                 'status' => 'confirmed',
-                'special_request' => 'Blocked for testing'
+                'special_request' => 'Blocked for testing',
             ]);
         }
     }

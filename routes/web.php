@@ -1,26 +1,24 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\GlobalSearchController;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\StaffController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\InventoryController;
-use App\Http\Controllers\RoleController;
-use App\Http\Controllers\PermissionController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\SettingController;
-use App\Http\Controllers\OrderController;
-use App\Http\Controllers\KitchenController;
 use App\Http\Controllers\BillingController;
-use App\Http\Controllers\ReportController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\ReservationController;
-use App\Http\Controllers\TableController;
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\GlobalSearchController;
+use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\KitchenController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PromotionController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ReservationController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\SettingController;
+use App\Http\Controllers\StaffController;
+use App\Http\Controllers\TableController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
@@ -63,9 +61,9 @@ Route::middleware('auth')->group(function () {
     // INVENTORY - Requires 'inventory' permission
     Route::middleware('permission:inventory')->group(function () {
         Route::resource('inventory-items', InventoryController::class);
-        
+
         Route::get('/inventory', function () {
-             return view('inventory.index');
+            return view('inventory.index');
         })->name('inventory.index');
     });
 

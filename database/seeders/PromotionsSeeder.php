@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\Promotion;
 use App\Models\Product;
+use App\Models\Promotion;
 use Carbon\Carbon;
+use Illuminate\Database\Seeder;
 
 class PromotionsSeeder extends Seeder
 {
@@ -16,9 +16,10 @@ class PromotionsSeeder extends Seeder
     {
         // Ensure we have some products
         $products = Product::all();
-        
+
         if ($products->count() === 0) {
             $this->command->info('No products found, skipping promotion seeding.');
+
             return;
         }
 
@@ -63,7 +64,7 @@ class PromotionsSeeder extends Seeder
             'start_date' => Carbon::now(),
             'end_date' => Carbon::now()->addDays(2),
         ]);
-        
+
         $promo3->products()->attach($products->random(min(2, $products->count()))->pluck('id'));
     }
 }

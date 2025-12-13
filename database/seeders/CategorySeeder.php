@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\Category;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use App\Models\Category;
 use Illuminate\Support\Str;
 
 class CategorySeeder extends Seeder
@@ -39,18 +39,18 @@ class CategorySeeder extends Seeder
             'Vegetariano',
             'Vegano',
             'Desayunos',
-            'Menú Infantil'
+            'Menú Infantil',
         ];
 
         foreach ($categories as $categoryName) {
             Category::create([
                 'name' => $categoryName,
                 'slug' => Str::slug($categoryName),
-                'description' => 'Deliciosa selección de ' . strtolower($categoryName) . ' preparados con los mejores ingredientes.',
+                'description' => 'Deliciosa selección de '.strtolower($categoryName).' preparados con los mejores ingredientes.',
                 'is_active' => true,
             ]);
         }
-        
+
         $this->command->info('20 Categorías creadas exitosamente.');
     }
 }

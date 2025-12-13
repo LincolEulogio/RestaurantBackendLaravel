@@ -37,8 +37,8 @@ class OrderController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('order_number', 'like', "%{$search}%")
-                  ->orWhere('customer_name', 'like', "%{$search}%")
-                  ->orWhere('customer_phone', 'like', "%{$search}%");
+                    ->orWhere('customer_name', 'like', "%{$search}%")
+                    ->orWhere('customer_phone', 'like', "%{$search}%");
             });
         }
 
@@ -61,7 +61,7 @@ class OrderController extends Controller
     public function show(Order $order)
     {
         $order->load(['items.product', 'statusHistory.user']);
-        
+
         return view('orders.show', compact('order'));
     }
 

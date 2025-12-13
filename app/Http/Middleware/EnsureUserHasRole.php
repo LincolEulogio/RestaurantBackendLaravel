@@ -18,12 +18,12 @@ class EnsureUserHasRole
         if (! $request->user() || ! in_array($request->user()->role, $roles)) {
             // Redirect based on role or to limited dashboard
             if ($request->user()) {
-                 return match($request->user()->role) {
+                return match ($request->user()->role) {
                     'chef' => redirect()->route('kitchen.index'),
                     'cashier' => redirect()->route('billing.index'),
                     'waiter' => redirect()->route('orders.index'),
                     default => redirect()->route('dashboard'),
-                 };
+                };
             }
             abort(403, 'Unauthorized.');
         }

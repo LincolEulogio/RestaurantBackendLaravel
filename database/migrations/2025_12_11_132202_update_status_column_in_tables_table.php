@@ -3,7 +3,6 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -13,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('tables', function (Blueprint $table) {
-            // Change status to string to support flexible statuses. 
+            // Change status to string to support flexible statuses.
             // This requires doctrine/dbal for SQLite/MySQL cross-compatibility in older/some setups,
             // but is the standard Laravel way.
             $table->string('status')->change();

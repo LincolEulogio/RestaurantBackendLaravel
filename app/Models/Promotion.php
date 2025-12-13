@@ -14,6 +14,8 @@ class Promotion extends Model
         'description',
         'discount_percent',
         'image',
+        'image_url',
+        'image_public_id',
         'status',
         'badge_label',
         'start_date',

@@ -15,6 +15,7 @@ class InventoryController extends Controller
         if (request()->wantsJson()) {
             return response()->json(InventoryItem::latest()->get());
         }
+
         return view('inventory.index');
     }
 
@@ -45,10 +46,10 @@ class InventoryController extends Controller
     public function update(Request $request, string $id)
     {
         $inventoryItem = InventoryItem::findOrFail($id);
-        
+
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
-            'sku' => 'sometimes|required|string|unique:inventory_items,sku,' . $id,
+            'sku' => 'sometimes|required|string|unique:inventory_items,sku,'.$id,
             'category' => 'nullable|string',
             'stock_current' => 'sometimes|required|numeric|min:0',
             'stock_min' => 'sometimes|required|numeric|min:0',
@@ -69,6 +70,7 @@ class InventoryController extends Controller
     {
         $inventoryItem = InventoryItem::findOrFail($id);
         $inventoryItem->delete();
+
         return response()->json(['success' => true]);
     }
 }

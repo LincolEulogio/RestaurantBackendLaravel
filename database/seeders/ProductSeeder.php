@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\Product;
 use App\Models\Category;
+use App\Models\Product;
 use Faker\Factory as Faker;
+use Illuminate\Database\Seeder;
 
 class ProductSeeder extends Seeder
 {
@@ -17,18 +17,19 @@ class ProductSeeder extends Seeder
     public function run()
     {
         $faker = Faker::create('es_ES');
-        
+
         // Obtener todos los IDs de categorías
         $categoryIds = Category::pluck('id')->toArray();
-        
+
         if (empty($categoryIds)) {
             $this->command->error('No hay categorías creadas. Ejecuta CategorySeeder primero.');
+
             return;
         }
 
         for ($i = 0; $i < 50; $i++) {
             $name = $this->generateProductName($faker);
-            
+
             Product::create([
                 'name' => $name,
                 'description' => $faker->sentence(10),
@@ -38,7 +39,7 @@ class ProductSeeder extends Seeder
                 'image' => null, // Dejar null por ahora
             ]);
         }
-        
+
         $this->command->info('50 Productos creados exitosamente.');
     }
 
@@ -46,7 +47,7 @@ class ProductSeeder extends Seeder
     {
         $adjectives = ['Especial', 'De la Casa', 'Supremo', 'Clásico', 'Picante', 'Dulce', 'Ahumado', 'Fresco', 'Criollo', 'Marinado'];
         $nouns = ['Pollo', 'Lomo', 'Pescado', 'Arroz', 'Tallarines', 'Ceviche', 'Causa', 'Ají de Gallina', 'Tacutacu', 'Seco'];
-        
-        return $faker->randomElement($nouns) . ' ' . $faker->randomElement($adjectives);
+
+        return $faker->randomElement($nouns).' '.$faker->randomElement($adjectives);
     }
 }

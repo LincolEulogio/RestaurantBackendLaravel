@@ -7,12 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 class Table extends Model
 {
     protected $fillable = [
-        'table_number', 
-        'capacity', 
+        'table_number',
+        'capacity',
         'status', // available, occupied, reserved, cleaning
         'location',
         'qr_code',
-        'current_session_id'
+        'current_session_id',
     ];
 
     public function reservations()

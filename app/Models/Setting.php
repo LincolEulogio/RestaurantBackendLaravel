@@ -14,6 +14,7 @@ class Setting extends Model
     public static function get($key, $default = null)
     {
         $setting = self::where('key', $key)->first();
+
         return $setting ? $setting->value : $default;
     }
 
@@ -27,7 +28,7 @@ class Setting extends Model
             [
                 'value' => $value,
                 'group' => $group,
-                'type' => $type
+                'type' => $type,
             ]
         );
     }

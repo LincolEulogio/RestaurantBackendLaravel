@@ -31,13 +31,13 @@ return new class extends Migration
             $table->dropForeign(['table_id']);
             $table->dropForeign(['waiter_id']);
             $table->dropColumn([
-                'table_id', 
-                'waiter_id', 
-                'session_token', 
-                'status', 
-                'started_at', 
-                'ended_at', 
-                'total_amount'
+                'table_id',
+                'waiter_id',
+                'session_token',
+                'status',
+                'started_at',
+                'ended_at',
+                'total_amount',
             ]);
         });
     }

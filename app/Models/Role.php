@@ -82,7 +82,7 @@ class Role extends Model
     {
         $formatted = [];
         $available = self::availablePermissions();
-        
+
         foreach ($available as $key => $description) {
             $formatted[$key] = [
                 'name' => ucfirst($key),
@@ -90,7 +90,7 @@ class Role extends Model
                 'enabled' => $this->hasPermission($key),
             ];
         }
-        
+
         return $formatted;
     }
 }

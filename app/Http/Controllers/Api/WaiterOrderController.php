@@ -19,10 +19,10 @@ class WaiterOrderController extends Controller
      */
     public function tables()
     {
-        $tables = Table::with(['currentSession', 'currentSession.orders' => function($q) {
+        $tables = Table::with(['currentSession', 'currentSession.orders' => function ($q) {
             $q->where('status', '!=', 'cancelled')->where('status', '!=', 'delivered');
         }])->get();
-        
+
         return response()->json($tables);
     }
 
@@ -32,16 +32,16 @@ class WaiterOrderController extends Controller
     public function updateTableStatus(Request $request, Table $table)
     {
         $validated = $request->validate([
-            'status' => 'required|in:available,occupied,reserved,cleaning,maintenance'
+            'status' => 'required|in:available,occupied,reserved,cleaning,maintenance',
         ]);
 
         $table->update([
-            'status' => $validated['status']
+            'status' => $validated['status'],
         ]);
 
         // If making available, we might want to ensure there is no active session or close it?
-        // For now, just updating status is enough as requested. 
-        // If the table is made 'available', the active session effectively becomes history 
+        // For now, just updating status is enough as requested.
+        // If the table is made 'available', the active session effectively becomes history
         // normally, but let's keep it simple and just update the status field.
 
         return response()->json($table);
@@ -66,7 +66,7 @@ class WaiterOrderController extends Controller
 
         $table->update([
             'status' => 'occupied',
-            'current_session_id' => $session->id
+            'current_session_id' => $session->id,
         ]);
 
         return response()->json($session);
@@ -85,8 +85,8 @@ class WaiterOrderController extends Controller
         ]);
 
         $table = Table::findOrFail($request->table_id);
-        
-        if (!$table->current_session_id) {
+
+        if (! $table->current_session_id) {
             // Auto-start session if not exists
             $this->startSession($request, $table);
             $table->refresh();
@@ -112,7 +112,7 @@ class WaiterOrderController extends Controller
             foreach ($request->items as $item) {
                 $product = Product::findOrFail($item['product_id']);
                 $itemSubtotal = $product->price * $item['quantity'];
-                
+
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $product->id,
@@ -127,7 +127,7 @@ class WaiterOrderController extends Controller
             }
 
             $order->subtotal = $subtotal;
-            $order->tax = 0; 
+            $order->tax = 0;
             $order->total = $subtotal + $order->tax;
             $order->save();
 
@@ -140,7 +140,8 @@ class WaiterOrderController extends Controller
 
         } catch (\Exception $e) {
             DB::rollback();
-            return response()->json(['message' => 'Error creating order: ' . $e->getMessage()], 500);
+
+            return response()->json(['message' => 'Error creating order: '.$e->getMessage()], 500);
         }
     }
 

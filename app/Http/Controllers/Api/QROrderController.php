@@ -20,13 +20,13 @@ class QROrderController extends Controller
     {
         $table = Table::where('qr_code', $qrCode)->first();
 
-        if (!$table) {
+        if (! $table) {
             return response()->json(['message' => 'Invalid QR Code'], 404);
         }
 
         return response()->json([
             'table' => $table->load('currentSession'),
-            'status' => $table->status
+            'status' => $table->status,
         ]);
     }
 
@@ -46,9 +46,9 @@ class QROrderController extends Controller
 
         try {
             DB::beginTransaction();
-            
+
             // Ensure session exists or start one
-            if (!$table->current_session_id) {
+            if (! $table->current_session_id) {
                 // For QR, we might want to be more strict, but for now auto-start
                 $session = TableSession::create([
                     'table_id' => $table->id,
@@ -56,10 +56,10 @@ class QROrderController extends Controller
                     'status' => 'active',
                     'started_at' => now(),
                 ]);
-                
+
                 $table->update([
                     'status' => 'occupied',
-                    'current_session_id' => $session->id
+                    'current_session_id' => $session->id,
                 ]);
                 $table->refresh();
             }
@@ -81,7 +81,7 @@ class QROrderController extends Controller
             foreach ($request->items as $item) {
                 $product = Product::findOrFail($item['product_id']);
                 $itemSubtotal = $product->price * $item['quantity'];
-                
+
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $product->id,
@@ -107,14 +107,15 @@ class QROrderController extends Controller
 
         } catch (\Exception $e) {
             DB::rollback();
-            return response()->json(['message' => 'Error creating order: ' . $e->getMessage()], 500);
+
+            return response()->json(['message' => 'Error creating order: '.$e->getMessage()], 500);
         }
     }
 
     public function callWaiter(Request $request)
     {
         $request->validate(['table_id' => 'required|exists:tables,id']);
-        
+
         // Logic to notify waiters (Event/Notification)
         // event(new WaiterCalled($request->table_id));
 
@@ -124,7 +125,7 @@ class QROrderController extends Controller
     public function requestBill(Request $request)
     {
         $request->validate(['table_id' => 'required|exists:tables,id']);
-        
+
         $table = Table::findOrFail($request->table_id);
         if ($table->currentSession) {
             // event(new BillRequested($table->id));
