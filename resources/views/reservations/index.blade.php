@@ -95,7 +95,25 @@
                     </div>
                 </div>
             </div>
+            {{-- Canceladas--}}
+            <div
+                class="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Canceladas</p>
+                        <p class="text-3xl font-bold text-red-600">{{ $cancelledReservations }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-xl flex items-center justify-center">
+                        <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
         </div>
+
 
         <!-- Filters -->
         <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 border border-gray-100 dark:border-gray-700 shadow-sm">
@@ -108,6 +126,18 @@
                 <div>
                     <input type="date" name="date" value="{{ request('date') }}"
                         class="w-full px-4 py-2.5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors">
+                </div>
+                <div>
+                    <select name="table_id"
+                        class="px-4 py-2.5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors">
+                        <option value="all">Todas las mesas</option>
+                        @foreach ($tables as $table)
+                            <option value="{{ $table->id }}"
+                                {{ request('table_id') == $table->id ? 'selected' : '' }}>
+                                Mesa {{ $table->table_number }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
                 <div>
                     <select name="status"
@@ -127,6 +157,10 @@
                     class="px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-semibold transition-colors">
                     Filtrar
                 </button>
+                <a href="{{ route('reservations.index') }}"
+                    class="px-6 py-2.5 bg-gray-600 text-white rounded-xl hover:bg-gray-700 font-semibold transition-colors inline-flex items-center justify-center">
+                    Resetear
+                </a>
             </form>
         </div>
 
@@ -137,6 +171,7 @@
                 <table class="w-full text-left text-sm text-gray-500 dark:text-gray-400">
                     <thead class="bg-gray-50 dark:bg-gray-900 text-xs uppercase text-gray-700 dark:text-gray-200">
                         <tr>
+                            <th scope="col" class="px-6 py-4 font-bold">#</th>
                             <th scope="col" class="px-6 py-4 font-bold">Cliente</th>
                             <th scope="col" class="px-6 py-4 font-bold">Fecha y Hora</th>
                             <th scope="col" class="px-6 py-4 font-bold">Mesa</th>
@@ -149,6 +184,10 @@
                     <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                         @forelse($reservations as $reservation)
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                <td class="px-6 py-4">
+                                    <span
+                                        class="font-mono text-sm font-bold text-gray-900 dark:text-white">{{ $reservation->id }}</span>
+                                </td>
                                 <td class="px-6 py-4">
                                     <div class="font-medium text-gray-900 dark:text-white">
                                         {{ $reservation->customer_name }}</div>
@@ -206,6 +245,20 @@
                                 </td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end gap-2">
+                                        <!-- View Details -->
+                                        <a href="{{ route('reservations.show', $reservation) }}"
+                                            class="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 dark:text-blue-400 dark:hover:text-blue-300 rounded-lg transition-colors"
+                                            title="Ver Detalles">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                                                </path>
+                                            </svg>
+                                        </a>
+
                                         @if ($reservation->status === 'pending')
                                             <form action="{{ route('reservations.update-status', $reservation) }}"
                                                 method="POST" class="inline">
@@ -213,7 +266,7 @@
                                                 @method('PATCH')
                                                 <input type="hidden" name="status" value="confirmed">
                                                 <button type="submit"
-                                                    class="p-1 text-green-600 hover:bg-green-100 rounded-md"
+                                                    class="p-2 text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/20 dark:text-green-400 dark:hover:text-green-300 rounded-lg transition-colors"
                                                     title="Confirmar">
                                                     <svg class="w-5 h-5" fill="none" stroke="currentColor"
                                                         viewBox="0 0 24 24">
@@ -231,7 +284,7 @@
                                                 @method('PATCH')
                                                 <input type="hidden" name="status" value="cancelled">
                                                 <button type="submit"
-                                                    class="p-1 text-red-600 hover:bg-red-100 rounded-md"
+                                                    class="p-2 text-orange-600 hover:text-orange-700 hover:bg-orange-50 dark:hover:bg-orange-900/20 dark:text-orange-400 dark:hover:text-orange-300 rounded-lg transition-colors"
                                                     title="Cancelar">
                                                     <svg class="w-5 h-5" fill="none" stroke="currentColor"
                                                         viewBox="0 0 24 24">
@@ -248,7 +301,7 @@
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit"
-                                                class="p-1 text-gray-400 hover:text-red-600 hover:bg-gray-100 rounded-md"
+                                                class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 dark:hover:text-red-400 rounded-lg transition-colors"
                                                 title="Eliminar">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor"
                                                     viewBox="0 0 24 24">
@@ -274,10 +327,70 @@
             </div>
         </div>
 
-        <!-- Pagination -->
-        <div class="mt-4">
-            {{ $reservations->links() }}
-        </div>
+
+        <!-- Professional Pagination -->
+        @if ($reservations->hasPages())
+            <div>
+                <div class="flex justify-center py-4">
+                    <nav class="flex items-center gap-2" aria-label="Pagination">
+                        <!-- Previous Button -->
+                        @if ($reservations->onFirstPage())
+                            <button disabled
+                                class="p-2 rounded-lg border border-gray-700 bg-gray-800 text-gray-400 opacity-50 cursor-not-allowed transition-all w-10 h-10 flex items-center justify-center">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 19l-7-7 7-7" />
+                                </svg>
+                            </button>
+                        @else
+                            <a href="{{ $reservations->previousPageUrl() }}"
+                                class="p-2 rounded-lg border border-gray-700 bg-gray-800 text-gray-400 hover:text-white hover:border-gray-600 transition-all w-10 h-10 flex items-center justify-center">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 19l-7-7 7-7" />
+                                </svg>
+                            </a>
+                        @endif
+
+                        <!-- Page Numbers -->
+                        <div class="flex items-center gap-2">
+                            @foreach (range(1, $reservations->lastPage()) as $page)
+                                @if ($page == $reservations->currentPage())
+                                    <button
+                                        class="w-10 h-10 rounded-lg text-sm font-bold bg-blue-600 text-white shadow-lg shadow-blue-500/30 border-0 flex items-center justify-center">
+                                        {{ $page }}
+                                    </button>
+                                @else
+                                    <a href="{{ $reservations->url($page) }}"
+                                        class="w-10 h-10 rounded-lg text-sm font-bold bg-gray-800 text-gray-400 border border-gray-700 hover:text-white hover:border-gray-600 transition-all flex items-center justify-center">
+                                        {{ $page }}
+                                    </a>
+                                @endif
+                            @endforeach
+                        </div>
+
+                        <!-- Next Button -->
+                        @if ($reservations->hasMorePages())
+                            <a href="{{ $reservations->nextPageUrl() }}"
+                                class="p-2 rounded-lg border border-gray-700 bg-gray-800 text-gray-400 hover:text-white hover:border-gray-600 transition-all w-10 h-10 flex items-center justify-center">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 5l7 7-7 7" />
+                                </svg>
+                            </a>
+                        @else
+                            <button disabled
+                                class="p-2 rounded-lg border border-gray-700 bg-gray-800 text-gray-400 opacity-50 cursor-not-allowed transition-all w-10 h-10 flex items-center justify-center">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        @endif
+                    </nav>
+                </div>
+            </div>
+        @endif
 
     </div>
 

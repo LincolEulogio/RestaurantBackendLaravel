@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Reservation;
+use App\Models\Table;
 use Illuminate\Http\Request;
 
 class ReservationController extends Controller
@@ -44,7 +45,12 @@ class ReservationController extends Controller
             });
         }
 
-        $reservations = $query->paginate(20);
+        // Filter by table
+        if ($request->has('table_id') && $request->table_id !== 'all') {
+            $query->where('table_id', $request->table_id);
+        }
+
+        $reservations = $query->paginate(10)->appends($request->except('page'));
 
         // Statistics
         $totalReservations = Reservation::count();
@@ -52,6 +58,7 @@ class ReservationController extends Controller
         $confirmedReservations = Reservation::where('status', 'confirmed')->count();
         $cancelledReservations = Reservation::where('status', 'cancelled')->count();
         $todayReservations = Reservation::whereDate('reservation_date', today())->count();
+        $tables = Table::orderBy('table_number', 'asc')->get();
 
         return view('reservations.index', compact(
             'reservations',
@@ -59,8 +66,18 @@ class ReservationController extends Controller
             'pendingReservations',
             'confirmedReservations',
             'cancelledReservations',
-            'todayReservations'
+            'todayReservations',
+            'tables'
         ));
+    }
+
+    /**
+     * Display the specified reservation.
+     */
+    public function show(Reservation $reservation)
+    {
+        $reservation->load('table');
+        return view('reservations.show', compact('reservation'));
     }
 
     /**
