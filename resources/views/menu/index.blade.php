@@ -119,7 +119,7 @@
         <!-- Menu Grid -->
         <div class="space-y-6">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                <template x-for="product in filteredProducts" :key="product.id">
+                <template x-for="product in paginatedProducts" :key="product.id">
                     <div
                         class="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700 group hover:shadow-xl transition-all duration-300 relative flex flex-col h-full">
 
@@ -207,6 +207,41 @@
                     <h3 class="text-lg font-medium text-gray-900 dark:text-white">No hay productos</h3>
                     <p class="mt-1 text-gray-500 dark:text-gray-400">No se encontraron productos en esta categoría.</p>
                 </div>
+            </div>
+
+            <!-- Pagination Controls -->
+            <div x-show="totalPages > 1" class="flex justify-center mt-8 pb-4">
+                <nav class="flex items-center gap-2" aria-label="Pagination">
+                    <!-- Previous Button -->
+                    <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1"
+                        class="p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+
+                    <!-- Page Numbers -->
+                    <div class="flex items-center gap-1">
+                        <template x-for="page in totalPages" :key="page">
+                            <button @click="changePage(page)"
+                                class="w-10 h-10 rounded-lg text-sm font-medium transition-colors"
+                                :class="currentPage === page ?
+                                    'bg-blue-600 text-white shadow-md' :
+                                    'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'"
+                                x-text="page">
+                            </button>
+                        </template>
+                    </div>
+
+                    <!-- Next Button -->
+                    <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages"
+                        class="p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                </nav>
             </div>
         </div>
 

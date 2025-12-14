@@ -44,17 +44,41 @@ export default () => ({
         }
     },
 
-    get filteredProducts() {
-        if (this.currentFilter === "Todos") {
-            return this.products;
+    currentFilter: "Todos",
+    currentPage: 1,
+    itemsPerPage: 10,
+
+    get paginatedProducts() {
+        const start = (this.currentPage - 1) * this.itemsPerPage;
+        const end = start + this.itemsPerPage;
+        return this.filteredProducts.slice(start, end);
+    },
+
+    get totalPages() {
+        return Math.ceil(this.filteredProducts.length / this.itemsPerPage);
+    },
+
+    changePage(page) {
+        if (page >= 1 && page <= this.totalPages) {
+            this.currentPage = page;
         }
-        return this.products.filter(
-            (p) => p.category && p.category.name === this.currentFilter
-        );
+    },
+
+    get filteredProducts() {
+        let result = [];
+        if (this.currentFilter === "Todos") {
+            result = this.products;
+        } else {
+            result = this.products.filter(
+                (p) => p.category && p.category.name === this.currentFilter
+            );
+        }
+        return result;
     },
 
     setFilter(categoryName) {
         this.currentFilter = categoryName;
+        this.currentPage = 1; // Reset to first page when filtering
     },
 
     openCreateModal() {
