@@ -18,6 +18,8 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\TableController;
+use App\Http\Controllers\PaymentMethodController;
+use App\Http\Controllers\PrinterController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -92,6 +94,16 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
         Route::put('/settings', [SettingController::class, 'update'])->name('settings.update');
+
+        // Payment Methods
+        Route::post('/payment-methods', [PaymentMethodController::class, 'store'])->name('payment-methods.store');
+        Route::put('/payment-methods/{paymentMethod}', [PaymentMethodController::class, 'update'])->name('payment-methods.update');
+        Route::delete('/payment-methods/{paymentMethod}', [PaymentMethodController::class, 'destroy'])->name('payment-methods.destroy');
+        Route::patch('/payment-methods/{paymentMethod}/toggle', [PaymentMethodController::class, 'toggle'])->name('payment-methods.toggle');
+
+        // Printers
+        Route::resource('printers', PrinterController::class)->except(['create', 'edit', 'show', 'index']);
+        Route::patch('/printers/{printer}/toggle', [PrinterController::class, 'toggle'])->name('printers.toggle');
     });
 });
 

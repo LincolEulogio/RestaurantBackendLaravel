@@ -13,8 +13,9 @@ class SettingController extends Controller
     {
         $settings = \App\Models\Setting::all()->pluck('value', 'key');
         $printers = \App\Models\Printer::all();
+        $paymentMethods = \App\Models\PaymentMethod::all();
 
-        return view('settings.index', compact('settings', 'printers'));
+        return view('settings.index', compact('settings', 'printers', 'paymentMethods'));
     }
 
     /**
