@@ -59,6 +59,39 @@ export default () => ({
         });
     },
 
+    currentPage: 1,
+    itemsPerPage: 10,
+
+    get paginatedItems() {
+        const start = (this.currentPage - 1) * this.itemsPerPage;
+        const end = start + this.itemsPerPage;
+        return this.filteredItems.slice(start, end);
+    },
+
+    get totalPages() {
+        return Math.ceil(this.filteredItems.length / this.itemsPerPage);
+    },
+
+    changePage(page) {
+        if (page >= 1 && page <= this.totalPages) {
+            this.currentPage = page;
+            this.$nextTick(() => {
+                // Ensure filtered list view scrolls to top if needed,
+                // or just stay put.
+            });
+        }
+    },
+
+    setFilterCategory(category) {
+        this.filterCategory = category;
+        this.currentPage = 1;
+    },
+
+    setFilterStatus(status) {
+        this.filterStatus = status;
+        this.currentPage = 1;
+    },
+
     // Calculated Stats
     get totalItems() {
         return this.items.length;

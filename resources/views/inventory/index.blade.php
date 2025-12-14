@@ -109,7 +109,7 @@
                         </span>
                     </div>
 
-                    <select x-model="filterCategory"
+                    <select x-model="filterCategory" @change="currentPage = 1"
                         class="h-11 pl-4 pr-10 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-200 outline-none focus:border-blue-500 cursor-pointer shadow-sm hidden md:block">
                         <option>Todas las categorías</option>
                         <template x-for="cat in categoriesList" :key="cat">
@@ -117,7 +117,7 @@
                         </template>
                     </select>
 
-                    <select x-model="filterStatus"
+                    <select x-model="filterStatus" @change="currentPage = 1"
                         class="h-11 pl-4 pr-10 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-200 outline-none focus:border-blue-500 cursor-pointer shadow-sm hidden md:block">
                         <option>Todos los estados</option>
                         <option>OK</option>
@@ -133,6 +133,10 @@
                     <table class="w-full text-left">
                         <thead class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
                             <tr>
+                                <th
+                                    class="py-4 px-6 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-200">
+                                    #
+                                </th>
                                 <th
                                     class="py-4 px-6 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-200">
                                     Insumo
@@ -162,8 +166,10 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-50 dark:divide-gray-700">
-                            <template x-for="item in filteredItems" :key="item.id">
+                            <template x-for="item in paginatedItems" :key="item.id">
                                 <tr class="hover:bg-gray-50/50 transition-colors dark:hover:bg-gray-700/50">
+                                    <td class="py-4 px-6 text-sm text-gray-500 dark:text-gray-400 font-mono"
+                                        x-text="item.id"></td>
                                     <td class="py-4 px-6">
                                         <div class="flex items-center gap-4">
                                             <div
@@ -236,99 +242,126 @@
                     </table>
                 </div>
             </div>
+        </div>
 
-            <!-- Modal for Create/Edit -->
-            <div x-show="openModal" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
-                <div @click="closeModal()" class="fixed inset-0 bg-black/30 backdrop-blur-sm transition-opacity">
+        <!-- Pagination Controls -->
+        <div x-show="totalPages > 1" class="flex justify-center mt-6">
+            <nav class="flex items-center gap-2" aria-label="Pagination">
+                <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1"
+                    class="p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                    <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                </button>
+
+                <div class="flex items-center gap-1">
+                    <template x-for="page in totalPages" :key="page">
+                        <button @click="changePage(page)"
+                            class="w-10 h-10 rounded-lg text-sm font-medium transition-colors"
+                            :class="currentPage === page ?
+                                'bg-blue-600 text-white shadow-md' :
+                                'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'"
+                            x-text="page">
+                        </button>
+                    </template>
                 </div>
-                <div class="flex min-h-full items-center justify-center p-4">
-                    <div
-                        class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 text-left shadow-xl transition-all sm:w-full sm:max-w-lg border border-gray-100 dark:border-gray-700">
-                        <form @submit.prevent="saveItem">
-                            <div class="bg-white dark:bg-gray-800 px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-                                <h3 class="text-xl font-bold text-gray-900 dark:text-gray-200 mb-4"
-                                    x-text="isEdit ? 'Editar Insumo' : 'Nuevo Insumo'"></h3>
 
-                                <div class="space-y-4">
-                                    <div class="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label
-                                                class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Nombre</label>
-                                            <input type="text" x-model="form.name" required
-                                                class="w-full rounded-xl bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500">
-                                        </div>
-                                        <div>
-                                            <label
-                                                class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">SKU</label>
-                                            <input type="text" x-model="form.sku" required
-                                                class="w-full rounded-xl bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500">
-                                        </div>
-                                    </div>
+                <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages"
+                    class="p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                    <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                </button>
+            </nav>
+        </div>
 
+        <!-- Modal for Create/Edit -->
+        <div x-show="openModal" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
+            <div @click="closeModal()" class="fixed inset-0 bg-black/30 backdrop-blur-sm transition-opacity">
+            </div>
+            <div class="flex min-h-full items-center justify-center p-4">
+                <div
+                    class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 text-left shadow-xl transition-all sm:w-full sm:max-w-lg border border-gray-100 dark:border-gray-700">
+                    <form @submit.prevent="saveItem">
+                        <div class="bg-white dark:bg-gray-800 px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                            <h3 class="text-xl font-bold text-gray-900 dark:text-gray-200 mb-4"
+                                x-text="isEdit ? 'Editar Insumo' : 'Nuevo Insumo'"></h3>
+
+                            <div class="space-y-4">
+                                <div class="grid grid-cols-2 gap-4">
                                     <div>
                                         <label
-                                            class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Categoría
-                                            de
-                                            Insumo:</label>
-                                        <input type="text" x-model="form.category" placeholder="Ej: Carnes"
+                                            class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Nombre</label>
+                                        <input type="text" x-model="form.name" required
                                             class="w-full rounded-xl bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500">
                                     </div>
-
-                                    <div class="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label
-                                                class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Stock
-                                                Actual</label>
-                                            <input type="number" step="0.01" x-model="form.stock_current"
-                                                required
-                                                class="w-full rounded-xl bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500">
-                                        </div>
-                                        <div>
-                                            <label
-                                                class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Stock
-                                                Mínimo</label>
-                                            <input type="number" step="0.01" x-model="form.stock_min" required
-                                                class="w-full rounded-xl bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500">
-                                        </div>
+                                    <div>
+                                        <label
+                                            class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">SKU</label>
+                                        <input type="text" x-model="form.sku" required
+                                            class="w-full rounded-xl bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500">
                                     </div>
+                                </div>
 
-                                    <div class="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label
-                                                class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Unidad</label>
-                                            <select x-model="form.unit"
-                                                class="w-full rounded-xl bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500">
-                                                <option value="unid">Unidad (unid)</option>
-                                                <option value="kg">Kilogramo (kg)</option>
-                                                <option value="lt">Litro (lt)</option>
-                                                <option value="gr">Gramo (gr)</option>
-                                                <option value="ml">Mililitro (ml)</option>
-                                                <option value="oz">Onza (oz)</option>
-                                                <option value="lb">Libra (lb)</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label
-                                                class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Precio
-                                                Unit.</label>
-                                            <input type="number" step="0.01" x-model="form.price_unit" required
-                                                class="w-full rounded-xl bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500">
-                                        </div>
+                                <div>
+                                    <label
+                                        class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Categoría
+                                        de
+                                        Insumo:</label>
+                                    <input type="text" x-model="form.category" placeholder="Ej: Carnes"
+                                        class="w-full rounded-xl bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500">
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label
+                                            class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Stock
+                                            Actual</label>
+                                        <input type="number" step="0.01" x-model="form.stock_current" required
+                                            class="w-full rounded-xl bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500">
+                                    </div>
+                                    <div>
+                                        <label
+                                            class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Stock
+                                            Mínimo</label>
+                                        <input type="number" step="0.01" x-model="form.stock_min" required
+                                            class="w-full rounded-xl bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500">
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label
+                                            class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Unidad</label>
+                                        <select x-model="form.unit"
+                                            class="w-full rounded-xl bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500">
+                                            <option value="unid">Unidad (unid)</option>
+                                            <option value="kg">Kilogramo (kg)</option>
+                                            <option value="lt">Litro (lt)</option>
+                                            <option value="gr">Gramo (gr)</option>
+                                            <option value="ml">Mililitro (ml)</option>
+                                            <option value="oz">Onza (oz)</option>
+                                            <option value="lb">Libra (lb)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label
+                                            class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Precio
+                                            Unit.</label>
+                                        <input type="number" step="0.01" x-model="form.price_unit" required
+                                            class="w-full rounded-xl bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500">
                                     </div>
                                 </div>
                             </div>
-                            <div
-                                class="bg-gray-50 dark:bg-gray-800/50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 gap-3 border-t border-gray-100 dark:border-gray-700">
-                                <button type="submit"
-                                    class="inline-flex w-full justify-center rounded-xl bg-blue-600 dark:bg-blue-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 sm:ml-3 sm:w-auto">Guardar</button>
-                                <button @click="closeModal()" type="button"
-                                    class="mt-3 inline-flex w-full justify-center rounded-xl bg-white dark:bg-gray-700 dark:border-gray-600 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-200 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 sm:mt-0 sm:w-auto">Cancelar</button>
-                            </div>
-                        </form>
-                    </div>
+                        </div>
+                        <div
+                            class="bg-gray-50 dark:bg-gray-800/50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 gap-3 border-t border-gray-100 dark:border-gray-700">
+                            <button type="submit"
+                                class="inline-flex w-full justify-center rounded-xl bg-blue-600 dark:bg-blue-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 sm:ml-3 sm:w-auto">Guardar</button>
+                            <button @click="closeModal()" type="button"
+                                class="mt-3 inline-flex w-full justify-center rounded-xl bg-white dark:bg-gray-700 dark:border-gray-600 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-gray-200 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 sm:mt-0 sm:w-auto">Cancelar</button>
+                        </div>
+                    </form>
                 </div>
             </div>
-
         </div>
+
+    </div>
     </div>
 </x-app-layout>
