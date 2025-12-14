@@ -32,19 +32,33 @@ class SettingController extends Controller
         }
 
         // Update provided values
+        // Update or Create provided values
         foreach ($input as $key => $value) {
-            // Avoid updating non-setting fields if any slip through
-            if (\App\Models\Setting::where('key', $key)->exists()) {
-                \App\Models\Setting::where('key', $key)->update(['value' => $value]);
-            }
+            \App\Models\Setting::updateOrCreate(
+                ['key' => $key],
+                [
+                    'value' => $value,
+                    'group' => 'general', // Default group
+                    'type' => 'string' // Default type, can be refined if needed
+                ]
+            );
         }
 
-        // Handle unchecked checkboxes (boolean types) - strictly for those missing in request
-        // Our x-toggle sends hidden input, but standard checkboxes might not.
-        $booleanKeys = \App\Models\Setting::where('type', 'boolean')->pluck('key');
+        // Handle unchecked checkboxes (boolean types)
+        // We assume keys starting with 'system_' are booleans if not present in request (and we know they are toggles)
+        $booleanKeys = ['system_auto_print', 'system_sound_notifications'];
         foreach ($booleanKeys as $key) {
             if (! $request->has($key)) {
-                \App\Models\Setting::where('key', $key)->update(['value' => '0']);
+                \App\Models\Setting::updateOrCreate(
+                    ['key' => $key],
+                    ['value' => '0', 'group' => 'system', 'type' => 'boolean']
+                );
+            } else {
+                 // Ensure it's treated as boolean if passed as "on" or "1"
+                 \App\Models\Setting::updateOrCreate(
+                    ['key' => $key],
+                    ['value' => '1', 'group' => 'system', 'type' => 'boolean']
+                );
             }
         }
 

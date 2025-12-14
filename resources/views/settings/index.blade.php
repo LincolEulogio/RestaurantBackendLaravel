@@ -90,6 +90,9 @@
                             <select name="restaurant_cuisine_type"
                                 class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                                 <option value="">Seleccionar tipo</option>
+                                <option value="Peruana"
+                                    {{ ($settings['restaurant_cuisine_type'] ?? '') == 'Peruana' ? 'selected' : '' }}>
+                                    Peruana</option>
                                 <option value="Italiana"
                                     {{ ($settings['restaurant_cuisine_type'] ?? '') == 'Italiana' ? 'selected' : '' }}>
                                     Italiana</option>
@@ -171,7 +174,7 @@
 
                 <!-- Global Save Button -->
                 <div class="flex justify-end pb-8">
-                    <x-ui.button
+                    <x-ui.button type="submit"
                         class="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 w-full sm:w-auto h-12 text-lg">
                         Guardar Configuración General
                     </x-ui.button>
