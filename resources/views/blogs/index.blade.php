@@ -13,8 +13,47 @@
             </button>
         </div>
 
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <!-- Total -->
+            <div
+                class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Publicaciones</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white" x-text="totalStats.total">0</p>
+                </div>
+                <div class="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-blue-600 dark:text-blue-400">
+                    <i data-lucide="file-text" class="w-6 h-6"></i>
+                </div>
+            </div>
+
+            <!-- Published -->
+            <div
+                class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Publicados</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white" x-text="totalStats.published">0</p>
+                </div>
+                <div class="p-2 bg-green-50 dark:bg-green-900/20 rounded-lg text-green-600 dark:text-green-400">
+                    <i data-lucide="check-circle" class="w-6 h-6"></i>
+                </div>
+            </div>
+
+            <!-- Drafts -->
+            <div
+                class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Borradores</p>
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white" x-text="totalStats.draft">0</p>
+                </div>
+                <div class="p-2 bg-orange-50 dark:bg-orange-900/20 rounded-lg text-orange-600 dark:text-orange-400">
+                    <i data-lucide="file-edit" class="w-6 h-6"></i>
+                </div>
+            </div>
+        </div>
+
         <!-- Filters -->
-        <div class="flex gap-2 overflow-x-auto pb-2">
+        <div class="flex flex-wrap gap-2">
             <button @click="setFilter('all')"
                 :class="currentFilter === 'all' ? 'bg-blue-600 text-white shadow-md' :
                     'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'"
@@ -45,6 +84,7 @@
                     <thead>
                         <tr
                             class="bg-gray-50/50 dark:bg-gray-700/50 text-gray-600 dark:text-gray-300 text-xs uppercase tracking-wider border-b border-gray-100 dark:border-gray-700">
+                            <th class="px-6 py-4 font-semibold text-left">#</th>
                             <th class="px-6 py-4 font-semibold text-left">Contenido</th>
                             <th class="px-4 py-4 font-semibold text-center">Estado</th>
                             <th class="px-4 py-4 font-semibold text-center">Fecha</th>
@@ -52,8 +92,10 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-                        <template x-for="blog in filteredBlogs" :key="blog.id">
+                        <template x-for="blog in paginatedBlogs" :key="blog.id">
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group">
+                                <td class="px-6 py-4 text-gray-500 dark:text-gray-400 font-medium" x-text="blog.id">
+                                </td>
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-4">
                                         <div
@@ -126,6 +168,33 @@
                     </tbody>
                 </table>
             </div>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div x-show="totalPages > 1" class="flex justify-center mt-6">
+            <nav class="flex items-center gap-2" aria-label="Pagination">
+                <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1"
+                    class="p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                    <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                </button>
+
+                <div class="flex items-center gap-1">
+                    <template x-for="page in totalPages" :key="page">
+                        <button @click="changePage(page)"
+                            class="w-10 h-10 rounded-lg text-sm font-medium transition-colors"
+                            :class="currentPage === page ?
+                                'bg-blue-600 text-white shadow-md' :
+                                'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'"
+                            x-text="page">
+                        </button>
+                    </template>
+                </div>
+
+                <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages"
+                    class="p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                    <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                </button>
+            </nav>
         </div>
 
         <!-- Create/Edit Modal -->

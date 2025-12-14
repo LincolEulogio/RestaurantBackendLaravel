@@ -55,6 +55,39 @@ export default () => ({
         });
     },
 
+    currentPage: 1,
+    get totalStats() {
+        return {
+            total: this.blogs.length,
+            published: this.blogs.filter((b) => b.status === "published")
+                .length,
+            draft: this.blogs.filter((b) => b.status === "draft").length,
+        };
+    },
+
+    itemsPerPage: 10,
+
+    get paginatedBlogs() {
+        const start = (this.currentPage - 1) * this.itemsPerPage;
+        const end = start + this.itemsPerPage;
+        return this.filteredBlogs.slice(start, end);
+    },
+
+    get totalPages() {
+        return Math.ceil(this.filteredBlogs.length / this.itemsPerPage);
+    },
+
+    changePage(page) {
+        if (page >= 1 && page <= this.totalPages) {
+            this.currentPage = page;
+            this.$nextTick(() => {
+                if (window.createIcons && window.icons) {
+                    window.createIcons({ icons: window.icons });
+                }
+            });
+        }
+    },
+
     openCreateModal() {
         this.resetForm();
         this.isEdit = false;
