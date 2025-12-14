@@ -32,6 +32,19 @@ class OrderController extends Controller
             $query->where('status', $request->status);
         }
 
+        // Filter by order type
+        if ($request->has('order_type') && $request->order_type !== 'all') {
+            $query->where('order_type', $request->order_type);
+        }
+
+        // Filter by date range
+        if ($request->has('date_from') && $request->date_from) {
+            $query->whereDate('order_date', '>=', $request->date_from);
+        }
+        if ($request->has('date_to') && $request->date_to) {
+            $query->whereDate('order_date', '<=', $request->date_to);
+        }
+
         // Search
         if ($request->has('search')) {
             $search = $request->search;
@@ -42,7 +55,7 @@ class OrderController extends Controller
             });
         }
 
-        $orders = $query->paginate(20);
+        $orders = $query->paginate(10)->appends($request->except('page'));
 
         // 3. Statistics (Clone base for each to keep role filters)
         $totalOrders = (clone $baseQuery)->count();
@@ -79,7 +92,7 @@ class OrderController extends Controller
         $order->updateStatus($request->status, $userId, $request->notes);
 
         return redirect()->route('orders.show', $order)
-            ->with('success', 'Order status updated successfully');
+            ->with('success', 'Estado del pedido actualizado correctamente');
     }
 
     /**
@@ -90,6 +103,6 @@ class OrderController extends Controller
         $order->delete();
 
         return redirect()->route('orders.index')
-            ->with('success', 'Order deleted successfully');
+            ->with('success', 'Pedido eliminado correctamente');
     }
 }

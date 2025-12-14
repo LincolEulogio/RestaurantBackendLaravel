@@ -67,7 +67,7 @@ class OrderController extends Controller
 
         if ($validator->fails()) {
             return response()->json([
-                'message' => 'Validation failed',
+                'message' => 'Validación fallida',
                 'errors' => $validator->errors(),
             ], 422);
         }
@@ -113,7 +113,7 @@ class OrderController extends Controller
             $order->statusHistory()->create([
                 'from_status' => '',
                 'to_status' => 'pending',
-                'notes' => 'Order created',
+                'notes' => 'Pedido creado',
             ]);
 
             DB::commit();
@@ -137,7 +137,7 @@ class OrderController extends Controller
             }
 
             return response()->json([
-                'message' => 'Order created successfully',
+                'message' => 'Pedido creado correctamente',
                 'order' => $order,
             ], 201);
 
@@ -145,7 +145,7 @@ class OrderController extends Controller
             DB::rollBack();
 
             return response()->json([
-                'message' => 'Failed to create order',
+                'message' => 'No se pudo crear el pedido',
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -173,7 +173,7 @@ class OrderController extends Controller
 
         if ($validator->fails()) {
             return response()->json([
-                'message' => 'Validation failed',
+                'message' => 'No se pudo actualizar el estado del pedido',
                 'errors' => $validator->errors(),
             ], 422);
         }
@@ -185,13 +185,13 @@ class OrderController extends Controller
             $order->load(['items.product', 'statusHistory.user']);
 
             return response()->json([
-                'message' => 'Order status updated successfully',
+                'message' => 'Estado del pedido actualizado correctamente',
                 'order' => $order,
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Failed to update order status',
+                'message' => 'No se pudo actualizar el estado del pedido',
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -206,12 +206,12 @@ class OrderController extends Controller
             $order->delete();
 
             return response()->json([
-                'message' => 'Order deleted successfully',
+                'message' => 'Pedido eliminado correctamente',
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Failed to delete order',
+                'message' => 'No se pudo eliminar el pedido',
                 'error' => $e->getMessage(),
             ], 500);
         }
