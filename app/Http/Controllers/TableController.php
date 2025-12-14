@@ -12,9 +12,11 @@ class TableController extends Controller
      */
     public function index()
     {
-        $tables = Table::orderBy('table_number')->paginate(10);
+        if (request()->wantsJson()) {
+            return response()->json(Table::orderBy('table_number')->get());
+        }
 
-        return view('tables.index', compact('tables'));
+        return view('tables.index', ['tables' => []]); // Pass empty array as fallback until JS loads
     }
 
     /**
@@ -30,6 +32,10 @@ class TableController extends Controller
         ]);
 
         Table::create($validated);
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
 
         return redirect()->route('tables.index')
             ->with('success', 'Mesa creada exitosamente.');
@@ -65,6 +71,10 @@ class TableController extends Controller
 
         $table->update($validated);
 
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
+
         return redirect()->route('tables.index')
             ->with('success', 'Mesa actualizada exitosamente.');
     }
@@ -77,6 +87,10 @@ class TableController extends Controller
         // Check if table has active reservations before deleting?
         // For now, simpler delete.
         $table->delete();
+
+        if (request()->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
 
         return redirect()->route('tables.index')
             ->with('success', 'Mesa eliminada exitosamente.');

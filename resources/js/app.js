@@ -19,6 +19,7 @@ import inventoryManager from "./components/inventory-manager";
 import billingManager from "./components/billing-manager";
 import reportsManager from "./components/reports-manager";
 import settingsManager from "./components/settings-manager";
+import tablesManager from "./components/tables-manager";
 
 window.Chart = Chart;
 window.Alpine = Alpine;
@@ -32,6 +33,7 @@ window.reportsManager = reportsManager;
 window.promotionsManager = promotionsManager;
 window.createIcons = createIcons;
 window.icons = icons;
+window.tablesManager = tablesManager;
 
 // Register Alpine Components
 Alpine.data("rolesManager", rolesManager);
@@ -45,6 +47,7 @@ Alpine.data("billingManager", billingManager);
 Alpine.data("reportsManager", reportsManager);
 Alpine.data("promotionsManager", promotionsManager);
 Alpine.data("settingsManager", settingsManager);
+Alpine.data("tablesManager", tablesManager);
 
 Alpine.start();
 
