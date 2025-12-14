@@ -1,11 +1,5 @@
 <x-app-layout>
-    <div x-data="{
-        activeTab: localStorage.getItem('settingsActiveTab') || 'general',
-        updateTab(tab) {
-            this.activeTab = tab;
-            localStorage.setItem('settingsActiveTab', tab);
-        }
-    }" x-init="$watch('activeTab', val => localStorage.setItem('settingsActiveTab', val))" class="space-y-6">
+    <div x-data="settingsManager" class="space-y-6">
         <!-- Header & Tabs -->
         <div>
             <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Configuración General</h1>
@@ -62,7 +56,8 @@
                                     class="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600">
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12">
+                                        </path>
                                     </svg>
                                     Subir Logo
                                 </x-ui.button>
@@ -86,7 +81,8 @@
                         </div>
                         <!-- Cuisine Type -->
                         <div class="space-y-2">
-                            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Tipo de Cocina</label>
+                            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Tipo de
+                                Cocina</label>
                             <select name="restaurant_cuisine_type"
                                 class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                                 <option value="">Seleccionar tipo</option>
@@ -154,7 +150,8 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <h4 class="font-medium text-gray-900 dark:text-white">Impresión Automática</h4>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Imprimir tickets automáticamente al
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Imprimir tickets
+                                    automáticamente al
                                     confirmar orden</p>
                             </div>
                             <x-toggle name="system_auto_print"
@@ -163,7 +160,8 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <h4 class="font-medium text-gray-900 dark:text-white">Notificaciones Sonoras</h4>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Reproducir sonido al recibir nuevas
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Reproducir sonido al recibir
+                                    nuevas
                                     órdenes</p>
                             </div>
                             <x-toggle name="system_sound_notifications"
@@ -237,38 +235,15 @@
                                 </div>
                                 <div>
                                     <h4 class="font-medium text-gray-900 dark:text-white">{{ $method->name }}</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ $method->description }}</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ $method->description }}
+                                    </p>
                                 </div>
                             </div>
                             <div class="flex items-center gap-4" x-data="{
                                 active: {{ $method->is_active ? 'true' : 'false' }},
-                                loading: false,
                                 async toggle() {
-                                    if (this.loading) return;
-                                    this.loading = true;
-                            
-                                    try {
-                                        const response = await fetch('{{ route('payment-methods.toggle', $method) }}', {
-                                            method: 'PATCH',
-                                            headers: {
-                                                'Content-Type': 'application/json',
-                                                'Accept': 'application/json',
-                                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                                            }
-                                        });
-                            
-                                        if (response.ok) {
-                                            const data = await response.json();
-                                            this.active = data.is_active;
-                                        } else {
-                                            // Revert on error or show notification
-                                            console.error('Failed to toggle');
-                                        }
-                                    } catch (e) {
-                                        console.error(e);
-                                    } finally {
-                                        this.loading = false;
-                                    }
+                                    const newStatus = await toggleStatus('{{ route('payment-methods.toggle', $method) }}');
+                                    if (newStatus !== null) this.active = newStatus;
                                 }
                             }">
                                 <button type="button" @click="toggle()" :disabled="loading"
@@ -295,7 +270,8 @@
                 <div class="flex justify-between items-center mb-6">
                     <div>
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Impresoras</h2>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Administra las impresoras para tickets
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Administra las impresoras para
+                            tickets
                             y cocina</p>
                     </div>
                     <x-ui.button @click="$dispatch('open-modal', 'add-printer-modal')"
@@ -323,24 +299,9 @@
                                 </div>
                                 <div x-data="{
                                     active: {{ $printer->is_active ? 'true' : 'false' }},
-                                    loading: false,
                                     async toggle() {
-                                        if (this.loading) return;
-                                        this.loading = true;
-                                        try {
-                                            const response = await fetch('{{ route('printers.toggle', $printer) }}', {
-                                                method: 'PATCH',
-                                                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
-                                            });
-                                            if (response.ok) {
-                                                const data = await response.json();
-                                                this.active = data.is_active;
-                                            }
-                                        } catch (e) {
-                                            console.error(e);
-                                        } finally {
-                                            this.loading = false;
-                                        }
+                                        const newStatus = await toggleStatus('{{ route('printers.toggle', $printer) }}');
+                                        if (newStatus !== null) this.active = newStatus;
                                     }
                                 }">
                                     <button type="button" @click="toggle()" :disabled="loading"
@@ -353,7 +314,8 @@
                                 </div>
                             </div>
 
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">{{ $printer->name }}
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+                                {{ $printer->name }}
                             </h3>
                             <div class="space-y-1 text-sm text-gray-500 dark:text-gray-400">
                                 <p class="flex items-center">
@@ -420,10 +382,12 @@
                                             <select name="type" id="type_{{ $printer->id }}"
                                                 class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
                                                 <option value="ticket"
-                                                    {{ $printer->type == 'ticket' ? 'selected' : '' }}>Caja / Ticket
+                                                    {{ $printer->type == 'ticket' ? 'selected' : '' }}>Caja /
+                                                    Ticket
                                                 </option>
                                                 <option value="kitchen"
-                                                    {{ $printer->type == 'kitchen' ? 'selected' : '' }}>Cocina</option>
+                                                    {{ $printer->type == 'kitchen' ? 'selected' : '' }}>Cocina
+                                                </option>
                                                 <option value="bar"
                                                     {{ $printer->type == 'bar' ? 'selected' : '' }}>Bar</option>
                                             </select>
@@ -472,7 +436,8 @@
                                     d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z">
                                 </path>
                             </svg>
-                            <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No hay impresoras</h3>
+                            <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No hay impresoras
+                            </h3>
                             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Comienza agregando una nueva
                                 impresora a tu sistema.</p>
                             <div class="mt-6">

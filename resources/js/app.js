@@ -18,6 +18,7 @@ import categoryManager from "./components/category-manager";
 import inventoryManager from "./components/inventory-manager";
 import billingManager from "./components/billing-manager";
 import reportsManager from "./components/reports-manager";
+import settingsManager from "./components/settings-manager";
 
 window.Chart = Chart;
 window.Alpine = Alpine;
@@ -43,6 +44,7 @@ Alpine.data("inventoryManager", inventoryManager);
 Alpine.data("billingManager", billingManager);
 Alpine.data("reportsManager", reportsManager);
 Alpine.data("promotionsManager", promotionsManager);
+Alpine.data("settingsManager", settingsManager);
 
 Alpine.start();
 
