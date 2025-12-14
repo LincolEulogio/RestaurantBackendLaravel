@@ -101,6 +101,7 @@
                 <table class="w-full text-left text-sm text-gray-500">
                     <thead class="bg-gray-50 dark:bg-gray-700 text-xs uppercase text-gray-700 dark:text-gray-200">
                         <tr>
+                            <th scope="col" class="px-6 py-4 font-bold">#</th>
                             <th scope="col" class="px-6 py-4 font-bold">Nombre</th>
                             <th scope="col" class="px-6 py-4 font-bold">Descripción</th>
                             <th scope="col" class="px-6 py-4 font-bold">Slug</th>
@@ -109,8 +110,10 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-                        <template x-for="category in categories" :key="category.id">
+                        <template x-for="category in paginatedCategories" :key="category.id">
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                <td class="px-6 py-4 font-medium text-gray-500 dark:text-gray-400" x-text="category.id">
+                                </td>
                                 <td class="px-6 py-4 font-medium text-gray-900 dark:text-gray-200"
                                     x-text="category.name"></td>
                                 <td class="px-6 py-4 text-gray-500 dark:text-gray-200"
@@ -158,6 +161,37 @@
                     </tbody>
                 </table>
             </div>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div x-show="totalPages > 1" class="flex justify-center mt-6">
+            <nav class="flex items-center gap-2" aria-label="Pagination">
+                <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1"
+                    class="p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+
+                <div class="flex items-center gap-1">
+                    <template x-for="page in totalPages" :key="page">
+                        <button @click="changePage(page)"
+                            class="w-10 h-10 rounded-lg text-sm font-medium transition-colors"
+                            :class="currentPage === page ?
+                                'bg-blue-600 text-white shadow-md' :
+                                'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'"
+                            x-text="page">
+                        </button>
+                    </template>
+                </div>
+
+                <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages"
+                    class="p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
+            </nav>
         </div>
 
         <!-- Create/Edit Modal -->

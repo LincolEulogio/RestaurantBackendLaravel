@@ -111,6 +111,25 @@ export default () => ({
         }
     },
 
+    currentPage: 1,
+    itemsPerPage: 10,
+
+    get paginatedCategories() {
+        const start = (this.currentPage - 1) * this.itemsPerPage;
+        const end = start + this.itemsPerPage;
+        return this.categories.slice(start, end);
+    },
+
+    get totalPages() {
+        return Math.ceil(this.categories.length / this.itemsPerPage);
+    },
+
+    changePage(page) {
+        if (page >= 1 && page <= this.totalPages) {
+            this.currentPage = page;
+        }
+    },
+
     deleteCategory(id) {
         Swal.fire({
             title: "¿Estás seguro?",
