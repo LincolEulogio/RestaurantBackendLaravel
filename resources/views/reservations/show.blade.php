@@ -52,19 +52,23 @@
         </div>
 
         <!-- Status Badge -->
-        <div class="flex items-center gap-3">
-            <span
-                class="px-4 py-2 rounded-full text-sm font-bold
-                @if ($reservation->status == 'pending') bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400
-                @elseif($reservation->status == 'confirmed') bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400
-                @elseif($reservation->status == 'completed') bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400
-                @else bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 @endif">
+        <div class="flex items-center justify-between">
+            <span class="text-sm text-gray-600 dark:text-gray-400">Estado</span>
+            @php
+                $statusClasses = match ($reservation->status) {
+                    'pending' => 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+                    'confirmed' => 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+                    'completed' => 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+                    default => 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+                };
+            @endphp
+            <span class="px-3 py-1 rounded-full text-sm font-semibold {{ $statusClasses }}">
                 {{ ucfirst($reservation->status) }}
             </span>
-            <span class="text-sm text-gray-500 dark:text-gray-400">
-                Creada el {{ $reservation->created_at->format('d/m/Y H:i') }}
-            </span>
         </div>
+        <span class="text-sm text-gray-500 dark:text-gray-400">
+            Creada el {{ $reservation->created_at->format('d/m/Y H:i') }}
+        </span>
 
         <!-- Main Content Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">

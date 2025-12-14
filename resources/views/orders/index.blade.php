@@ -245,14 +245,22 @@
                                         class="text-gray-900 dark:text-white capitalize">{{ $order->order_type }}</span>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <span
-                                        class="px-2.5 py-1 rounded-full text-xs font-bold
-                                        @if ($order->status == 'pending') bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400
-                                        @elseif($order->status == 'confirmed') bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400
-                                        @elseif($order->status == 'preparing') bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400
-                                        @elseif($order->status == 'ready') bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400
-                                        @elseif($order->status == 'delivered') bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300
-                                        @else bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 @endif">
+                                    @php
+                                        $statusClasses = match ($order->status) {
+                                            'pending'
+                                                => 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+                                            'confirmed'
+                                                => 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+                                            'preparing'
+                                                => 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+                                            'ready'
+                                                => 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+                                            'delivered'
+                                                => 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
+                                            default => 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+                                        };
+                                    @endphp
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-bold {{ $statusClasses }}">
                                         {{ $order->status_label }}
                                     </span>
                                 </td>
