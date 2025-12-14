@@ -100,17 +100,19 @@
         </div>
 
         <!-- Filter Tabs -->
-        <div class="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+        <div class="flex gap-2 overflow-x-auto scrollbar-hide p-4">
             <button @click="setFilter('Todos')"
-                :class="currentFilter === 'Todos' ? 'bg-gray-900 text-white shadow-md' :
-                    'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'"
+                :class="currentFilter === 'Todos' ?
+                    'bg-blue-600 text-white shadow-md ring-2 ring-blue-600 ring-offset-2 dark:ring-offset-gray-900' :
+                    'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700'"
                 class="px-5 py-2.5 rounded-full text-sm font-bold transition-all whitespace-nowrap">
                 Todos
             </button>
             <template x-for="cat in categories" :key="cat.id">
                 <button @click="setFilter(cat.name)"
-                    :class="currentFilter === cat.name ? 'bg-gray-900 text-white shadow-md' :
-                        'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'"
+                    :class="currentFilter === cat.name ?
+                        'bg-blue-600 text-white shadow-md ring-2 ring-blue-600 ring-offset-2 dark:ring-offset-gray-900' :
+                        'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700'"
                     class="px-5 py-2.5 rounded-full text-sm font-bold transition-all whitespace-nowrap"
                     x-text="cat.name"></button>
             </template>
