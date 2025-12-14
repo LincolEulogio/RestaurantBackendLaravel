@@ -31,36 +31,45 @@
 
         <!-- Date Range Filter -->
         <x-ui.card class="px-5 py-3">
-            <form method="GET" action="{{ route('reports.index') }}"
-                class="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
                 <h3 class="font-medium text-gray-900 dark:text-white">Rango de Fechas</h3>
                 <div class="flex flex-col md:flex-row items-center gap-4">
                     <div class="flex items-center gap-2">
                         <span class="text-sm text-gray-500 dark:text-gray-400">Desde:</span>
-                        <input type="date" name="start_date" value="{{ $startDate }}"
+                        <input type="date" x-model="startDate"
                             class="border-gray-200 dark:border-gray-600 rounded-md text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500 text-gray-600 dark:text-gray-200 dark:bg-gray-700">
                     </div>
                     <div class="flex items-center gap-2">
                         <span class="text-sm text-gray-500 dark:text-gray-400">Hasta:</span>
-                        <input type="date" name="end_date" value="{{ $endDate }}"
+                        <input type="date" x-model="endDate"
                             class="border-gray-200 dark:border-gray-600 rounded-md text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500 text-gray-600 dark:text-gray-200 dark:bg-gray-700">
                     </div>
-                    <button type="submit"
+                    <button @click="applyDateFilter()"
                         class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors dark:bg-blue-700 dark:hover:bg-blue-800">
                         Aplicar Filtro
                     </button>
                     <div class="flex bg-gray-100 dark:bg-gray-700 p-1 rounded-md">
-                        <a href="{{ route('reports.index', ['start_date' => now()->format('Y-m-d'), 'end_date' => now()->format('Y-m-d')]) }}"
-                            class="px-3 py-1 text-sm text-gray-600 dark:text-gray-300 rounded hover:bg-white dark:hover:bg-gray-600 hover:shadow-sm transition-all">Hoy</a>
-                        <a href="{{ route('reports.index', ['start_date' => now()->subDays(7)->format('Y-m-d'), 'end_date' => now()->format('Y-m-d')]) }}"
-                            class="px-3 py-1 text-sm text-gray-600 dark:text-gray-300 rounded hover:bg-white dark:hover:bg-gray-600 hover:shadow-sm transition-all">7
-                            días</a>
-                        <a href="{{ route('reports.index', ['start_date' => now()->subDays(30)->format('Y-m-d'), 'end_date' => now()->format('Y-m-d')]) }}"
-                            class="px-3 py-1 text-sm font-medium bg-blue-600 text-white shadow-sm rounded dark:bg-blue-600">30
-                            días</a>
+                        <button @click="setQuickFilter(0)" class="px-3 py-1 text-sm rounded transition-all"
+                            :class="startDate === endDate ?
+                                'bg-white dark:bg-gray-600 shadow-sm text-gray-800 dark:text-white font-medium' :
+                                'text-gray-600 dark:text-gray-300 hover:bg-white/50'">
+                            Hoy
+                        </button>
+                        <button @click="setQuickFilter(7)" class="px-3 py-1 text-sm rounded transition-all"
+                            :class="(new Date(endDate) - new Date(startDate)) / (1000 * 3600 * 24) === 7 ?
+                                'bg-white dark:bg-gray-600 shadow-sm text-gray-800 dark:text-white font-medium' :
+                                'text-gray-600 dark:text-gray-300 hover:bg-white/50'">
+                            7 días
+                        </button>
+                        <button @click="setQuickFilter(30)" class="px-3 py-1 text-sm rounded transition-all"
+                            :class="(new Date(endDate) - new Date(startDate)) / (1000 * 3600 * 24) === 30 ?
+                                'bg-white dark:bg-gray-600 shadow-sm text-gray-800 dark:text-white font-medium' :
+                                'text-gray-600 dark:text-gray-300 hover:bg-white/50'">
+                            30 días
+                        </button>
                     </div>
                 </div>
-            </form>
+            </div>
         </x-ui.card>
 
         <!-- Key Metrics - Row 1 -->

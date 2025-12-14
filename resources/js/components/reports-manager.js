@@ -6,6 +6,41 @@ export default () => ({
         this.initCharts();
     },
 
+    startDate:
+        new URLSearchParams(window.location.search).get("start_date") ||
+        new Date().toISOString().split("T")[0],
+    endDate:
+        new URLSearchParams(window.location.search).get("end_date") ||
+        new Date().toISOString().split("T")[0],
+
+    updateDates() {
+        // Optional: validate dates here
+    },
+
+    applyDateFilter() {
+        const url = new URL(window.location.href);
+        url.searchParams.set("start_date", this.startDate);
+        url.searchParams.set("end_date", this.endDate);
+        window.location.href = url.toString();
+    },
+
+    setQuickFilter(days) {
+        const end = new Date();
+        const start = new Date();
+
+        if (days === 0) {
+            // Hoy (Today)
+            // Start and End are already Today
+        } else {
+            start.setDate(end.getDate() - days);
+        }
+
+        this.startDate = start.toISOString().split("T")[0];
+        this.endDate = end.toISOString().split("T")[0];
+
+        this.applyDateFilter();
+    },
+
     initCharts() {
         // Setup defaults
         Chart.defaults.font.family = "'Figtree', sans-serif";
