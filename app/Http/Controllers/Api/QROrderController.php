@@ -10,6 +10,7 @@ use App\Models\Table;
 use App\Models\TableSession;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Http\Resources\OrderResource;
 
 class QROrderController extends Controller
 {
@@ -64,11 +65,18 @@ class QROrderController extends Controller
                 $table->refresh();
             }
 
+            // Ensure session token is available
+            $sessionToken = $table->currentSession ? $table->currentSession->session_token : null;
+            if (!$sessionToken && $table->current_session_id) {
+                $session = TableSession::find($table->current_session_id);
+                $sessionToken = $session ? $session->session_token : null;
+            }
+
             $order = Order::create([
                 'table_id' => $table->id,
                 'waiter_id' => null, // Self-service
                 'order_source' => 'qr_self_service',
-                'session_token' => $table->currentSession->session_token,
+                'session_token' => $sessionToken,
                 'status' => 'pending',
                 'subtotal' => 0,
                 'tax' => 0,
@@ -100,18 +108,24 @@ class QROrderController extends Controller
             $order->total = $subtotal + $order->tax;
             $order->save();
 
-            $table->currentSession->increment('total_amount', $order->total);
+            // Update session total
+            if ($table->current_session_id) {
+                TableSession::where('id', $table->current_session_id)->increment('total_amount', $order->total);
+            }
 
             DB::commit();
 
             try {
+                // Load relationships for response
+                $order->load(['items.product', 'table']);
+
                 // Emit WebSocket Event
                 event(new \App\Events\OrderPlaced($order));
             } catch (\Throwable $e) {
                 \Log::error('Post-creation error in QROrderController: '.$e->getMessage());
             }
 
-            return response()->json(new OrderResource($order->load('items.product')), 201);
+            return response()->json(new OrderResource($order), 201);
 
         } catch (\Exception $e) {
             DB::rollback();

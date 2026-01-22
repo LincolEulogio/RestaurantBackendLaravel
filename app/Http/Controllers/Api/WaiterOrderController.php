@@ -11,6 +11,7 @@ use App\Models\TableSession;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use App\Http\Resources\OrderResource;
 
 class WaiterOrderController extends Controller
 {
@@ -95,11 +96,18 @@ class WaiterOrderController extends Controller
         try {
             DB::beginTransaction();
 
+            // Ensure session token is available
+            $sessionToken = $table->currentSession ? $table->currentSession->session_token : null;
+            if (!$sessionToken && $table->current_session_id) {
+                $session = TableSession::find($table->current_session_id);
+                $sessionToken = $session ? $session->session_token : null;
+            }
+
             $order = Order::create([
                 'table_id' => $table->id,
                 'waiter_id' => auth()->id(),
                 'order_source' => 'waiter',
-                'session_token' => $table->currentSession->session_token,
+                'session_token' => $sessionToken,
                 'status' => 'pending',
                 'subtotal' => 0,
                 'tax' => 0,
@@ -120,7 +128,7 @@ class WaiterOrderController extends Controller
                     'quantity' => $item['quantity'],
                     'unit_price' => $product->price,
                     'subtotal' => $itemSubtotal,
-                    'notes' => $item['notes'] ?? null,
+                    'special_instructions' => $item['notes'] ?? null,
                 ]);
 
                 $subtotal += $itemSubtotal;
@@ -132,23 +140,41 @@ class WaiterOrderController extends Controller
             $order->save();
 
             // Update session total
-            $table->currentSession->increment('total_amount', $order->total);
+            if ($table->current_session_id) {
+                TableSession::where('id', $table->current_session_id)->increment('total_amount', $order->total);
+            }
 
             DB::commit();
 
             try {
+                // Load relationships for response
+                $order->load(['items.product', 'table', 'waiter']);
+                
                 // Emit WebSocket Event
                 event(new \App\Events\OrderPlaced($order));
             } catch (\Throwable $e) {
                 \Log::error('Post-creation error in WaiterOrderController: '.$e->getMessage());
             }
 
-            return response()->json(new OrderResource($order->load('items.product')), 201);
+            return response()->json(new OrderResource($order), 201);
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollback();
 
-            return response()->json(['message' => 'Error creating order: '.$e->getMessage()], 500);
+            $errorDetail = [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+            ];
+
+            // Write to a public file so it's readable by the agent
+            file_put_contents(public_path('debug_error.txt'), json_encode($errorDetail, JSON_PRETTY_PRINT));
+
+            return response()->json([
+                'message' => 'Error creating order: '.$e->getMessage(),
+                'detail' => $errorDetail
+            ], 500)->header('Access-Control-Allow-Origin', '*');
         }
     }
 
