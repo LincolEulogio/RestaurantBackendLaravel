@@ -121,18 +121,17 @@ class OrderController extends Controller
 
             DB::commit();
 
-            // Load relationships for response
-            $order->load(['items.product', 'statusHistory']);
-
-            // Emit WebSocket Event
-            event(new \App\Events\OrderPlaced($order));
-
-            // Print Ticket
-            $this->printService->printOrderTicket($order);
-
-            // Send notification to users with 'orders' permission (Admins, Kitchen, Waiters, etc.)
             try {
-                // Filter users who have the 'orders' permission
+                // Load relationships for response
+                $order->load(['items.product', 'statusHistory', 'table', 'waiter']);
+
+                // Emit WebSocket Event
+                event(new \App\Events\OrderPlaced($order));
+
+                // Print Ticket
+                $this->printService->printOrderTicket($order);
+
+                // Send notification to users with 'orders' permission
                 $usersToNotify = User::all()->filter(function ($user) {
                     return $user->hasPermission('orders');
                 });
@@ -140,14 +139,17 @@ class OrderController extends Controller
                 if ($usersToNotify->count() > 0) {
                     Notification::send($usersToNotify, new NewOrderAlert($order));
                 }
-            } catch (\Exception $e) {
-                // Log error but don't fail the request
-                \Log::error('Failed to send notification: '.$e->getMessage());
+            } catch (\Throwable $e) {
+                // Log error but don't fail the request since the order was already created and committed
+                \Log::error('Post-creation error in OrderController: '.$e->getMessage(), [
+                    'order_id' => $order->id,
+                    'trace' => $e->getTraceAsString()
+                ]);
             }
 
             return response()->json([
                 'message' => 'Pedido creado correctamente',
-                'order' => $order,
+                'order' => new OrderResource($order),
             ], 201);
 
         } catch (\Exception $e) {

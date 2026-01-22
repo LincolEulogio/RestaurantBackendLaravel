@@ -19,7 +19,11 @@ class OrderObserver
             
             // Only deduct once (e.g., from pending/confirmed to preparing)
             if (!in_array($prevStatus, ['preparing', 'ready', 'delivered'])) {
-                $this->deductInventory($order);
+                try {
+                    $this->deductInventory($order);
+                } catch (\Throwable $e) {
+                    Log::error("Failed to deduct inventory for Order #{$order->id}: " . $e->getMessage());
+                }
             }
         }
     }

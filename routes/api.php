@@ -35,7 +35,6 @@ Route::get('/promotions', [\App\Http\Controllers\PromotionController::class, 'ap
 Route::post('/reservations', [\App\Http\Controllers\Api\ReservationController::class, 'store']);
 
 // Protected routes (require authentication)
-// Protected routes (require authentication)
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/orders', [OrderController::class, 'index']);
     Route::get('/orders/{order}', [OrderController::class, 'show']);

@@ -136,10 +136,14 @@ class WaiterOrderController extends Controller
 
             DB::commit();
 
-            // Emit WebSocket Event
-            event(new \App\Events\OrderPlaced($order));
+            try {
+                // Emit WebSocket Event
+                event(new \App\Events\OrderPlaced($order));
+            } catch (\Throwable $e) {
+                \Log::error('Post-creation error in WaiterOrderController: '.$e->getMessage());
+            }
 
-            return response()->json($order->load('items.product'), 201);
+            return response()->json(new OrderResource($order->load('items.product')), 201);
 
         } catch (\Exception $e) {
             DB::rollback();
