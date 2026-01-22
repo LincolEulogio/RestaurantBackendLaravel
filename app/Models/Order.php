@@ -157,6 +157,9 @@ class Order extends Model
             'notes' => $notes,
         ]);
 
+        // Emit WebSocket Event
+        event(new \App\Events\OrderStatusChanged($this));
+
         return $this;
     }
 

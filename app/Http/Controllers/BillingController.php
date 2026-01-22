@@ -72,11 +72,30 @@ class BillingController extends Controller
         $userId = auth()->id();
         $order->updateStatus('delivered', $userId, "Pagado con {$request->payment_method}");
 
+        // Automation: Release table and close session if it's a dine-in/waiter order
+        if ($order->table_id && $order->table) {
+            $table = $order->table;
+            
+            // Close session
+            if ($table->currentSession) {
+                $table->currentSession->update([
+                    'status' => 'completed',
+                    'completed_at' => now(),
+                ]);
+            }
+
+            // Free table
+            $table->update([
+                'status' => 'available',
+                'current_session_id' => null,
+            ]);
+        }
+
         // Calculate change
         $change = $request->amount_received - $order->total;
 
         return redirect()->route('billing.index')
-            ->with('success', 'Pago procesado exitosamente')
+            ->with('success', 'Pago procesado exitosamente y mesa liberada')
             ->with('change', $change);
     }
 

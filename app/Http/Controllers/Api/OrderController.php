@@ -11,9 +11,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Validator;
+use App\Services\PrintService;
+use App\Http\Resources\OrderResource;
 
 class OrderController extends Controller
 {
+    public function __construct(protected PrintService $printService) {}
     /**
      * Display a listing of orders.
      */
@@ -41,7 +44,7 @@ class OrderController extends Controller
         $perPage = $request->get('per_page', 15);
         $orders = $query->paginate($perPage);
 
-        return response()->json($orders);
+        return OrderResource::collection($orders);
     }
 
     /**
@@ -120,6 +123,12 @@ class OrderController extends Controller
 
             // Load relationships for response
             $order->load(['items.product', 'statusHistory']);
+
+            // Emit WebSocket Event
+            event(new \App\Events\OrderPlaced($order));
+
+            // Print Ticket
+            $this->printService->printOrderTicket($order);
 
             // Send notification to users with 'orders' permission (Admins, Kitchen, Waiters, etc.)
             try {

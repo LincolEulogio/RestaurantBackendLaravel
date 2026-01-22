@@ -103,6 +103,9 @@ class QROrderController extends Controller
 
             DB::commit();
 
+            // Emit WebSocket Event
+            event(new \App\Events\OrderPlaced($order));
+
             return response()->json($order->load('items.product'), 201);
 
         } catch (\Exception $e) {

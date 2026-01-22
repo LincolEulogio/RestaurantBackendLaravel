@@ -6,6 +6,11 @@ use App\Models\Product;
 use App\Services\CloudinaryService;
 use Illuminate\Http\Request;
 
+use App\Http\Resources\ProductResource;
+use Illuminate\Support\Facades\Cache;
+
+use App\Models\AuditLog;
+
 class ProductController extends Controller
 {
     public function __construct(public CloudinaryService $cloudinary) {}
@@ -16,7 +21,7 @@ class ProductController extends Controller
     public function index()
     {
         if (request()->wantsJson()) {
-            return response()->json(Product::with('category')->latest()->get());
+            return ProductResource::collection(Product::with('category')->latest()->get());
         }
 
         return view('menu.index', [
@@ -29,29 +34,14 @@ class ProductController extends Controller
      */
     public function apiIndex()
     {
-        $products = Product::with('category')
-            ->where('is_available', true)
-            ->latest()
-            ->get()
-            ->map(function ($product) {
-                return [
-                    'id' => $product->id,
-                    'name' => $product->name,
-                    'description' => $product->description,
-                    'price' => $product->price,
-                    'category_id' => $product->category_id,
-                    'category' => $product->category ? [
-                        'id' => $product->category->id,
-                        'name' => $product->category->name,
-                    ] : null,
-                    'image' => $product->image_url,
-                    'is_available' => $product->is_available,
-                    'created_at' => $product->created_at,
-                    'updated_at' => $product->updated_at,
-                ];
-            });
+        $products = Cache::remember('api_products', 3600, function () {
+            return Product::with('category')
+                ->where('is_available', true)
+                ->latest()
+                ->get();
+        });
 
-        return response()->json($products);
+        return ProductResource::collection($products);
     }
 
     // ...
@@ -78,6 +68,7 @@ class ProductController extends Controller
         }
 
         Product::create($validated);
+        Cache::forget('api_products');
 
         if ($request->wantsJson()) {
             return response()->json(['success' => true]);
@@ -116,7 +107,12 @@ class ProductController extends Controller
             $validated['image_public_id'] = $image['public_id'];
         }
 
+        $oldValues = $product->only(['price', 'is_available', 'category_id']);
         $product->update($validated);
+        
+        AuditLog::log('update_product', $product, $oldValues, $product->only(['price', 'is_available', 'category_id']));
+        
+        Cache::forget('api_products');
 
         if ($request->wantsJson()) {
             return response()->json(['success' => true]);
@@ -138,6 +134,7 @@ class ProductController extends Controller
         }
 
         $product->delete();
+        Cache::forget('api_products');
 
         if (request()->wantsJson()) {
             return response()->json(['success' => true]);

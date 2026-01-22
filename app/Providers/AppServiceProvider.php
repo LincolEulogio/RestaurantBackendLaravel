@@ -45,5 +45,8 @@ class AppServiceProvider extends ServiceProvider
         Blade::if('admin', function () {
             return auth()->check() && auth()->user()->isAdmin();
         });
+
+        // Register Observers
+        \App\Models\Order::observe(\App\Observers\OrderObserver::class);
     }
 }

@@ -74,4 +74,11 @@ class Product extends Model
     {
         return $this->belongsToMany(Promotion::class);
     }
+
+    public function ingredients()
+    {
+        return $this->belongsToMany(InventoryItem::class, 'product_inventory')
+                    ->withPivot('quantity')
+                    ->withTimestamps();
+    }
 }
