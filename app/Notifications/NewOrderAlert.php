@@ -4,10 +4,12 @@ namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Notification;
+use Illuminate\Queue\SerializesModels;
 
-class NewOrderAlert extends Notification implements ShouldQueue
+class NewOrderAlert extends Notification
 {
-    use Queueable;
+    use Queueable, SerializesModels;
 
     public $order;
 

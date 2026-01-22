@@ -5,12 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use Illuminate\Http\Request;
 
+use App\Http\Resources\CategoryResource;
+
 class CategoryController extends Controller
 {
     public function index()
     {
         if (request()->wantsJson()) {
-            return response()->json(Category::where('is_active', true)->get());
+            return CategoryResource::collection(Category::where('is_active', true)->get());
         }
 
         return view('categories.index');
@@ -21,18 +23,7 @@ class CategoryController extends Controller
      */
     public function apiIndex()
     {
-        $categories = Category::where('is_active', true)
-            ->get()
-            ->map(function ($category) {
-                return [
-                    'id' => $category->id,
-                    'name' => $category->name,
-                    'slug' => $category->slug,
-                    'description' => $category->description,
-                ];
-            });
-
-        return response()->json($categories);
+        return CategoryResource::collection(Category::where('is_active', true)->get());
     }
 
     public function store(Request $request)

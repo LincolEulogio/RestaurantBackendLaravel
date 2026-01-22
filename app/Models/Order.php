@@ -58,7 +58,6 @@ class Order extends Model
                 $order->order_number = self::generateOrderNumber();
             }
 
-            // Set order_date to current timestamp if not already set
             if (empty($order->order_date)) {
                 $order->order_date = now();
             }
