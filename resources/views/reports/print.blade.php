@@ -201,8 +201,51 @@
         </tbody>
     </table>
 
-    <div style="text-align: center; color: #999; font-size: 10px; margin-top: 40px;">
-        Generado el {{ now()->format('d/m/Y H:i') }} - RestaurantOS Intelligence System
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+        <div>
+            <div class="section-title">Métodos de Pago</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Método</th>
+                        <th class="text-right">Ingresos</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($paymentMethods as $method)
+                        <tr>
+                            <td style="text-transform: capitalize;">{{ $method->payment_method }}</td>
+                            <td class="text-right">S/ {{ number_format($method->revenue, 2) }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+        <div>
+            <div class="section-title">Tipos de Orden</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tipo</th>
+                        <th class="text-right">Ventas</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($orderTypes as $type)
+                        <tr>
+                            <td style="text-transform: capitalize;">{{ $type->order_type }}</td>
+                            <td class="text-right">S/ {{ number_format($type->revenue, 2) }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div
+        style="text-align: center; color: #999; font-size: 10px; margin-top: 40px; border-top: 1px solid #eee; padding-top: 10px;">
+        Este documento es un reporte oficial generado por el Sistema de Inteligencia RestaurantOS.
+        <br>Generado el {{ now()->format('d/m/Y H:i') }}
     </div>
 </body>
 
