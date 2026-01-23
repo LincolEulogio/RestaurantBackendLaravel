@@ -22,6 +22,13 @@ export default () => ({
         console.log("Menu Manager initialized");
     },
 
+    handleImageError(event, product) {
+        // Set image_url to null so Alpine shows the placeholder automatically
+        if (product) {
+            product.image_url = null;
+        }
+    },
+
     async fetchCategories() {
         try {
             const response = await axios.get("/categories");
@@ -33,8 +40,11 @@ export default () => ({
 
     async fetchProducts() {
         try {
-            const response = await axios.get("/menu");
+            // Add timestamp to avoid cache issues
+            const timestamp = Date.now();
+            const response = await axios.get(`/menu?_t=${timestamp}`);
             this.products = response.data;
+            console.log("Products loaded:", this.products.length);
         } catch (error) {
             console.error("Error fetching products:", error);
             Toast.fire({
@@ -44,7 +54,6 @@ export default () => ({
         }
     },
 
-    currentFilter: "Todos",
     currentPage: 1,
     itemsPerPage: 10,
 
@@ -70,7 +79,7 @@ export default () => ({
             result = this.products;
         } else {
             result = this.products.filter(
-                (p) => p.category && p.category.name === this.currentFilter
+                (p) => p.category && p.category.name === this.currentFilter,
             );
         }
         return result;
@@ -128,12 +137,46 @@ export default () => ({
         const file = event.target.files[0];
         if (!file) return;
 
+        // Validate file type
+        const allowedTypes = [
+            "image/jpeg",
+            "image/jpg",
+            "image/png",
+            "image/gif",
+            "image/webp",
+        ];
+        if (!allowedTypes.includes(file.type)) {
+            Toast.fire({
+                icon: "error",
+                title: "Tipo de archivo no válido",
+                text: "Solo se permiten imágenes (JPEG, PNG, GIF, WebP)",
+            });
+            return;
+        }
+
+        // Validate file size (max 10MB)
+        const maxSize = 10 * 1024 * 1024;
+        if (file.size > maxSize) {
+            Toast.fire({
+                icon: "error",
+                title: "Archivo demasiado grande",
+                text: "El tamaño máximo permitido es 10MB",
+            });
+            return;
+        }
+
         this.form.image = file;
 
         // Create preview
         const reader = new FileReader();
         reader.onload = (e) => {
             this.form.image_preview = e.target.result;
+        };
+        reader.onerror = () => {
+            Toast.fire({
+                icon: "error",
+                title: "Error al procesar la imagen",
+            });
         };
         reader.readAsDataURL(file);
     },
@@ -164,13 +207,14 @@ export default () => ({
             }
 
             if (response.data.success) {
+                // Clear cache to ensure frontend gets fresh data
                 await this.fetchProducts();
                 this.closeModal();
                 Toast.fire({
                     icon: "success",
                     title: this.isEdit
-                        ? "Producto actualizado"
-                        : "Producto creado",
+                        ? "Producto actualizado correctamente"
+                        : "Producto creado correctamente",
                 });
             }
         } catch (error) {
@@ -184,7 +228,7 @@ export default () => ({
                     error.response.data.errors
                 ) {
                     const errorMessages = Object.values(
-                        error.response.data.errors
+                        error.response.data.errors,
                     )
                         .flat()
                         .join("\n");
@@ -222,17 +266,27 @@ export default () => ({
         }).then(async (result) => {
             if (result.isConfirmed) {
                 try {
-                    await axios.delete(`/menu/${id}`);
-                    await this.fetchProducts();
-                    Toast.fire({
-                        icon: "success",
-                        title: "Producto eliminado",
-                    });
+                    const response = await axios.delete(`/menu/${id}`);
+                    if (response.data.success) {
+                        await this.fetchProducts();
+                        Toast.fire({
+                            icon: "success",
+                            title: "Producto eliminado correctamente",
+                        });
+                    }
                 } catch (error) {
                     console.error("Error deleting product:", error);
+                    let errorMessage = "Error al eliminar el producto";
+
+                    if (error.response && error.response.data) {
+                        errorMessage =
+                            error.response.data.message || errorMessage;
+                    }
+
                     Toast.fire({
                         icon: "error",
                         title: "Error al eliminar",
+                        text: errorMessage,
                     });
                 }
             }

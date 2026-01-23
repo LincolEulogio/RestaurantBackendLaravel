@@ -20,7 +20,7 @@ class ProductController extends Controller
      */
     public function index()
     {
-        if (request()->wantsJson()) {
+        if (request()->wantsJson() || request()->ajax()) {
             return ProductResource::collection(Product::with('category')->latest()->get());
         }
 
@@ -67,11 +67,14 @@ class ProductController extends Controller
             $validated['image_public_id'] = $image['public_id'];
         }
 
-        Product::create($validated);
+        $product = Product::create($validated);
+
+        // Clear all caches
         Cache::forget('api_products');
+        Cache::flush(); // Clear all cache to ensure fresh data
 
         if ($request->wantsJson()) {
-            return response()->json(['success' => true]);
+            return response()->json(['success' => true, 'product' => $product]);
         }
 
         return redirect()->back()->with('success', 'Producto creado exitosamente.');
@@ -109,13 +112,15 @@ class ProductController extends Controller
 
         $oldValues = $product->only(['price', 'is_available', 'category_id']);
         $product->update($validated);
-        
+
         AuditLog::log('update_product', $product, $oldValues, $product->only(['price', 'is_available', 'category_id']));
-        
+
+        // Clear all caches
         Cache::forget('api_products');
+        Cache::flush(); // Clear all cache to ensure fresh data
 
         if ($request->wantsJson()) {
-            return response()->json(['success' => true]);
+            return response()->json(['success' => true, 'product' => $product]);
         }
 
         return redirect()->back()->with('success', 'Producto actualizado.');
@@ -128,13 +133,19 @@ class ProductController extends Controller
     {
         $product = Product::findOrFail($id);
 
-        // Delete image from Cloudinary if exists
+        // For Soft Deletes, we usually don't delete the image 
+        // in case we need to restore the product or see it in old orders.
+        /* 
         if ($product->image_public_id) {
             $this->cloudinary->deleteImage($product->image_public_id);
         }
+        */
 
         $product->delete();
+
+        // Clear all caches
         Cache::forget('api_products');
+        Cache::flush(); // Clear all cache to ensure fresh data
 
         if (request()->wantsJson()) {
             return response()->json(['success' => true]);
