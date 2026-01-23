@@ -132,25 +132,20 @@
                 <!-- Search -->
                 <div class="flex-1">
                     <input type="text" name="search" value="{{ request('search') }}"
+                        x-on:input.debounce.500ms="$el.form.submit()"
                         placeholder="Buscar por número de orden, cliente o teléfono..."
                         class="w-full px-4 py-2.5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400 border border-gray-200 dark:border-gray-600 rounded-xl focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors">
                 </div>
 
-                <!-- Date From -->
+                <!-- Date -->
                 <div class="w-full lg:w-auto">
-                    <input type="date" name="date_from" value="{{ request('date_from') }}"
-                        class="w-full px-4 py-2.5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors">
-                </div>
-
-                <!-- Date To -->
-                <div class="w-full lg:w-auto">
-                    <input type="date" name="date_to" value="{{ request('date_to') }}"
+                    <input type="date" name="date" value="{{ request('date') }}" x-on:change="$el.form.submit()"
                         class="w-full px-4 py-2.5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors">
                 </div>
 
                 <!-- Order Type -->
                 <div class="w-full lg:w-auto">
-                    <select name="order_type"
+                    <select name="order_type" x-on:change="$el.form.submit()"
                         class="w-full px-4 py-2.5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors">
                         <option value="all">Todos los tipos</option>
                         <option value="pickup" {{ request('order_type') == 'pickup' ? 'selected' : '' }}>Pickup
@@ -164,7 +159,7 @@
 
                 <!-- Status -->
                 <div class="w-full lg:w-auto">
-                    <select name="status"
+                    <select name="status" x-on:change="$el.form.submit()"
                         class="w-full px-4 py-2.5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors">
                         <option value="all">Todos los estados</option>
                         <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pendiente
@@ -183,12 +178,8 @@
 
                 <!-- Buttons -->
                 <div class="flex gap-2">
-                    <button type="submit"
-                        class="px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-semibold transition-colors whitespace-nowrap">
-                        Filtrar
-                    </button>
                     <a href="{{ route('orders.index') }}"
-                        class="px-6 py-2.5 bg-gray-600 text-white rounded-xl hover:bg-gray-700 font-semibold transition-colors inline-flex items-center justify-center whitespace-nowrap">
+                        class="px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-semibold transition-colors inline-flex items-center justify-center whitespace-nowrap">
                         Resetear
                     </a>
                 </div>

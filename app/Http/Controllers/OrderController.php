@@ -37,12 +37,9 @@ class OrderController extends Controller
             $query->where('order_type', $request->order_type);
         }
 
-        // Filter by date range
-        if ($request->has('date_from') && $request->date_from) {
-            $query->whereDate('order_date', '>=', $request->date_from);
-        }
-        if ($request->has('date_to') && $request->date_to) {
-            $query->whereDate('order_date', '<=', $request->date_to);
+        // Filter by specific date
+        if ($request->has('date') && $request->date) {
+            $query->whereDate('order_date', $request->date);
         }
 
         // Search
