@@ -13,16 +13,9 @@ class ReservationController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Reservation::with('table')->orderBy('reservation_date', 'asc')->orderBy('reservation_time', 'asc');
-
-        // Filter by date (default to today if no filters? No, show all upcoming maybe? Let's show all desc or filtered)
-        // If sorting by date desc, we see newest bookings first.
-        // Actually, for reservations, seeing upcoming is usually better.
-        // Let's stick to created_at desc for "management" like orders, or reservation_date desc.
-        // Let's use reservation_date desc for now to see latest dates.
-        if (! $request->has('sort')) {
-            $query->orderBy('reservation_date', 'desc');
-        }
+        $query = Reservation::with('table')
+            ->orderBy('reservation_date', 'desc')
+            ->orderBy('reservation_time', 'desc');
 
         // Filter by status
         if ($request->has('status') && $request->status !== 'all') {
