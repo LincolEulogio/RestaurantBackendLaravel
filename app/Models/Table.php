@@ -14,6 +14,7 @@ class Table extends Model
         'capacity',
         'status', // available, reserved, maintenance
         'location',
+        'current_session_id',
     ];
 
     public function reservations()

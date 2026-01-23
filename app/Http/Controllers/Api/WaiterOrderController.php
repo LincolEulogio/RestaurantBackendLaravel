@@ -144,6 +144,9 @@ class WaiterOrderController extends Controller
                 TableSession::where('id', $table->current_session_id)->increment('total_amount', $order->total);
             }
 
+            // Ensure table is marked as occupied
+            $table->update(['status' => 'occupied']);
+
             DB::commit();
 
             try {

@@ -15,6 +15,8 @@ class ProductResource extends JsonResource
             'description' => $this->description,
             'price' => $this->price,
             'image_url' => $this->image_url,
+            'image' => $this->image_url, // Alias for frontend compatibility
+            'category_id' => $this->category_id,
             'category' => new CategoryResource($this->whenLoaded('category')),
             'is_available' => $this->is_available,
         ];
