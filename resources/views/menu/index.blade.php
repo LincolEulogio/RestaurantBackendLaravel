@@ -101,7 +101,7 @@
         </div>
 
         <!-- Filter Tabs -->
-        <div class="flex gap-2 overflow-x-auto scrollbar-hide p-4">
+        <div class="flex gap-2 overflow-x-auto p-4">
             <button @click="setFilter('Todos')"
                 :class="currentFilter === 'Todos' ?
                     'bg-blue-600 text-white shadow-md ring-2 ring-blue-600 ring-offset-2 dark:ring-offset-gray-900' :
