@@ -9,6 +9,8 @@ use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\KitchenController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PaymentMethodController;
+use App\Http\Controllers\PrinterController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PromotionController;
@@ -18,8 +20,6 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\TableController;
-use App\Http\Controllers\PaymentMethodController;
-use App\Http\Controllers\PrinterController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -62,6 +62,9 @@ Route::middleware('auth')->group(function () {
 
     // INVENTORY - Requires 'inventory' permission
     Route::middleware('permission:inventory')->group(function () {
+        Route::get('/inventory/export/excel', [InventoryController::class, 'exportExcel'])->name('inventory.export.excel');
+        Route::get('/inventory/export/pdf', [InventoryController::class, 'exportPdf'])->name('inventory.export.pdf');
+
         Route::resource('inventory-items', InventoryController::class);
 
         Route::get('/inventory', function () {

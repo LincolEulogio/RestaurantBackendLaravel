@@ -2,11 +2,27 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\InventoryExport;
 use App\Models\InventoryItem;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class InventoryController extends Controller
 {
+    public function exportExcel()
+    {
+        return Excel::download(new InventoryExport, 'inventario-'.now()->format('d-m-Y').'.xlsx');
+    }
+
+    public function exportPdf()
+    {
+        $items = InventoryItem::all();
+        $pdf = Pdf::loadView('inventory.pdf', compact('items'));
+
+        return $pdf->download('inventario-'.now()->format('d-m-Y').'.pdf');
+    }
+
     /**
      * Display a listing of the resource.
      */
