@@ -120,15 +120,16 @@
             <form method="GET" action="{{ route('reservations.index') }}" class="flex flex-col md:flex-row gap-4">
                 <div class="flex-1">
                     <input type="text" name="search" value="{{ request('search') }}"
+                        x-on:input.debounce.500ms="$el.form.submit()"
                         placeholder="Buscar por cliente, email o teléfono..."
                         class="w-full px-4 py-2.5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400 border border-gray-200 dark:border-gray-600 rounded-xl focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors">
                 </div>
                 <div>
-                    <input type="date" name="date" value="{{ request('date') }}"
+                    <input type="date" name="date" value="{{ request('date') }}" x-on:change="$el.form.submit()"
                         class="w-full px-4 py-2.5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors">
                 </div>
                 <div>
-                    <select name="table_id"
+                    <select name="table_id" x-on:change="$el.form.submit()"
                         class="px-4 py-2.5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors">
                         <option value="all">Todas las mesas</option>
                         @foreach ($tables as $table)
@@ -140,7 +141,7 @@
                     </select>
                 </div>
                 <div>
-                    <select name="status"
+                    <select name="status" x-on:change="$el.form.submit()"
                         class="px-4 py-2.5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 rounded-xl focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 transition-colors">
                         <option value="all">Todos los estados</option>
                         <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pendiente
@@ -153,14 +154,12 @@
                         </option>
                     </select>
                 </div>
-                <button type="submit"
-                    class="px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-semibold transition-colors">
-                    Filtrar
-                </button>
-                <a href="{{ route('reservations.index') }}"
-                    class="px-6 py-2.5 bg-gray-600 text-white rounded-xl hover:bg-gray-700 font-semibold transition-colors inline-flex items-center justify-center">
-                    Resetear
-                </a>
+                <div class="flex gap-2">
+                    <a href="{{ route('reservations.index') }}"
+                        class="px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-semibold transition-colors inline-flex items-center justify-center whitespace-nowrap">
+                        Resetear
+                    </a>
+                </div>
             </form>
         </div>
 

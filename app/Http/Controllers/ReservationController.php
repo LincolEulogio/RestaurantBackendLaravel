@@ -18,17 +18,17 @@ class ReservationController extends Controller
             ->orderBy('reservation_time', 'desc');
 
         // Filter by status
-        if ($request->has('status') && $request->status !== 'all') {
+        if ($request->filled('status') && $request->status !== 'all') {
             $query->where('status', $request->status);
         }
 
         // Filter by specific date
-        if ($request->has('date')) {
-            $query->where('reservation_date', $request->date);
+        if ($request->filled('date')) {
+            $query->whereDate('reservation_date', $request->date);
         }
 
-        // Search
-        if ($request->has('search')) {
+        // Search (by customer or ID)
+        if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('customer_name', 'like', "%{$search}%")
@@ -39,7 +39,7 @@ class ReservationController extends Controller
         }
 
         // Filter by table
-        if ($request->has('table_id') && $request->table_id !== 'all') {
+        if ($request->filled('table_id') && $request->table_id !== 'all') {
             $query->where('table_id', $request->table_id);
         }
 
