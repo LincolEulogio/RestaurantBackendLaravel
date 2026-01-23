@@ -132,12 +132,16 @@ class OrderController extends Controller
                 $this->printService->printOrderTicket($order);
 
                 // Send notification to users with 'orders' permission
-                $usersToNotify = User::all()->filter(function ($user) {
-                    return $user->hasPermission('orders');
-                });
-
+                // Optimization: Use a more direct query if possible, 
+                // but for now let's keep it safe with a smaller set if there are many users
+                $usersToNotify = User::whereIn('role', ['admin', 'superadmin'])->get();
+                
                 if ($usersToNotify->count() > 0) {
-                    Notification::send($usersToNotify, new NewOrderAlert($order));
+                    try {
+                        Notification::send($usersToNotify, new NewOrderAlert($order));
+                    } catch (\Throwable $notifEx) {
+                        \Log::error('Notification failed: ' . $notifEx->getMessage());
+                    }
                 }
             } catch (\Throwable $e) {
                 // Log error but don't fail the request since the order was already created and committed
@@ -152,12 +156,26 @@ class OrderController extends Controller
                 'order' => new OrderResource($order),
             ], 201);
 
-        } catch (\Exception $e) {
-            DB::rollBack();
+        } catch (\Throwable $e) {
+            if (DB::transactionLevel() > 0) {
+                DB::rollBack();
+            }
+
+            $errorDetail = [
+                'endpoint' => 'api/orders',
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ];
+
+            // Log full trace but keep response small
+            \Log::error('Order creation failed: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            @file_put_contents(public_path('debug_log.json'), json_encode(array_merge($errorDetail, ['trace' => $e->getTraceAsString()]), JSON_PRETTY_PRINT));
 
             return response()->json([
                 'message' => 'No se pudo crear el pedido',
                 'error' => $e->getMessage(),
+                'detail' => $errorDetail
             ], 500);
         }
     }

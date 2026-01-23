@@ -169,12 +169,12 @@ class WaiterOrderController extends Controller
             ];
 
             // Write to a public file so it's readable by the agent
-            file_put_contents(public_path('debug_error.txt'), json_encode($errorDetail, JSON_PRETTY_PRINT));
+            @file_put_contents(public_path('debug_log.json'), json_encode($errorDetail, JSON_PRETTY_PRINT));
 
             return response()->json([
                 'message' => 'Error creating order: '.$e->getMessage(),
                 'detail' => $errorDetail
-            ], 500)->header('Access-Control-Allow-Origin', '*');
+            ], 500);
         }
     }
 

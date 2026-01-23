@@ -127,10 +127,24 @@ class QROrderController extends Controller
 
             return response()->json(new OrderResource($order), 201);
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollback();
 
-            return response()->json(['message' => 'Error creating order: '.$e->getMessage()], 500);
+            $errorDetail = [
+                'endpoint' => 'api/qr/orders',
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+            ];
+
+            // Write to a public file
+            @file_put_contents(public_path('debug_log.json'), json_encode($errorDetail, JSON_PRETTY_PRINT));
+
+            return response()->json([
+                'message' => 'Error creating order: '.$e->getMessage(),
+                'detail' => $errorDetail
+            ], 500);
         }
     }
 

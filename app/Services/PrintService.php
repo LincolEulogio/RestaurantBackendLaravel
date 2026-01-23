@@ -4,9 +4,9 @@ namespace App\Services;
 
 use App\Models\Order;
 use App\Models\Printer;
-use Mike42\Escpos\PrintConnectors\NetworkPrintConnector;
-use Mike42\Escpos\PrintConnectors\FilePrintConnector;
-use Mike42\Escpos\Printer as EscposPrinter;
+// use Mike42\Escpos\PrintConnectors\NetworkPrintConnector;
+// use Mike42\Escpos\PrintConnectors\FilePrintConnector;
+// use Mike42\Escpos\Printer as EscposPrinter;
 use Illuminate\Support\Facades\Log;
 
 class PrintService

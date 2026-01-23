@@ -18,7 +18,6 @@ return Application::configure(basePath: dirname(__DIR__))
             'cors' => \App\Http\Middleware\Cors::class,
         ]);
 
-        // Apply CORS globally to handle preflight requests
         $middleware->use([
             \App\Http\Middleware\Cors::class,
         ]);

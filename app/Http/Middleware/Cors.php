@@ -31,14 +31,34 @@ class Cors
                 ->header('Access-Control-Max-Age', '86400');
         }
 
-        $response = $next($request);
+        try {
+            $response = $next($request);
+        } catch (\Throwable $e) {
+            // Log the actual error for the developer
+            \Log::error("CORS Middleware caught exception: " . $e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
 
-        // Add CORS headers to response
-        if (in_array($origin, $allowedOrigins)) {
-            $response->headers->set('Access-Control-Allow-Origin', $origin);
-            $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-            $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
-            $response->headers->set('Access-Control-Allow-Credentials', 'true');
+            $response = response()->json([
+                'message' => 'Internal Server Error (Caught by CORS Middleware)',
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ], 500);
+        }
+
+        // Add CORS headers ONLY IF THEY ARE NOT ALREADY PRESENT
+        if (!$response->headers->has('Access-Control-Allow-Origin')) {
+            $originToSet = in_array($origin, $allowedOrigins) ? $origin : (env('APP_DEBUG') ? '*' : '');
+            
+            if ($originToSet) {
+                $response->headers->set('Access-Control-Allow-Origin', $originToSet);
+                $response->headers->set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+                $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+                $response->headers->set('Access-Control-Allow-Credentials', 'true');
+            }
         }
 
         return $response;
