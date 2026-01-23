@@ -12,7 +12,7 @@ class KitchenController extends Controller
     /**
      * Display the kitchen KDS view with active orders.
      */
-    public function index()
+    public function index(Request $request)
     {
         // SELF-HEAL: Ensure inventory tables exist (fixes 500 error if migration failed)
         if (!Schema::hasTable('product_inventory')) {
@@ -41,11 +41,43 @@ class KitchenController extends Controller
             }
         }
 
-        // Get orders that are relevant for the kitchen (not delivered or cancelled)
-        $orders = Order::with(['items.product'])
-            ->whereIn('status', ['pending', 'confirmed', 'preparing', 'ready'])
-            ->orderBy('created_at', 'asc')
-            ->get();
+        // Build query with filters
+        $query = Order::with(['items.product', 'table']);
+        
+        // Filter by status
+        if ($request->has('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        } else {
+            $query->whereIn('status', ['pending', 'confirmed', 'preparing', 'ready']);
+        }
+        
+        // Filter by table
+        if ($request->has('table_id') && $request->table_id) {
+            $query->where('table_id', $request->table_id);
+        }
+        
+        // Filter by order source
+        if ($request->has('source') && $request->source !== 'all') {
+            $query->where('order_source', $request->source);
+        }
+        
+        // Filter by time range
+        if ($request->has('time_range')) {
+            switch ($request->time_range) {
+                case 'last_hour':
+                    $query->where('created_at', '>=', now()->subHour());
+                    break;
+                case 'last_3_hours':
+                    $query->where('created_at', '>=', now()->subHours(3));
+                    break;
+                case 'today':
+                    $query->whereDate('created_at', today());
+                    break;
+            }
+        }
+        
+        // Get orders - NEWEST FIRST
+        $orders = $query->orderBy('created_at', 'desc')->get();
 
         // Count orders by status
         $pendingCount = $orders->where('status', 'pending')->count();
@@ -58,12 +90,45 @@ class KitchenController extends Controller
     /**
      * Fetch orders only (for AJAX refresh).
      */
-    public function fetchOrders()
+    public function fetchOrders(Request $request)
     {
-        $orders = Order::with(['items.product'])
-            ->whereIn('status', ['pending', 'confirmed', 'preparing', 'ready'])
-            ->orderBy('created_at', 'asc')
-            ->get();
+        // Build query with filters
+        $query = Order::with(['items.product', 'table']);
+        
+        // Filter by status
+        if ($request->has('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        } else {
+            $query->whereIn('status', ['pending', 'confirmed', 'preparing', 'ready']);
+        }
+        
+        // Filter by table
+        if ($request->has('table_id') && $request->table_id) {
+            $query->where('table_id', $request->table_id);
+        }
+        
+        // Filter by order source
+        if ($request->has('source') && $request->source !== 'all') {
+            $query->where('order_source', $request->source);
+        }
+        
+        // Filter by time range
+        if ($request->has('time_range')) {
+            switch ($request->time_range) {
+                case 'last_hour':
+                    $query->where('created_at', '>=', now()->subHour());
+                    break;
+                case 'last_3_hours':
+                    $query->where('created_at', '>=', now()->subHours(3));
+                    break;
+                case 'today':
+                    $query->whereDate('created_at', today());
+                    break;
+            }
+        }
+        
+        // Get orders - NEWEST FIRST
+        $orders = $query->orderBy('created_at', 'desc')->get();
 
         $pendingCount = $orders->where('status', 'pending')->count();
         $preparingCount = $orders->whereIn('status', ['confirmed', 'preparing'])->count();
