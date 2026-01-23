@@ -90,12 +90,16 @@ class DashboardController extends Controller
         // Low stock items (stock_current < 10)
         $lowStockCount = InventoryItem::where('stock_current', '<', 10)->count();
 
-        // Weekly sales (last 7 days)
+        $dateRaw = DB::getDriverName() === 'sqlite' ? 'date(delivered_at)' : 'DATE(delivered_at)';
+        $dayNameRaw = DB::getDriverName() === 'sqlite' 
+            ? 'strftime("%w", delivered_at)' // Returns 0-6
+            : 'DAYNAME(delivered_at)';
+
         $weeklySales = Order::where('status', 'delivered')
             ->where('delivered_at', '>=', Carbon::now()->subDays(7))
             ->select(
-                DB::raw('DATE(delivered_at) as date'),
-                DB::raw('DAYNAME(delivered_at) as day_name'),
+                DB::raw("$dateRaw as date"),
+                DB::raw("$dayNameRaw as day_name"),
                 DB::raw('SUM(total) as revenue')
             )
             ->groupBy('date', 'day_name')
@@ -238,11 +242,12 @@ class DashboardController extends Controller
             ->groupBy('status')
             ->get();
 
-        // 5. Peak Hours (Hourly Sales Today)
+        $hourRaw = config('database.default') === 'sqlite' ? 'strftime("%H", delivered_at)' : 'HOUR(delivered_at)';
+
         $hourlySales = Order::where('status', 'delivered')
             ->whereDate('delivered_at', Carbon::today())
             ->select(
-                DB::raw('HOUR(delivered_at) as hour'),
+                DB::raw("$hourRaw as hour"),
                 DB::raw('SUM(total) as revenue'),
                 DB::raw('COUNT(*) as count')
             )
@@ -302,10 +307,13 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
             
-        // 9. Delayed Orders (> 40 mins from confirmed to delivered)
+        $delayedOrdersRaw = DB::getDriverName() === 'sqlite'
+            ? '(strftime("%s", delivered_at) - strftime("%s", confirmed_at)) / 60 > 40'
+            : 'TIMESTAMPDIFF(MINUTE, confirmed_at, delivered_at) > 40';
+
         $delayedOrdersCount = Order::where('status', 'delivered')
             ->whereDate('created_at', Carbon::today())
-            ->whereRaw('TIMESTAMPDIFF(MINUTE, confirmed_at, delivered_at) > 40')
+            ->whereRaw($delayedOrdersRaw)
             ->count();
 
         // 10. Most Used Table
@@ -468,11 +476,12 @@ class DashboardController extends Controller
             ->limit(20)
             ->get();
 
-        // Hourly completion rate today
+        $hourRaw = DB::getDriverName() === 'sqlite' ? 'strftime("%H", delivered_at)' : 'HOUR(delivered_at)';
+
         $hourlyData = Order::where('status', 'delivered')
             ->whereBetween('delivered_at', [$todayStart, $todayEnd])
             ->select(
-                DB::raw('HOUR(delivered_at) as hour'),
+                DB::raw("$hourRaw as hour"),
                 DB::raw('COUNT(*) as count')
             )
             ->groupBy('hour')
@@ -535,11 +544,12 @@ class DashboardController extends Controller
             ->limit(15)
             ->get();
 
-        // Hourly sales
+        $hourRaw = config('database.default') === 'sqlite' ? 'strftime("%H", delivered_at)' : 'HOUR(delivered_at)';
+
         $hourlyData = Order::where('status', 'delivered')
             ->whereBetween('delivered_at', [$todayStart, $todayEnd])
             ->select(
-                DB::raw('HOUR(delivered_at) as hour'),
+                DB::raw("$hourRaw as hour"),
                 DB::raw('SUM(total) as revenue')
             )
             ->groupBy('hour')

@@ -68,8 +68,11 @@ class BillingController extends Controller
             return back()->with('error', 'El monto recibido es insuficiente');
         }
 
-        // Update order to delivered
+        // Update order status and payment status
         $userId = auth()->id();
+        $order->payment_status = 'paid';
+        $order->save();
+
         $order->updateStatus('delivered', $userId, "Pagado con {$request->payment_method}");
 
         // Automation: Release table and close session if it's a dine-in/waiter order

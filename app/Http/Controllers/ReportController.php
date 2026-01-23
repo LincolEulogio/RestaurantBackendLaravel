@@ -102,10 +102,14 @@ class ReportController extends Controller
         $customersChange = $prevCustomers > 0 ? (($uniqueCustomers - $prevCustomers) / $prevCustomers) * 100 : 0;
 
         // Monthly Revenue Data (last 12 months)
+        $monthRaw = DB::getDriverName() === 'sqlite' 
+            ? 'strftime("%Y-%m", delivered_at)' 
+            : 'DATE_FORMAT(delivered_at, "%Y-%m")';
+
         $monthlyRevenue = Order::where('status', 'delivered')
             ->where('delivered_at', '>=', Carbon::now()->subMonths(12))
             ->select(
-                DB::raw('DATE_FORMAT(delivered_at, "%Y-%m") as month'),
+                DB::raw("$monthRaw as month"),
                 DB::raw('SUM(total) as revenue'),
                 DB::raw('COUNT(*) as orders')
             )
@@ -130,10 +134,14 @@ class ReportController extends Controller
             ->get();
 
         // Hourly Sales Distribution
+        $hourRaw = DB::getDriverName() === 'sqlite'
+            ? 'strftime("%H", delivered_at)'
+            : 'HOUR(delivered_at)';
+
         $hourlySales = Order::where('status', 'delivered')
             ->whereBetween('delivered_at', [$startDate, $endDate])
             ->select(
-                DB::raw('HOUR(delivered_at) as hour'),
+                DB::raw("$hourRaw as hour"),
                 DB::raw('SUM(total) as revenue'),
                 DB::raw('COUNT(*) as orders')
             )
@@ -199,10 +207,14 @@ class ReportController extends Controller
             ->get();
 
         // Daily Trends (last 30 days)
+        $dateRaw = DB::getDriverName() === 'sqlite'
+            ? 'date(delivered_at)'
+            : 'DATE(delivered_at)';
+
         $dailyTrends = Order::where('status', 'delivered')
             ->where('delivered_at', '>=', Carbon::now()->subDays(30))
             ->select(
-                DB::raw('DATE(delivered_at) as date'),
+                DB::raw("$dateRaw as date"),
                 DB::raw('SUM(total) as revenue'),
                 DB::raw('COUNT(*) as orders')
             )
@@ -211,10 +223,14 @@ class ReportController extends Controller
             ->get();
 
         // Peak Hours Analysis
+        $hourRaw = DB::getDriverName() === 'sqlite'
+            ? 'strftime("%H", delivered_at)'
+            : 'HOUR(delivered_at)';
+
         $peakHours = Order::where('status', 'delivered')
             ->whereBetween('delivered_at', [$startDate, $endDate])
             ->select(
-                DB::raw('HOUR(delivered_at) as hour'),
+                DB::raw("$hourRaw as hour"),
                 DB::raw('COUNT(*) as order_count')
             )
             ->groupBy('hour')

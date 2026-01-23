@@ -65,6 +65,28 @@ class ReservationController extends Controller
     }
 
     /**
+     * Store a newly created reservation in storage.
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'table_id' => 'required|exists:tables,id',
+            'customer_name' => 'required|string|max:255',
+            'customer_email' => 'required|email|max:255',
+            'customer_phone' => 'required|string|max:20',
+            'reservation_date' => 'required|date',
+            'reservation_time' => 'required',
+            'party_size' => 'required|integer|min:1',
+            'special_request' => 'nullable|string',
+        ]);
+
+        Reservation::create($validated);
+
+        return redirect()->route('reservations.index')
+            ->with('success', 'Reservation created successfully');
+    }
+
+    /**
      * Display the specified reservation.
      */
     public function show(Reservation $reservation)

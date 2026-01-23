@@ -2,17 +2,18 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Table extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'table_number',
         'capacity',
-        'status', // available, occupied, reserved, cleaning
+        'status', // available, reserved, maintenance
         'location',
-        'qr_code',
-        'current_session_id',
     ];
 
     public function reservations()
