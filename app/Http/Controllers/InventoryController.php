@@ -23,6 +23,13 @@ class InventoryController extends Controller
         return $pdf->download('inventario-'.now()->format('d-m-Y').'.pdf');
     }
 
+    public function print()
+    {
+        $items = InventoryItem::all();
+
+        return view('inventory.print', compact('items'));
+    }
+
     /**
      * Display a listing of the resource.
      */

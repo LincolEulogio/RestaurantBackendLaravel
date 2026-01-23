@@ -38,6 +38,13 @@ class ReportController extends Controller
         return $pdf->download('reporte-ventas-'.now()->format('d-m-Y').'.pdf');
     }
 
+    public function print(Request $request)
+    {
+        $data = $this->getReportData($request);
+
+        return view('reports.print', $data);
+    }
+
     private function getReportData(Request $request): array
     {
         // Date range (default: last 30 days)

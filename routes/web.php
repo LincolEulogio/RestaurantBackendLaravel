@@ -64,6 +64,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('permission:inventory')->group(function () {
         Route::get('/inventory/export/excel', [InventoryController::class, 'exportExcel'])->name('inventory.export.excel');
         Route::get('/inventory/export/pdf', [InventoryController::class, 'exportPdf'])->name('inventory.export.pdf');
+        Route::get('/inventory/print', [InventoryController::class, 'print'])->name('inventory.print');
 
         Route::resource('inventory-items', InventoryController::class);
 
@@ -77,6 +78,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
         Route::get('/reports/export/excel', [ReportController::class, 'exportExcel'])->name('reports.export.excel');
         Route::get('/reports/export/pdf', [ReportController::class, 'exportPdf'])->name('reports.export.pdf');
+        Route::get('/reports/print', [ReportController::class, 'print'])->name('reports.print');
     });
 
     // KITCHEN/KDS - Requires 'kitchen' permission
