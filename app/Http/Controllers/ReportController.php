@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ReportsExport;
 use App\Models\Category;
 use App\Models\Order;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ReportController extends Controller
 {
@@ -15,9 +18,38 @@ class ReportController extends Controller
      */
     public function index(Request $request)
     {
+        $data = $this->getReportData($request);
+
+        return view('reports.index', $data);
+    }
+
+    public function exportExcel(Request $request)
+    {
+        $data = $this->getReportData($request);
+
+        return Excel::download(new ReportsExport($data), 'reporte-ventas-'.now()->format('d-m-Y').'.xlsx');
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $data = $this->getReportData($request);
+        $pdf = Pdf::loadView('reports.pdf', $data);
+
+        return $pdf->download('reporte-ventas-'.now()->format('d-m-Y').'.pdf');
+    }
+
+    private function getReportData(Request $request): array
+    {
         // Date range (default: last 30 days)
         $startDate = $request->input('start_date', Carbon::now()->subDays(30)->startOfDay());
         $endDate = $request->input('end_date', Carbon::now()->endOfDay());
+
+        if (is_string($startDate)) {
+            $startDate = Carbon::parse($startDate)->startOfDay();
+        }
+        if (is_string($endDate)) {
+            $endDate = Carbon::parse($endDate)->endOfDay();
+        }
 
         // Key Metrics
         $totalRevenue = Order::where('status', 'delivered')
@@ -36,9 +68,12 @@ class ReportController extends Controller
             ->count('customer_email');
 
         // Previous period for comparison
-        $daysDiff = Carbon::parse($startDate)->diffInDays(Carbon::parse($endDate));
-        $prevStartDate = Carbon::parse($startDate)->subDays($daysDiff);
-        $prevEndDate = Carbon::parse($startDate)->subSecond();
+        $daysDiff = $startDate->diffInDays($endDate);
+        if ($daysDiff == 0) {
+            $daysDiff = 1;
+        }
+        $prevStartDate = (clone $startDate)->subDays($daysDiff);
+        $prevEndDate = (clone $startDate)->subSecond();
 
         $prevRevenue = Order::where('status', 'delivered')
             ->whereBetween('delivered_at', [$prevStartDate, $prevEndDate])
@@ -180,13 +215,6 @@ class ReportController extends Controller
             ->limit(3)
             ->get();
 
-        // Calculate additional metrics
-        $cashRevenue = $paymentMethods->where('payment_method', 'cash')->sum('revenue');
-        $cardRevenue = $paymentMethods->where('payment_method', 'card')->sum('revenue');
-        $dineInOrders = $orderTypes->where('order_type', 'dine_in')->first()->count ?? 0;
-        $takeawayOrders = $orderTypes->where('order_type', 'takeaway')->first()->count ?? 0;
-        $deliveryOrders = $orderTypes->where('order_type', 'delivery')->first()->count ?? 0;
-
         // New Metrics
         $cancelledOrders = Order::where('status', 'cancelled')
             ->whereBetween('updated_at', [$startDate, $endDate])
@@ -202,41 +230,42 @@ class ReportController extends Controller
             ->whereBetween('orders.delivered_at', [$startDate, $endDate])
             ->sum('quantity');
 
-        // Net Profit (Estimated at 30% profit margin as per simplified logic, or customized)
-        // Adjusting logic: if margin is 70% as per category report, let's use that on Subtotal.
-        // Net Profit = Subtotal * 0.30 (Conservative/Example) OR Subtotal * 0.70 (Optimistic)
-        // Let's use 20% Net Profit on Total Revenue for safety/realism or stick to the category logic.
-        // Given the category report uses 70% margin, I'll calculate Net Profit as 20% of Total Revenue for a realistic "Bottom Line" estimate.
+        $cashRevenue = $paymentMethods->where('payment_method', 'cash')->sum('revenue');
+        $cardRevenue = $paymentMethods->where('payment_method', 'card')->sum('revenue');
+        $dineInOrders = $orderTypes->where('order_type', 'dine_in')->first()->count ?? 0;
+        $takeawayOrders = $orderTypes->where('order_type', 'takeaway')->first()->count ?? 0;
+        $deliveryOrders = $orderTypes->where('order_type', 'delivery')->first()->count ?? 0;
+
         $netProfit = $totalRevenue * 0.20;
 
-        return view('reports.index', compact(
-            'totalRevenue',
-            'completedOrders',
-            'averageTicket',
-            'uniqueCustomers',
-            'revenueChange',
-            'ordersChange',
-            'ticketChange',
-            'customersChange',
-            'monthlyRevenue',
-            'topProducts',
-            'hourlyData',
-            'categoryPerformance',
-            'paymentMethods',
-            'orderTypes',
-            'dailyTrends',
-            'peakHours',
-            'cashRevenue',
-            'cardRevenue',
-            'dineInOrders',
-            'takeawayOrders',
-            'deliveryOrders',
-            'startDate',
-            'endDate',
-            'cancelledOrders',
-            'cancelledAmount',
-            'totalItemsSold',
-            'netProfit'
-        ));
+        return [
+            'totalRevenue' => $totalRevenue,
+            'completedOrders' => $completedOrders,
+            'averageTicket' => $averageTicket,
+            'uniqueCustomers' => $uniqueCustomers,
+            'revenueChange' => $revenueChange,
+            'ordersChange' => $ordersChange,
+            'ticketChange' => $ticketChange,
+            'customersChange' => $customersChange,
+            'monthlyRevenue' => $monthlyRevenue,
+            'topProducts' => $topProducts,
+            'hourlyData' => $hourlyData,
+            'categoryPerformance' => $categoryPerformance,
+            'paymentMethods' => $paymentMethods,
+            'orderTypes' => $orderTypes,
+            'dailyTrends' => $dailyTrends,
+            'peakHours' => $peakHours,
+            'cashRevenue' => $cashRevenue,
+            'cardRevenue' => $cardRevenue,
+            'dineInOrders' => $dineInOrders,
+            'takeawayOrders' => $takeawayOrders,
+            'deliveryOrders' => $deliveryOrders,
+            'startDate' => $startDate->toDateString(),
+            'endDate' => $endDate->toDateString(),
+            'cancelledOrders' => $cancelledOrders,
+            'cancelledAmount' => $cancelledAmount,
+            'totalItemsSold' => $totalItemsSold ?? 0,
+            'netProfit' => $netProfit,
+        ];
     }
 }

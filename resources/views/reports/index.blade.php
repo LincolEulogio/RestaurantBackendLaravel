@@ -9,23 +9,24 @@
                 </p>
             </div>
             <div class="flex items-center gap-2">
-                <x-ui.button variant="outline"
-                    class="gap-2 text-gray-600 border-gray-300 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700">
+                <a :href="`{{ route('reports.export.pdf') }}?start_date=${startDate}&end_date=${endDate}`"
+                    class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium transition-all rounded-xl gap-2 text-gray-600 border border-gray-300 hover:bg-gray-50 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
                         </path>
                     </svg>
                     Exportar PDF
-                </x-ui.button>
-                <x-ui.button class="gap-2 bg-emerald-500 hover:bg-emerald-600 text-white border-0">
+                </a>
+                <a :href="`{{ route('reports.export.excel') }}?start_date=${startDate}&end_date=${endDate}`"
+                    class="bg-blue-500 inline-flex items-center justify-center px-4 py-2 text-sm font-medium transition-all rounded-xl gap-2 text-white border-0">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
                         </path>
                     </svg>
                     Exportar Excel
-                </x-ui.button>
+                </a>
             </div>
         </div>
 
