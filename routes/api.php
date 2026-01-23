@@ -58,3 +58,10 @@ Route::prefix('qr')->group(function () {
     Route::post('/call-waiter', [\App\Http\Controllers\Api\QROrderController::class, 'callWaiter']);
     Route::post('/request-bill', [\App\Http\Controllers\Api\QROrderController::class, 'requestBill']);
 });
+
+// Culqi Payment Routes
+Route::prefix('payment')->group(function () {
+    Route::post('/process-card', [\App\Http\Controllers\Api\PaymentController::class, 'processCardPayment']);
+    Route::post('/create-order', [\App\Http\Controllers\Api\PaymentController::class, 'createCulqiOrder']);
+    Route::post('/webhook', [\App\Http\Controllers\Api\PaymentController::class, 'webhook']);
+});
