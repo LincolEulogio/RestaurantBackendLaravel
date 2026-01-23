@@ -68,15 +68,17 @@ Todos los pedidos siguen una máquina de estados estricta gestionada en `Order.p
 
 **Historial de Estados:** Cada cambio se guarda en la tabla `order_status_history`, permitiendo auditar quién cambió el estado y en qué momento.
 
+**Lógica de Inventario (OrderObserver):** El sistema descuenta automáticamente los ingredientes del inventario cuando un pedido pasa a estado `preparing` o `ready`. Esta lógica está centralizada en `App\Observers\OrderObserver` para garantizar la consistencia sin importar la fuente del pedido.
+
 ---
 
-## 4. Proceso de Cocina (KDS)
+## 4. Proceso de Cocina (KDS) y Tiempo Real
 
-El controlador `KitchenController` maneja la lógica de visualización en tiempo real:
+El controlador `KitchenController` maneja la lógica de visualización, apoyado por WebSockets:
 
-1. **Filtro:** Solo muestra pedidos en estado `pending`, `confirmed`, `preparing` o `ready`.
+1. **Tiempo Real:** Se utiliza el evento `App\Events\OrderPlaced` (broadcast) para notificar a la cocina inmediatamente cuando llega un pedido nuevo.
 2. **Acción:** El cocinero puede "Confirmar", "Empezar preparación" o "Marcar como Listo".
-3. **Prioridad:** Los pedidos se ordenan por fecha de creación (los más antiguos primero para evitar retrasos).
+3. **Prioridad:** Los pedidos se ordenan por fecha de creación (FIFO).
 
 ---
 
@@ -92,7 +94,7 @@ Gestionado por `BillingController`, el proceso se diferencia según el rol del u
 1. Solo los pedidos en estado `ready` pueden ser cobrados.
 2. El cajero selecciona el método de pago (`cash`, `card`, `yape`, `plin`).
 3. Se registra el monto recibido y se calcula el cambio.
-4. Al marcar como pagado, el estado del pedido cambia automáticamente a `delivered` y se registra la venta.
+4. Al marcar como pagado, el estado del pedido cambia automáticamente a `delivered` y se registra la venta en el historial financiero.
 
 ---
 
@@ -102,40 +104,41 @@ Gestionado por `BillingController`, el proceso se diferencia según el rol del u
 
 El sistema utiliza un middleware personalizado `permission:nombre_permiso`. Los principales permisos son:
 
-- `orders`: Ver y gestionar el listado de pedidos.
-- `menu`: Editar productos, categorías y promociones.
-- `inventory`: Control de existencias.
-- `reports`: Acceso a estadísticas de ventas.
-- `kitchen`: Acceso al visor de cocina.
-- `billing`: Acceso a la interfaz de cobros.
-- `settings`: Configuración general, gestión de personal y roles.
+- `orders`, `menu`, `inventory`, `reports`, `kitchen`, `billing`, `settings`.
 
-### Gestión de Imágenes (Cloudinary)
+### Servicios del Sistema
 
-El sistema integra `CloudinaryService` para manejar archivos multimedia de manera eficiente.
-
-- Al subir una imagen de producto o blog, se envía a la nube.
-- Se guarda el `public_id` y la `url` en la base de datos para referenciarlos.
+- **Imágenes (Cloudinary):** Gestión de multimedia en la nube vía `CloudinaryService`.
+- **Impresión (PrintService):** El sistema está preparado para impresión térmica (ESC/POS).
+    - _Nota:_ Actualmente en modo "Simulación/Log" para evitar errores 500 por dependencias faltantes en el entorno local. Los tickets se registran en los logs de Laravel.
 
 ---
 
 ## 7. Esquema de Base de Datos (Tablas Clave)
 
-1. **`users`:** Personal del restaurante con diferentes roles.
-2. **`products`:** Platos o artículos del menú (incluye precio, estado de disponibilidad).
-3. **`orders`:** Cabecera del pedido (datos del cliente, total, estado, fuente).
-4. **`order_items`:** Detalle del pedido (qué platos se pidieron, cantidad, notas especiales).
-5. **`tables` / `table_sessions`:** Control de ocupación de mesas en tiempo real.
-6. **`reservations`:** Reservas anticipadas de clientes.
-7. **`promotions`:** Descuentos o combos aplicables a productos.
+1. **`users`**, **`products`**, **`orders`**, **`order_items`**, **`tables` / `table_sessions`**, **`reservations`**, **`promotions`**.
 
 ---
 
-## 8. Seguridad y API
+## 8. Seguridad, API y CORS
 
-- **Web:** Protegido por autenticación de sesión estándar (Laravel Breeze/Breeze-style).
-- **API:** Protegida por **Laravel Sanctum**. Las aplicaciones externas (Mesero/QR) deben enviar un Token de Portador (Bearer Token) para acceder a rutas protegidas como la creación de pedidos por mesero.
+- **Autenticación:**
+    - **Web:** Laravel Breeze.
+    - **API:** **Laravel Sanctum** (Bearer Tokens para App Mesero/QR).
+- **CORS (Middleware Personalizado):**
+    - Se ha implementado un middleware robusto (`App\Http\Middleware\Cors`) que garantiza la conectividad entre el puerto 3000 (Frontend) y 8000 (Backend).
+    - **Control de Errores:** El middleware captura excepciones críticas para asegurar que incluso en un Error 500, el navegador reciba las cabeceras CORS, permitiendo al frontend leer el detalle del fallo.
+    - **Prevención de Duplicados:** Implementa lógica para evitar cabeceras duplicadas que bloqueen al navegador.
 
 ---
 
-**Nota:** Esta documentación se enfoca exclusivamente en la lógica del servidor (Backend). Para la integración con el frontend, consulte los endpoints en `routes/api.php`.
+## 9. Diagnóstico y Robustez
+
+Para facilitar el mantenimiento, se han implementado herramientas de diagnóstico profundo:
+
+- **`debug_log.json`:** En la carpeta `public`, el sistema registra el rastro (trace) completo de cualquier fallo en la creación de pedidos.
+- **Detección de Fallos en Middleware:** Los controladores (`OrderController`, `WaiterOrderController`) están protegiendo la transacción de base de datos (`DB::beginTransaction`) y capturando cualquier `Throwable` para loguear errores detallados en `storage/logs/laravel.log`.
+
+---
+
+**Nota:** Esta documentación se actualiza con cada cambio crítico en la arquitectura del servidor.

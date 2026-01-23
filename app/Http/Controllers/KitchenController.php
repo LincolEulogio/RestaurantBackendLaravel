@@ -56,6 +56,23 @@ class KitchenController extends Controller
     }
 
     /**
+     * Fetch orders only (for AJAX refresh).
+     */
+    public function fetchOrders()
+    {
+        $orders = Order::with(['items.product'])
+            ->whereIn('status', ['pending', 'confirmed', 'preparing', 'ready'])
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        $pendingCount = $orders->where('status', 'pending')->count();
+        $preparingCount = $orders->whereIn('status', ['confirmed', 'preparing'])->count();
+        $readyCount = $orders->where('status', 'ready')->count();
+
+        return view('kitchen.orders-partial', compact('orders', 'pendingCount', 'preparingCount', 'readyCount'));
+    }
+
+    /**
      * Update order status from kitchen.
      */
     public function updateStatus(Request $request, Order $order)

@@ -77,6 +77,7 @@ Route::middleware('auth')->group(function () {
     // KITCHEN/KDS - Requires 'kitchen' permission
     Route::middleware('permission:kitchen')->group(function () {
         Route::get('/kitchen', [KitchenController::class, 'index'])->name('kitchen.index');
+        Route::get('/kitchen/fetch-orders', [KitchenController::class, 'fetchOrders'])->name('kitchen.fetch-orders');
         Route::patch('/kitchen/{order}/status', [KitchenController::class, 'updateStatus'])->name('kitchen.update-status');
     });
 
