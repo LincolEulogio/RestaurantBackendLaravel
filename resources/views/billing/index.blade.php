@@ -160,7 +160,8 @@
                                         @foreach ($order->items->take(3) as $item)
                                             <span
                                                 class="bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded text-gray-600 dark:text-gray-300">
-                                                <b>{{ $item->quantity }}x</b> {{ $item->product->name }}
+                                                <b>{{ $item->quantity }}x</b>
+                                                {{ $item->product->name ?? $item->product_name }}
                                             </span>
                                         @endforeach
                                         @if ($order->items->count() > 3)
@@ -288,7 +289,8 @@
                                                         x-text="item.quantity + 'x'"></span>
                                                     <div class="flex-1">
                                                         <p class="text-gray-800 dark:text-gray-200 font-medium"
-                                                            x-text="item.product.name"></p>
+                                                            x-text="item.product ? item.product.name : item.product_name">
+                                                        </p>
                                                         <template x-if="item.notes">
                                                             <p class="text-xs text-gray-400 italic"
                                                                 x-text="item.notes"></p>

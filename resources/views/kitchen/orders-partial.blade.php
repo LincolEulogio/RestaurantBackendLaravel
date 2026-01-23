@@ -55,7 +55,7 @@
                     </span>
                     <div class="flex-1">
                         <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                            {{ $item->product->name }}</p>
+                            {{ $item->product->name ?? $item->product_name }}</p>
                         @if ($item->special_instructions)
                             <span
                                 class="text-xs text-red-500 italic block mt-1">{{ $item->special_instructions }}</span>
