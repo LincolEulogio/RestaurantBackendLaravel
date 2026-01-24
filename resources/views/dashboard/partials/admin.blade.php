@@ -81,50 +81,368 @@
     </div>
 </div>
 
-<!-- 2. Order Status Overview (NEW) -->
-<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+{{-- Eficiencia Operativa --}}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+    {{-- Rotación de Mesas --}}
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+        <div class="flex justify-between items-start">
+            <div class="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-blue-600 dark:text-blue-400">
+                <i data-lucide="rotate-cw" class="w-8 h-8"></i>
+            </div>
+            @if ($tableRotation > 3)
+                <span
+                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">Excelente</span>
+            @elseif($tableRotation < 2)
+                <span
+                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">Mejorar</span>
+            @else
+                <span
+                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">Normal</span>
+            @endif
+        </div>
+        <div class="mt-4">
+            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Rotación de Mesas</h3>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($tableRotation, 1) }}x</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Veces por día</p>
+        </div>
+    </div>
+
+    {{-- Tiempo Promedio de Servicio --}}
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+        <div class="flex justify-between items-start">
+            <div class="p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-purple-600 dark:text-purple-400">
+                <i data-lucide="timer" class="w-8 h-8"></i>
+            </div>
+            @if ($avgServiceTime < 30)
+                <span
+                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">Rápido</span>
+            @elseif($avgServiceTime > 45)
+                <span
+                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300">Lento</span>
+            @else
+                <span
+                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300">Normal</span>
+            @endif
+        </div>
+        <div class="mt-4">
+            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Tiempo de Servicio</h3>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($avgServiceTime, 0) }} min
+            </p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Creación → Entrega</p>
+        </div>
+    </div>
+
+    {{-- Tasa de Cancelación --}}
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+        <div class="flex justify-between items-start">
+            <div class="p-2 bg-red-50 dark:bg-red-900/20 rounded-lg text-red-600 dark:text-red-400">
+                <i data-lucide="x-circle" class="w-8 h-8"></i>
+            </div>
+            @if ($cancellationRate < 5)
+                <span
+                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">Bajo</span>
+            @elseif($cancellationRate > 10)
+                <span
+                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300">Alto</span>
+            @else
+                <span
+                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">Normal</span>
+            @endif
+        </div>
+        <div class="mt-4">
+            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Tasa de Cancelación</h3>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($cancellationRate, 1) }}%</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">De órdenes hoy</p>
+        </div>
+    </div>
+
+    {{-- Eficiencia de Cocina --}}
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+        <div class="flex justify-between items-start">
+            <div class="p-2 bg-green-50 dark:bg-green-900/20 rounded-lg text-green-600 dark:text-green-400">
+                <i data-lucide="chef-hat" class="w-8 h-8"></i>
+            </div>
+            @if ($kitchenEfficiency > 5)
+                <span
+                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">Eficiente</span>
+            @elseif($kitchenEfficiency < 3)
+                <span
+                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">Mejorar</span>
+            @else
+                <span
+                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">Normal</span>
+            @endif
+        </div>
+        <div class="mt-4">
+            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Eficiencia Cocina</h3>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($kitchenEfficiency, 1) }}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Órdenes por hora</p>
+        </div>
+    </div>
+</div>
+
+{{-- Análisis de Clientes, Proyecciones y Calidad --}}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+    {{-- Clientes Nuevos --}}
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+        <div class="flex justify-between items-start">
+            <div class="p-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg text-indigo-600 dark:text-indigo-400">
+                <i data-lucide="user-plus" class="w-8 h-8"></i>
+            </div>
+            @if ($newCustomersToday > 5)
+                <span
+                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">Excelente</span>
+            @endif
+        </div>
+        <div class="mt-4">
+            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Clientes Nuevos</h3>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $newCustomersToday }}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Primera orden hoy</p>
+        </div>
+    </div>
+
+    {{-- Clientes Recurrentes --}}
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+        <div class="flex justify-between items-start">
+            <div class="p-2 bg-green-50 dark:bg-green-900/20 rounded-lg text-green-600 dark:text-green-400">
+                <i data-lucide="repeat" class="w-8 h-8"></i>
+            </div>
+            @if ($satisfactionRate > 50)
+                <span
+                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">{{ number_format($satisfactionRate, 0) }}%</span>
+            @endif
+        </div>
+        <div class="mt-4">
+            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Clientes Recurrentes</h3>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $returningCustomers }}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Con más de 1 orden</p>
+        </div>
+    </div>
+
+    {{-- Proyección Mensual --}}
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+        <div class="flex justify-between items-start">
+            <div class="p-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg text-emerald-600 dark:text-emerald-400">
+                <i data-lucide="trending-up" class="w-8 h-8"></i>
+            </div>
+            @if ($projectedMonthlySales > $lastMonthSales && $lastMonthSales > 0)
+                <span
+                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
+                    +{{ number_format((($projectedMonthlySales - $lastMonthSales) / $lastMonthSales) * 100, 0) }}%
+                </span>
+            @endif
+        </div>
+        <div class="mt-4">
+            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Proyección Mensual</h3>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ formatMoney($projectedMonthlySales) }}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Basado en promedio diario</p>
+        </div>
+    </div>
+
+    {{-- Satisfacción del Cliente --}}
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+        <div class="flex justify-between items-start">
+            <div class="p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg text-yellow-600 dark:text-yellow-400">
+                <i data-lucide="heart" class="w-8 h-8"></i>
+            </div>
+            @if ($satisfactionRate > 60)
+                <span
+                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">Excelente</span>
+            @elseif($satisfactionRate > 40)
+                <span
+                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">Bueno</span>
+            @endif
+        </div>
+        <div class="mt-4">
+            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Satisfacción</h3>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($satisfactionRate, 1) }}%</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Clientes que regresan</p>
+        </div>
+    </div>
+</div>
+
+{{-- Segunda fila de métricas --}}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+    {{-- Horario Pico --}}
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+        <div class="flex justify-between items-start">
+            <div class="p-2 bg-orange-50 dark:bg-orange-900/20 rounded-lg text-orange-600 dark:text-orange-400">
+                <i data-lucide="clock-3" class="w-8 h-8"></i>
+            </div>
+            @if ($peakHourOrders > 10)
+                <span
+                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300">{{ $peakHourOrders }}
+                    órdenes</span>
+            @endif
+        </div>
+        <div class="mt-4">
+            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Horario Pico</h3>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $peakHourTime }}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Hora con más órdenes</p>
+        </div>
+    </div>
+
+    {{-- Órdenes Perfectas --}}
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+        <div class="flex justify-between items-start">
+            <div class="p-2 bg-teal-50 dark:bg-teal-900/20 rounded-lg text-teal-600 dark:text-teal-400">
+                <i data-lucide="zap" class="w-8 h-8"></i>
+            </div>
+            @if ($perfectOrderRate > 70)
+                <span
+                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">{{ number_format($perfectOrderRate, 0) }}%</span>
+            @elseif($perfectOrderRate < 40)
+                <span
+                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">{{ number_format($perfectOrderRate, 0) }}%</span>
+            @else
+                <span
+                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300">{{ number_format($perfectOrderRate, 0) }}%</span>
+            @endif
+        </div>
+        <div class="mt-4">
+            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Órdenes Perfectas</h3>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $perfectOrders }}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Entregadas en &lt;30 min</p>
+        </div>
+    </div>
+
+    {{-- Ganancia Estimada --}}
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+        <div class="flex justify-between items-start">
+            <div class="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-blue-600 dark:text-blue-400">
+                <i data-lucide="wallet" class="w-8 h-8"></i>
+            </div>
+            <span
+                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">60%
+                margen</span>
+        </div>
+        <div class="mt-4">
+            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Ganancia Estimada</h3>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ formatMoney($estimatedProfit) }}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">De ventas hoy</p>
+        </div>
+    </div>
+
+    {{-- Predicción Mañana --}}
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+        <div class="flex justify-between items-start">
+            <div class="p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-purple-600 dark:text-purple-400">
+                <i data-lucide="calendar-clock" class="w-8 h-8"></i>
+            </div>
+            <span
+                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300">Predicción</span>
+        </div>
+        <div class="mt-4">
+            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Ventas Mañana</h3>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ formatMoney($predictedTomorrowSales) }}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Basado en semana pasada</p>
+        </div>
+    </div>
+</div>
+
+<!-- Estado de Órdenes -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
     @php
         $statsMap = $orderStatusStats->pluck('count', 'status')->toArray();
         $pending = $statsMap['pending'] ?? 0;
-        $inKitchen = ($statsMap['confirmed'] ?? 0) + ($statsMap['preparing'] ?? 0);
+        // Usar $kitchenOrders directamente para consistencia con /kitchen
         $ready = $statsMap['ready'] ?? 0;
         $cancelled = $statsMap['cancelled'] ?? 0;
     @endphp
 
-    <div
-        class="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-xl border border-yellow-100 dark:border-yellow-900/30 flex items-center justify-between">
-        <div>
-            <p class="text-xs font-medium text-yellow-800 dark:text-yellow-200 uppercase">Pendientes</p>
-            <p class="text-2xl font-bold text-yellow-900 dark:text-yellow-100">{{ $pending }}</p>
+    {{-- Órdenes Pendientes --}}
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+        <div class="flex justify-between items-start">
+            <div class="p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg text-yellow-600 dark:text-yellow-400">
+                <i data-lucide="clipboard-list" class="w-8 h-8"></i>
+            </div>
+            @if ($pending > 0)
+                <span
+                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">Atención</span>
+            @else
+                <span
+                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">OK</span>
+            @endif
         </div>
-        <i data-lucide="clipboard-list" class="w-8 h-8 text-yellow-500 opacity-50"></i>
+        <div class="mt-4">
+            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Órdenes Pendientes</h3>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $pending }}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Por confirmar</p>
+        </div>
     </div>
 
-    <div
-        class="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-xl border border-orange-100 dark:border-orange-900/30 flex items-center justify-between">
-        <div>
-            <p class="text-xs font-medium text-orange-800 dark:text-orange-200 uppercase">En Cocina</p>
-            <p class="text-2xl font-bold text-orange-900 dark:text-orange-100">{{ $inKitchen }}</p>
+    {{-- Órdenes en Cocina --}}
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+        <div class="flex justify-between items-start">
+            <div class="p-2 bg-orange-50 dark:bg-orange-900/20 rounded-lg text-orange-600 dark:text-orange-400">
+                <i data-lucide="chef-hat" class="w-8 h-8"></i>
+            </div>
+            @if ($kitchenOrders > 5)
+                <span
+                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300">Alta
+                    carga</span>
+            @elseif($kitchenOrders > 0)
+                <span
+                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">En
+                    proceso</span>
+            @else
+                <span
+                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">Libre</span>
+            @endif
         </div>
-        <i data-lucide="chef-hat" class="w-8 h-8 text-orange-500 opacity-50"></i>
+        <div class="mt-4">
+            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">En Cocina</h3>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $kitchenOrders }}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Preparándose</p>
+        </div>
     </div>
 
-    <div
-        class="bg-green-50 dark:bg-green-900/20 p-4 rounded-xl border border-green-100 dark:border-green-900/30 flex items-center justify-between">
-        <div>
-            <p class="text-xs font-medium text-green-800 dark:text-green-200 uppercase">Listos</p>
-            <p class="text-2xl font-bold text-green-900 dark:text-green-100">{{ $ready }}</p>
+    {{-- Órdenes Listas --}}
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+        <div class="flex justify-between items-start">
+            <div class="p-2 bg-green-50 dark:bg-green-900/20 rounded-lg text-green-600 dark:text-green-400">
+                <i data-lucide="check-circle" class="w-8 h-8"></i>
+            </div>
+            @if ($ready > 3)
+                <span
+                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">Entregar</span>
+            @elseif($ready > 0)
+                <span
+                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">Listas</span>
+            @else
+                <span
+                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300">Ninguna</span>
+            @endif
         </div>
-        <i data-lucide="check-circle" class="w-8 h-8 text-green-500 opacity-50"></i>
+        <div class="mt-4">
+            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Órdenes Listas</h3>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $ready }}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Para entregar</p>
+        </div>
     </div>
 
-    <div
-        class="bg-red-50 dark:bg-red-900/20 p-4 rounded-xl border border-red-100 dark:border-red-900/30 flex items-center justify-between">
-        <div>
-            <p class="text-xs font-medium text-red-800 dark:text-red-200 uppercase">Cancelados</p>
-            <p class="text-2xl font-bold text-red-900 dark:text-red-100">{{ $cancelled }}</p>
+    {{-- Órdenes Canceladas --}}
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+        <div class="flex justify-between items-start">
+            <div class="p-2 bg-red-50 dark:bg-red-900/20 rounded-lg text-red-600 dark:text-red-400">
+                <i data-lucide="x-circle" class="w-8 h-8"></i>
+            </div>
+            @if ($cancelled > 2)
+                <span
+                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300">Alto</span>
+            @elseif($cancelled > 0)
+                <span
+                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">Algunas</span>
+            @else
+                <span
+                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">Ninguna</span>
+            @endif
         </div>
-        <i data-lucide="x-circle" class="w-8 h-8 text-red-500 opacity-50"></i>
+        <div class="mt-4">
+            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Órdenes Canceladas</h3>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $cancelled }}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Hoy</p>
+        </div>
     </div>
 </div>
 
@@ -134,10 +452,36 @@
     <div
         class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700 lg:col-span-2">
         <div class="flex justify-between items-center mb-6">
-            <h3 class="font-bold text-gray-800 dark:text-gray-100">Ventas Semanales</h3>
-            <span class="text-sm text-gray-500 dark:text-gray-400">Últimos 7 días</span>
+            <div>
+                <h3 class="font-bold text-gray-800 dark:text-gray-100" id="salesChartTitle">Ventas Semanales</h3>
+                <span class="text-sm text-gray-500 dark:text-gray-400" id="salesChartSubtitle">Últimos 7 días</span>
+            </div>
+            <!-- Time Filter Buttons -->
+            <div class="flex gap-2">
+                <button data-filter="hour"
+                    class="sales-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600">
+                    Hora
+                </button>
+                <button data-filter="today"
+                    class="sales-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600">
+                    Hoy
+                </button>
+                <button data-filter="week"
+                    class="sales-filter-btn active px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 bg-indigo-600 text-white hover:bg-indigo-700">
+                    Semana
+                </button>
+                <button data-filter="month"
+                    class="sales-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600">
+                    Mes
+                </button>
+            </div>
         </div>
-        <div class="h-64 w-full">
+        <div class="h-64 w-full relative">
+            <!-- Loading Spinner -->
+            <div id="chartLoadingSpinner"
+                class="absolute inset-0 items-center justify-center bg-white/80 dark:bg-gray-800/80 hidden">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+            </div>
             <canvas id="weeklySalesChart"></canvas>
         </div>
     </div>
@@ -403,6 +747,92 @@
     </div>
 </div>
 
+{{-- Productividad de Personal y Restock --}}
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    {{-- Productividad de Meseros --}}
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+        <h3 class="font-bold text-gray-800 dark:text-gray-100 mb-6 flex items-center gap-2">
+            <i data-lucide="users-2" class="w-5 h-5 text-blue-600"></i>
+            Productividad de Meseros (Hoy)
+        </h3>
+        <div class="space-y-3">
+            @forelse($waiterProductivity as $waiter)
+                <div
+                    class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/30 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors">
+                    <div class="flex-1">
+                        <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ $waiter->name }}</p>
+                        <div class="flex gap-4 mt-1">
+                            <span class="text-xs text-gray-500 dark:text-gray-400">
+                                <i data-lucide="shopping-cart" class="w-3 h-3 inline"></i>
+                                {{ $waiter->total_orders }} órdenes
+                            </span>
+                            <span class="text-xs text-gray-500 dark:text-gray-400">
+                                <i data-lucide="check-circle" class="w-3 h-3 inline"></i>
+                                {{ $waiter->completed_orders }} completadas
+                            </span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-lg font-bold text-gray-900 dark:text-white">
+                            {{ formatMoney($waiter->total_sales) }}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Ticket:
+                            {{ formatMoney($waiter->avg_ticket) }}</p>
+                    </div>
+                </div>
+            @empty
+                <p class="text-center text-gray-500 py-4">Sin datos de meseros hoy</p>
+            @endforelse
+        </div>
+    </div>
+
+    {{-- Productos que Necesitan Restock --}}
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
+        <h3 class="font-bold text-gray-800 dark:text-gray-100 mb-6 flex items-center gap-2">
+            <i data-lucide="package-x" class="w-5 h-5 text-red-600"></i>
+            Productos que Necesitan Restock
+        </h3>
+        <div class="space-y-2">
+            @forelse($productsNeedingRestock as $item)
+                <div
+                    class="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-100 dark:border-red-900/30">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                            <i data-lucide="alert-triangle" class="w-4 h-4 text-red-600 dark:text-red-400"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-900 dark:text-white">
+                                {{ Str::limit($item->name, 25) }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Mín: {{ $item->stock_min }}
+                                {{ $item->unit }}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p
+                            class="text-lg font-bold {{ $item->stock_current < $item->stock_min ? 'text-red-600 dark:text-red-400' : 'text-yellow-600 dark:text-yellow-400' }}">
+                            {{ $item->stock_current }}
+                        </p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ $item->unit }}</p>
+                    </div>
+                </div>
+            @empty
+                <div class="text-center py-6">
+                    <i data-lucide="check-circle" class="w-12 h-12 text-green-500 mx-auto mb-2"></i>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Todo el inventario está bien abastecido</p>
+                </div>
+            @endforelse
+        </div>
+        @if ($productsNeedingRestock->count() > 0)
+            <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <a href="{{ route('inventory.index') }}"
+                    class="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1">
+                    Ver inventario completo
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </a>
+            </div>
+        @endif
+    </div>
+</div>
+
 @push('scripts')
     <script>
         window.dashboardData = {
@@ -412,10 +842,12 @@
         };
 
         document.addEventListener('DOMContentLoaded', function() {
-            // 1. Weekly Sales Chart
+            // 1. Weekly Sales Chart - Store reference for dynamic updates
             const weeklyCtx = document.getElementById('weeklySalesChart')?.getContext('2d');
+            let weeklySalesChartInstance = null;
+
             if (weeklyCtx) {
-                new Chart(weeklyCtx, {
+                weeklySalesChartInstance = new Chart(weeklyCtx, {
                     type: 'line',
                     data: {
                         labels: window.dashboardData.weeklySales.map(d => {
@@ -427,7 +859,7 @@
                         datasets: [{
                             label: 'Ventas',
                             data: window.dashboardData.weeklySales.map(d => d.revenue),
-                            borderColor: '#6366f1', // Indigo 500
+                            borderColor: '#6366f1',
                             backgroundColor: (ctx) => {
                                 const grad = ctx.chart.ctx.createLinearGradient(0, 0, 0, 300);
                                 grad.addColorStop(0, 'rgba(99, 102, 241, 0.2)');
@@ -453,7 +885,7 @@
                             y: {
                                 beginAtZero: true,
                                 grid: {
-                                    color: 'rgba(107, 114, 128, 0.1)' // Gray-500 with opacity
+                                    color: 'rgba(107, 114, 128, 0.1)'
                                 },
                                 ticks: {
                                     color: '#9ca3af'
@@ -469,6 +901,73 @@
                             }
                         }
                     }
+                });
+
+                // Sales Chart Filter Functionality
+                const filterButtons = document.querySelectorAll('.sales-filter-btn');
+                const chartTitle = document.getElementById('salesChartTitle');
+                const chartSubtitle = document.getElementById('salesChartSubtitle');
+                const loadingSpinner = document.getElementById('chartLoadingSpinner');
+
+                filterButtons.forEach(btn => {
+                    btn.addEventListener('click', async function() {
+                        if (this.disabled) return;
+
+                        // Update active state
+                        filterButtons.forEach(b => {
+                            b.classList.remove('active', 'bg-indigo-600', 'text-white',
+                                'hover:bg-indigo-700');
+                            b.classList.add('bg-gray-100', 'dark:bg-gray-700',
+                                'text-gray-700', 'dark:text-gray-300');
+                        });
+                        this.classList.add('active', 'bg-indigo-600', 'text-white',
+                            'hover:bg-indigo-700');
+                        this.classList.remove('bg-gray-100', 'dark:bg-gray-700',
+                            'text-gray-700', 'dark:text-gray-300');
+
+                        const filter = this.dataset.filter;
+                        loadingSpinner.classList.remove('hidden');
+                        loadingSpinner.classList.add('flex');
+                        filterButtons.forEach(b => b.disabled = true);
+
+                        try {
+                            const response = await fetch(
+                                `/dashboard/filter-sales?timeFilter=${filter}`);
+                            const data = await response.json();
+
+                            weeklySalesChartInstance.data.labels = data.labels;
+                            weeklySalesChartInstance.data.datasets[0].data = data.data;
+                            weeklySalesChartInstance.update('active');
+
+                            const titles = {
+                                'hour': {
+                                    title: 'Ventas por Hora',
+                                    subtitle: 'Última hora'
+                                },
+                                'today': {
+                                    title: 'Ventas de Hoy',
+                                    subtitle: 'Últimas 24 horas'
+                                },
+                                'week': {
+                                    title: 'Ventas Semanales',
+                                    subtitle: 'Últimos 7 días'
+                                },
+                                'month': {
+                                    title: 'Ventas Mensuales',
+                                    subtitle: 'Últimos 30 días'
+                                }
+                            };
+                            chartTitle.textContent = titles[filter].title;
+                            chartSubtitle.textContent = titles[filter].subtitle;
+
+                        } catch (error) {
+                            console.error('Error fetching sales data:', error);
+                        } finally {
+                            loadingSpinner.classList.add('hidden');
+                            loadingSpinner.classList.remove('flex');
+                            filterButtons.forEach(b => b.disabled = false);
+                        }
+                    });
                 });
             }
 

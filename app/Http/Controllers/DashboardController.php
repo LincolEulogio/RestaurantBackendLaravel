@@ -344,7 +344,295 @@ class DashboardController extends Controller
              $aiInsights[] = ['type' => 'info', 'icon' => 'archive', 'text' => "Tienes " . $deadDishes->count() . " platos sin ventas en 30 días (ej. {$deadDishes->first()->name}). Considera rotarlos."];
         }
 
+        // ========== NUEVAS MÉTRICAS AVANZADAS ==========
+
+        // 1. EFICIENCIA OPERATIVA
+        
+        // Tasa de rotación de mesas (cuántas veces se usa cada mesa por día)
+        $dineInDeliveredToday = Order::where('order_type', 'dine_in')
+            ->whereDate('created_at', Carbon::today())
+            ->where('status', 'delivered')
+            ->count();
+        $tableRotation = $totalTables > 0 ? round($dineInDeliveredToday / $totalTables, 2) : 0;
+
+        // Tiempo promedio de atención completa (desde creación hasta entrega)
+        $completedOrdersToday = Order::whereDate('created_at', Carbon::today())
+            ->where('status', 'delivered')
+            ->whereNotNull('delivered_at')
+            ->get();
+
+        $avgServiceTime = $completedOrdersToday->count() > 0
+            ? round($completedOrdersToday->average(function ($order) {
+                return $order->delivered_at->diffInMinutes($order->created_at);
+            }), 1)
+            : 0;
+
+        // Tasa de cancelación
+        $totalOrdersToday = Order::whereDate('created_at', Carbon::today())->count();
+        $cancelledToday = Order::whereDate('created_at', Carbon::today())
+            ->where('status', 'cancelled')
+            ->count();
+        $cancellationRate = $totalOrdersToday > 0 
+            ? round(($cancelledToday / $totalOrdersToday) * 100, 1) 
+            : 0;
+
+        // Eficiencia de cocina (órdenes completadas por hora)
+        $currentHour = Carbon::now()->hour;
+        $openingHour = 6; // Asumiendo apertura a las 6am
+        $hoursOpen = max($currentHour - $openingHour, 1);
+        $kitchenEfficiency = round($completedOrdersToday->count() / $hoursOpen, 1);
+
+        // 2. ANÁLISIS DE CLIENTES
+
+        // Clientes nuevos hoy (primera orden)
+        $ordersToday = Order::whereDate('created_at', Carbon::today())
+            ->whereNotNull('customer_email')
+            ->get();
+
+        $newCustomersToday = $ordersToday->filter(function ($order) {
+            return Order::where('customer_email', $order->customer_email)
+                ->where('created_at', '<', Carbon::today())
+                ->doesntExist();
+        })->unique('customer_email')->count();
+
+        // Clientes recurrentes (con más de 1 orden histórica)
+        $returningCustomers = DB::table('orders')
+            ->select('customer_email', DB::raw('COUNT(*) as order_count'))
+            ->whereNotNull('customer_email')
+            ->groupBy('customer_email')
+            ->having('order_count', '>', 1)
+            ->count();
+
+        // Distribución de órdenes por hora (para identificar horarios pico)
+        $hourRawForOrders = DB::getDriverName() === 'sqlite' 
+            ? 'strftime("%H", created_at)' 
+            : 'HOUR(created_at)';
+
+        $ordersByHour = Order::whereDate('created_at', Carbon::today())
+            ->select(
+                DB::raw("$hourRawForOrders as hour"),
+                DB::raw('COUNT(*) as count')
+            )
+            ->groupBy('hour')
+            ->orderBy('hour')
+            ->get();
+
+        // Horario pico del día
+        $peakHour = $ordersByHour->sortByDesc('count')->first();
+        $peakHourTime = $peakHour ? $peakHour->hour . ':00' : 'N/A';
+        $peakHourOrders = $peakHour ? $peakHour->count : 0;
+
+        // 3. MÉTRICAS FINANCIERAS AVANZADAS
+
+        // Proyección de ventas del mes (basada en promedio diario)
+        $daysInMonth = Carbon::now()->daysInMonth;
+        $daysPassed = Carbon::now()->day;
+        $avgDailySales = $daysPassed > 0 
+            ? Order::where('status', 'delivered')
+                ->whereMonth('delivered_at', Carbon::now()->month)
+                ->whereYear('delivered_at', Carbon::now()->year)
+                ->sum('total') / $daysPassed
+            : 0;
+        $projectedMonthlySales = round($avgDailySales * $daysInMonth, 2);
+
+        // Margen de ganancia estimado (asumiendo 60% de margen)
+        $estimatedProfit = round($todaySales * 0.6, 2);
+        $estimatedCost = round($todaySales * 0.4, 2);
+
+        // 4. ANÁLISIS DE PERSONAL MEJORADO
+
+        // Productividad de meseros (órdenes y ventas por mesero)
+        $waiterProductivity = DB::table('orders')
+            ->join('users', 'orders.waiter_id', '=', 'users.id')
+            ->whereDate('orders.created_at', Carbon::today())
+            ->select(
+                'users.name',
+                DB::raw('COUNT(orders.id) as total_orders'),
+                DB::raw('SUM(orders.total) as total_sales'),
+                DB::raw('AVG(orders.total) as avg_ticket'),
+                DB::raw('COUNT(CASE WHEN orders.status = "delivered" THEN 1 END) as completed_orders')
+            )
+            ->groupBy('users.id', 'users.name')
+            ->orderByDesc('total_sales')
+            ->limit(5)
+            ->get();
+
+        // Tiempo promedio de servicio por mesero
+        $waiterServiceTimeRaw = DB::getDriverName() === 'sqlite'
+            ? '(strftime("%s", orders.delivered_at) - strftime("%s", orders.created_at)) / 60'
+            : 'TIMESTAMPDIFF(MINUTE, orders.created_at, orders.delivered_at)';
+
+        $waiterServiceTime = DB::table('orders')
+            ->join('users', 'orders.waiter_id', '=', 'users.id')
+            ->whereDate('orders.created_at', Carbon::today())
+            ->where('orders.status', 'delivered')
+            ->whereNotNull('orders.delivered_at')
+            ->select(
+                'users.name',
+                DB::raw("AVG($waiterServiceTimeRaw) as avg_time")
+            )
+            ->groupBy('users.id', 'users.name')
+            ->orderBy('avg_time')
+            ->limit(5)
+            ->get();
+
+        // 5. PREDICCIONES Y TENDENCIAS
+
+        // Predicción simple de ventas para mañana (basada en mismo día de semana pasada)
+        $tomorrowDayOfWeek = Carbon::tomorrow()->dayOfWeek;
+        $lastWeekSameDay = Carbon::now()->subWeek()->startOfWeek()->addDays($tomorrowDayOfWeek);
+        
+        $lastWeekSameDaySales = Order::where('status', 'delivered')
+            ->whereDate('delivered_at', $lastWeekSameDay)
+            ->sum('total');
+        
+        $predictedTomorrowSales = round($lastWeekSameDaySales, 2);
+
+        // Productos que necesitarán restock pronto
+        $productsNeedingRestock = InventoryItem::where(function($query) {
+                $query->where('stock_current', '<', DB::raw('stock_min'))
+                      ->orWhereRaw('stock_current < (stock_min * 1.5)');
+            })
+            ->where('is_active', true)
+            ->orderBy('stock_current')
+            ->limit(10)
+            ->get();
+
+        // 6. MÉTRICAS DE CALIDAD
+
+        // Tiempo promedio de preparación por categoría
+        $prepTimeRaw = DB::getDriverName() === 'sqlite'
+            ? '(strftime("%s", ready_at) - strftime("%s", confirmed_at)) / 60'
+            : 'TIMESTAMPDIFF(MINUTE, confirmed_at, ready_at)';
+
+        $prepTimeByCategory = DB::table('order_items')
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->join('products', 'order_items.product_id', '=', 'products.id')
+            ->join('categories', 'products.category_id', '=', 'categories.id')
+            ->whereDate('orders.created_at', Carbon::today())
+            ->where('orders.status', 'delivered')
+            ->whereNotNull('orders.confirmed_at')
+            ->whereNotNull('orders.ready_at')
+            ->select(
+                'categories.name',
+                DB::raw("AVG($prepTimeRaw) as avg_prep_time")
+            )
+            ->groupBy('categories.id', 'categories.name')
+            ->orderBy('avg_prep_time')
+            ->get();
+
+        // Tasa de satisfacción estimada (clientes que reordenan)
+        $uniqueCustomers = Order::whereNotNull('customer_email')
+            ->distinct('customer_email')
+            ->count('customer_email');
+        
+        $returningCustomersCount = DB::table('orders')
+            ->whereNotNull('customer_email')
+            ->select('customer_email')
+            ->groupBy('customer_email')
+            ->havingRaw('COUNT(*) > 1')
+            ->get()
+            ->count();
+
+        $satisfactionRate = $uniqueCustomers > 0 
+            ? round(($returningCustomersCount / $uniqueCustomers) * 100, 1) 
+            : 0;
+
+        // Órdenes perfectas (entregadas en menos de 30 minutos)
+        $perfectOrdersRaw = DB::getDriverName() === 'sqlite'
+            ? '(strftime("%s", orders.delivered_at) - strftime("%s", orders.created_at)) / 60 <= 30'
+            : 'TIMESTAMPDIFF(MINUTE, orders.created_at, orders.delivered_at) <= 30';
+
+        $perfectOrders = Order::where('status', 'delivered')
+            ->whereDate('created_at', Carbon::today())
+            ->whereNotNull('delivered_at')
+            ->whereRaw($perfectOrdersRaw)
+            ->count();
+
+        $perfectOrderRate = $completedOrdersToday->count() > 0
+            ? round(($perfectOrders / $completedOrdersToday->count()) * 100, 1)
+            : 0;
+
+        // 7. INSIGHTS DE IA MEJORADOS
+
+        // Insight de horario pico
+        if ($peakHourOrders > 10) {
+            $aiInsights[] = [
+                'type' => 'info',
+                'icon' => 'clock',
+                'text' => "Horario pico hoy: {$peakHourTime} hrs con {$peakHourOrders} órdenes. Asegura personal suficiente."
+            ];
+        }
+
+        // Insight de rotación de mesas
+        if ($tableRotation < 2 && $totalTables > 0) {
+            $aiInsights[] = [
+                'type' => 'warning',
+                'icon' => 'table',
+                'text' => "Rotación de mesas baja ({$tableRotation} veces/día). Optimiza tiempos de servicio."
+            ];
+        } elseif ($tableRotation > 4) {
+            $aiInsights[] = [
+                'type' => 'good',
+                'icon' => 'trending-up',
+                'text' => "Excelente rotación de mesas ({$tableRotation} veces/día). ¡Gran eficiencia!"
+            ];
+        }
+
+        // Insight de clientes nuevos
+        if ($newCustomersToday > 5) {
+            $aiInsights[] = [
+                'type' => 'good',
+                'icon' => 'users',
+                'text' => "{$newCustomersToday} clientes nuevos hoy. ¡Excelente adquisición!"
+            ];
+        }
+
+        // Insight de proyección
+        if ($projectedMonthlySales > $lastMonthSales && $lastMonthSales > 0) {
+            $projectionDiff = $projectedMonthlySales - $lastMonthSales;
+            $aiInsights[] = [
+                'type' => 'good',
+                'icon' => 'trending-up',
+                'text' => "Proyección: S/. " . number_format($projectedMonthlySales, 2) . " este mes (+" . number_format($projectionDiff, 2) . " vs mes pasado)"
+            ];
+        }
+
+        // Insight de eficiencia
+        if ($perfectOrderRate > 70) {
+            $aiInsights[] = [
+                'type' => 'good',
+                'icon' => 'check-circle',
+                'text' => "{$perfectOrderRate}% de órdenes entregadas en <30 min. ¡Excelente servicio!"
+            ];
+        } elseif ($perfectOrderRate < 40 && $completedOrdersToday->count() > 5) {
+            $aiInsights[] = [
+                'type' => 'warning',
+                'icon' => 'alert-triangle',
+                'text' => "Solo {$perfectOrderRate}% de órdenes en <30 min. Revisa procesos de cocina."
+            ];
+        }
+
+        // Insight de cancelaciones
+        if ($cancellationRate > 10 && $totalOrdersToday > 5) {
+            $aiInsights[] = [
+                'type' => 'bad',
+                'icon' => 'x-circle',
+                'text' => "Tasa de cancelación alta ({$cancellationRate}%). Investiga causas."
+            ];
+        }
+
+        // Insight de satisfacción
+        if ($satisfactionRate > 50) {
+            $aiInsights[] = [
+                'type' => 'good',
+                'icon' => 'heart',
+                'text' => "{$satisfactionRate}% de clientes regresan. ¡Gran fidelización!"
+            ];
+        }
+
         return view('dashboard', compact(
+            // Métricas básicas
             'todaySales',
             'todayOrders',
             'salesChange',
@@ -359,6 +647,7 @@ class DashboardController extends Controller
             'maxQuantity',
             'recentOrders',
             'thisMonthSales',
+            'lastMonthSales',
             'monthlyChange',
             'averageOrderValue',
             'totalCustomers',
@@ -379,7 +668,39 @@ class DashboardController extends Controller
             'deadDishes',
             'delayedOrdersCount',
             'mostUsedTableName',
-            'avgTicketByChannel'
+            'avgTicketByChannel',
+            
+            // Nuevas métricas de eficiencia operativa
+            'tableRotation',
+            'avgServiceTime',
+            'cancellationRate',
+            'kitchenEfficiency',
+            
+            // Nuevas métricas de análisis de clientes
+            'newCustomersToday',
+            'returningCustomers',
+            'ordersByHour',
+            'peakHourTime',
+            'peakHourOrders',
+            
+            // Nuevas métricas financieras avanzadas
+            'projectedMonthlySales',
+            'estimatedProfit',
+            'estimatedCost',
+            
+            // Nuevas métricas de personal
+            'waiterProductivity',
+            'waiterServiceTime',
+            
+            // Nuevas predicciones y tendencias
+            'predictedTomorrowSales',
+            'productsNeedingRestock',
+            
+            // Nuevas métricas de calidad
+            'prepTimeByCategory',
+            'satisfactionRate',
+            'perfectOrders',
+            'perfectOrderRate'
         ))->with('userRole', 'admin');
     }
 
@@ -566,5 +887,143 @@ class DashboardController extends Controller
             'recentOrders',
             'hourlyData'
         ))->with('userRole', 'cashier');
+    }
+
+    /**
+     * Filter sales chart data via AJAX
+     */
+    public function filterSalesChart(Request $request)
+    {
+        $timeFilter = $request->input('timeFilter', 'week');
+        
+        $labels = [];
+        $data = [];
+        
+        switch ($timeFilter) {
+            case 'hour':
+                // Last 60 minutes, grouped by 5-minute intervals
+                $startTime = Carbon::now()->subHour();
+                $endTime = Carbon::now();
+                
+                $minuteRaw = DB::getDriverName() === 'sqlite'
+                    ? '(CAST(strftime("%M", delivered_at) AS INTEGER) / 5) * 5'
+                    : '(MINUTE(delivered_at) DIV 5) * 5';
+                
+                $hourRaw = DB::getDriverName() === 'sqlite'
+                    ? 'strftime("%H", delivered_at)'
+                    : 'HOUR(delivered_at)';
+                
+                $sales = Order::where('status', 'delivered')
+                    ->whereBetween('delivered_at', [$startTime, $endTime])
+                    ->select(
+                        DB::raw("$hourRaw as hour"),
+                        DB::raw("$minuteRaw as minute"),
+                        DB::raw('SUM(total) as revenue')
+                    )
+                    ->groupBy('hour', 'minute')
+                    ->orderBy('hour')
+                    ->orderBy('minute')
+                    ->get();
+                
+                // Fill all 5-minute intervals
+                for ($i = 0; $i < 12; $i++) {
+                    $time = Carbon::now()->subMinutes(60 - ($i * 5));
+                    $hour = $time->format('H');
+                    $minute = (int)($time->format('i') / 5) * 5;
+                    
+                    $existing = $sales->first(function($item) use ($hour, $minute) {
+                        return $item->hour == $hour && $item->minute == $minute;
+                    });
+                    
+                    $labels[] = $time->format('H:i');
+                    $data[] = $existing ? (float)$existing->revenue : 0;
+                }
+                break;
+                
+            case 'today':
+                // Last 24 hours, grouped by hour
+                $startTime = Carbon::now()->subDay();
+                $endTime = Carbon::now();
+                
+                $hourRaw = DB::getDriverName() === 'sqlite'
+                    ? 'strftime("%H", delivered_at)'
+                    : 'HOUR(delivered_at)';
+                
+                $sales = Order::where('status', 'delivered')
+                    ->whereBetween('delivered_at', [$startTime, $endTime])
+                    ->select(
+                        DB::raw("$hourRaw as hour"),
+                        DB::raw('SUM(total) as revenue')
+                    )
+                    ->groupBy('hour')
+                    ->orderBy('hour')
+                    ->get();
+                
+                // Fill all 24 hours
+                for ($i = 23; $i >= 0; $i--) {
+                    $hour = Carbon::now()->subHours($i)->format('H');
+                    $existing = $sales->firstWhere('hour', $hour);
+                    
+                    $labels[] = $hour . ':00';
+                    $data[] = $existing ? (float)$existing->revenue : 0;
+                }
+                break;
+                
+            case 'week':
+                // Last 7 days, grouped by day
+                $dateRaw = DB::getDriverName() === 'sqlite' ? 'date(delivered_at)' : 'DATE(delivered_at)';
+                
+                $sales = Order::where('status', 'delivered')
+                    ->where('delivered_at', '>=', Carbon::now()->subDays(7))
+                    ->select(
+                        DB::raw("$dateRaw as date"),
+                        DB::raw('SUM(total) as revenue')
+                    )
+                    ->groupBy('date')
+                    ->orderBy('date')
+                    ->get();
+                
+                // Fill all 7 days
+                for ($i = 6; $i >= 0; $i--) {
+                    $date = Carbon::now()->subDays($i);
+                    $dateStr = $date->format('Y-m-d');
+                    $existing = $sales->firstWhere('date', $dateStr);
+                    
+                    $labels[] = $date->locale('es')->isoFormat('ddd');
+                    $data[] = $existing ? (float)$existing->revenue : 0;
+                }
+                break;
+                
+            case 'month':
+                // Last 30 days, grouped by day
+                $dateRaw = DB::getDriverName() === 'sqlite' ? 'date(delivered_at)' : 'DATE(delivered_at)';
+                
+                $sales = Order::where('status', 'delivered')
+                    ->where('delivered_at', '>=', Carbon::now()->subDays(30))
+                    ->select(
+                        DB::raw("$dateRaw as date"),
+                        DB::raw('SUM(total) as revenue')
+                    )
+                    ->groupBy('date')
+                    ->orderBy('date')
+                    ->get();
+                
+                // Fill all 30 days
+                for ($i = 29; $i >= 0; $i--) {
+                    $date = Carbon::now()->subDays($i);
+                    $dateStr = $date->format('Y-m-d');
+                    $existing = $sales->firstWhere('date', $dateStr);
+                    
+                    $labels[] = $date->format('d M');
+                    $data[] = $existing ? (float)$existing->revenue : 0;
+                }
+                break;
+        }
+        
+        return response()->json([
+            'labels' => $labels,
+            'data' => $data,
+            'filter' => $timeFilter
+        ]);
     }
 }
