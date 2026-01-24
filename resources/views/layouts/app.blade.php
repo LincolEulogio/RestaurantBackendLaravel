@@ -56,7 +56,8 @@
                     </div>
                 @endisset
 
-                {{ $slot }}
+                @yield('content')
+                {{ $slot ?? '' }}
             </main>
         </div>
     </div>

@@ -31,6 +31,53 @@ class ProductController extends Controller
 
     /**
      * API endpoint for frontend - returns only available products
+     * 
+     * @OA\Get(
+     *     path="/api/products",
+     *     tags={"Products"},
+     *     summary="Get all available products",
+     *     description="Returns list of all available products with category information",
+     *     @OA\Parameter(
+     *         name="category_id",
+     *         in="query",
+     *         description="Filter by category ID",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="available",
+     *         in="query",
+     *         description="Filter by availability (1=available, 0=unavailable)",
+     *         required=false,
+     *         @OA\Schema(type="integer", enum={0, 1})
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="name", type="string", example="Pizza Margherita"),
+     *                     @OA\Property(property="description", type="string", example="Deliciosa pizza con tomate y queso"),
+     *                     @OA\Property(property="price", type="string", example="25.00"),
+     *                     @OA\Property(property="image", type="string", example="https://res.cloudinary.com/..."),
+     *                     @OA\Property(property="available", type="boolean", example=true),
+     *                     @OA\Property(
+     *                         property="category",
+     *                         type="object",
+     *                         @OA\Property(property="id", type="integer", example=1),
+     *                         @OA\Property(property="name", type="string", example="Pizzas")
+     *                     )
+     *                 )
+     *             )
+     *         )
+     *     )
+     * )
      */
     public function apiIndex()
     {

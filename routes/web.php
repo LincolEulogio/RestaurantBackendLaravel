@@ -3,6 +3,7 @@
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GlobalSearchController;
 use App\Http\Controllers\InventoryController;
@@ -47,6 +48,9 @@ Route::middleware('auth')->group(function () {
     Route::resource('tables', TableController::class);
     Route::resource('blogs', BlogController::class);
     Route::patch('reservations/{reservation}/status', [ReservationController::class, 'updateStatus'])->name('reservations.update-status');
+
+    // CUSTOMERS
+    Route::resource('customers', CustomerController::class);
 
     // ORDERS - Requires 'orders' permission
     Route::middleware('permission:orders')->group(function () {

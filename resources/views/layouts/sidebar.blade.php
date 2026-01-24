@@ -141,6 +141,12 @@
                 </a>
             @endpermission
 
+            <a href="{{ route('customers.index') }}"
+                class="flex items-center px-4 py-3 {{ request()->routeIs('customers.*') ? 'text-white bg-blue-600' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white' }} rounded-lg group">
+                <i data-lucide="user-round-check" class="w-5 h-5 mr-3"></i>
+                Clientes
+            </a>
+
             {{-- SECCIÓN: ADMINISTRACIÓN --}}
             @permission('settings')
                 <div class="pt-4 pb-2">
@@ -291,6 +297,12 @@
                     Reportes
                 </a>
             @endpermission
+
+            <a href="{{ route('customers.index') }}"
+                class="flex items-center px-4 py-3 {{ request()->routeIs('customers.*') ? 'text-white bg-blue-600' : 'text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:text-white dark:hover:text-white' }} rounded-lg group">
+                <i data-lucide="user-round-check" class="w-5 h-5 mr-3"></i>
+                Clientes
+            </a>
 
             {{-- SECCIÓN: ADMINISTRACIÓN --}}
             @permission('settings')

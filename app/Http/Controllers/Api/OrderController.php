@@ -19,6 +19,34 @@ class OrderController extends Controller
     public function __construct(protected PrintService $printService) {}
     /**
      * Display a listing of orders.
+     * 
+     * @OA\Get(
+     *     path="/api/orders",
+     *     tags={"Orders"},
+     *     summary="Get all orders",
+     *     description="Returns paginated list of orders (requires authentication)",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="status",
+     *         in="query",
+     *         description="Filter by status",
+     *         required=false,
+     *         @OA\Schema(type="string", enum={"pending","confirmed","preparing","ready","delivered","cancelled"})
+     *     ),
+     *     @OA\Parameter(
+     *         name="search",
+     *         in="query",
+     *         description="Search by order number, customer name or phone",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(type="object")
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
      */
     public function index(Request $request)
     {
@@ -49,6 +77,46 @@ class OrderController extends Controller
 
     /**
      * Store a newly created order.
+     * 
+     * @OA\Post(
+     *     path="/api/orders",
+     *     tags={"Orders"},
+     *     summary="Create a new order",
+     *     description="Creates a new order with items (no authentication required for public orders)",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"customer_name","customer_phone","order_type","items"},
+     *             @OA\Property(property="customer_name", type="string", example="Juan"),
+     *             @OA\Property(property="customer_lastname", type="string", example="Pérez"),
+     *             @OA\Property(property="customer_email", type="string", example="juan@example.com"),
+     *             @OA\Property(property="customer_phone", type="string", example="987654321"),
+     *             @OA\Property(property="delivery_address", type="string", example="Av. Principal 123"),
+     *             @OA\Property(property="order_type", type="string", enum={"delivery","pickup","dine-in","online"}),
+     *             @OA\Property(property="payment_method", type="string", enum={"card","yape","plin","cash"}),
+     *             @OA\Property(property="notes", type="string", example="Sin cebolla"),
+     *             @OA\Property(
+     *                 property="items",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     @OA\Property(property="product_id", type="integer", example=1),
+     *                     @OA\Property(property="quantity", type="integer", example=2),
+     *                     @OA\Property(property="special_instructions", type="string", example="Extra queso")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Order created successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Pedido creado correctamente"),
+     *             @OA\Property(property="order", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(response=422, description="Validation error"),
+     *     @OA\Response(response=500, description="Server error")
+     * )
      */
     public function store(Request $request)
     {
