@@ -37,6 +37,7 @@
                             <th class="px-4 py-4 font-semibold">Reportes</th>
                             <th class="px-4 py-4 font-semibold">Reservas</th>
                             <th class="px-4 py-4 font-semibold">Facturación</th>
+                            <th class="px-4 py-4 font-semibold">Clientes</th>
                             <th class="px-4 py-4 font-semibold">Configuración</th>
                             <th class="px-6 py-4 font-semibold text-right">Acciones</th>
                         </tr>
@@ -228,6 +229,20 @@
                                         <span class="sr-only">Toggle</span>
                                         <span aria-hidden="true"
                                             :class="(permissions.billing ?? false) ? 'translate-x-5' : 'translate-x-0'"
+                                            class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out">
+                                        </span>
+                                    </div>
+                                </td>
+                                <!-- Customers -->
+                                <td class="px-4 py-4 text-center">
+                                    <div @click="togglePermission('customers')"
+                                        :class="(permissions.customers ?? false) ? 'bg-green-500' :
+                                        'bg-gray-200 dark:bg-gray-600'"
+                                        class="relative inline-flex items-center h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                                        role="switch" :aria-checked="permissions.customers ?? false">
+                                        <span class="sr-only">Toggle</span>
+                                        <span aria-hidden="true"
+                                            :class="(permissions.customers ?? false) ? 'translate-x-5' : 'translate-x-0'"
                                             class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out">
                                         </span>
                                     </div>
@@ -435,6 +450,20 @@
                         </p>
                     </div>
                 </div>
+                <!-- Clientes -->
+                <div class="flex items-start gap-4">
+                    <div class="p-2 bg-cyan-100 rounded-lg text-cyan-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
+                            </path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-gray-900 dark:text-white">Clientes</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Gestión de clientes y su historial</p>
+                    </div>
+                </div>
                 <!-- Configuración -->
                 <div class="flex items-start gap-4">
                     <div class="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-300">
@@ -535,6 +564,11 @@
                                                 class="rounded border-gray-300 dark:border-gray-500 dark:bg-gray-700 text-green-600 shadow-sm focus:ring-green-500">
                                             <span
                                                 class="ml-2 text-sm text-gray-600 dark:text-gray-300">Facturación</span></label>
+                                        <label class="inline-flex items-center"><input type="checkbox"
+                                                name="permissions[customers]" value="1"
+                                                class="rounded border-gray-300 dark:border-gray-500 dark:bg-gray-700 text-green-600 shadow-sm focus:ring-green-500">
+                                            <span
+                                                class="ml-2 text-sm text-gray-600 dark:text-gray-300">Clientes</span></label>
                                         <label class="inline-flex items-center"><input type="checkbox"
                                                 name="permissions[settings]" value="1"
                                                 class="rounded border-gray-300 dark:border-gray-500 dark:bg-gray-700 text-green-600 shadow-sm focus:ring-green-500">

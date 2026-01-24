@@ -49,8 +49,10 @@ Route::middleware('auth')->group(function () {
     Route::resource('blogs', BlogController::class);
     Route::patch('reservations/{reservation}/status', [ReservationController::class, 'updateStatus'])->name('reservations.update-status');
 
-    // CUSTOMERS
-    Route::resource('customers', CustomerController::class);
+    // CUSTOMERS - Requires 'customers' permission
+    Route::middleware('permission:customers')->group(function () {
+        Route::resource('customers', CustomerController::class);
+    });
 
     // ORDERS - Requires 'orders' permission
     Route::middleware('permission:orders')->group(function () {
