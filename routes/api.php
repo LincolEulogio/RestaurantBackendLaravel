@@ -26,6 +26,9 @@ Route::post('/login', [\App\Http\Controllers\Api\AuthController::class, 'login']
 // Public order creation (no auth required for customers)
 Route::post('/orders', [OrderController::class, 'store']);
 
+// Public order tracking (no auth required)
+Route::get('/orders/track/{orderCode}', [\App\Http\Controllers\OrderTrackingController::class, 'track']);
+
 // Public reservation routes
 Route::get('/reservations/availability', [\App\Http\Controllers\Api\ReservationController::class, 'checkAvailability']);
 Route::get('/reservations/available-tables', [\App\Http\Controllers\Api\ReservationController::class, 'getAvailableTables']);
