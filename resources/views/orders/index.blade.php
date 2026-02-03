@@ -245,9 +245,11 @@
                                             'preparing'
                                                 => 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
                                             'ready'
-                                                => 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+                                                => 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400',
+                                            'in_transit'
+                                                => 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400',
                                             'delivered'
-                                                => 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
+                                                => 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
                                             default => 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
                                         };
                                     @endphp

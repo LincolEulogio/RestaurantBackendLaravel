@@ -40,7 +40,7 @@
     <!-- Ready Orders -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700">
         <div class="flex justify-between items-start">
-            <div class="p-2 bg-purple-50 rounded-lg text-purple-600">
+            <div class="p-2 bg-cyan-50 rounded-lg text-cyan-600">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -80,7 +80,8 @@
     <div class="overflow-x-auto">
         <table class="w-full text-left">
             <thead>
-                <tr class="bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-300 text-xs uppercase tracking-wider">
+                <tr
+                    class="bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-300 text-xs uppercase tracking-wider">
                     <th class="px-6 py-3 font-semibold">Pedido</th>
                     <th class="px-6 py-3 font-semibold">Tipo</th>
                     <th class="px-6 py-3 font-semibold">Cliente</th>
@@ -105,7 +106,7 @@
                                     'pending' => 'bg-yellow-100 text-yellow-800',
                                     'confirmed' => 'bg-blue-100 text-blue-800',
                                     'preparing' => 'bg-orange-100 text-orange-800',
-                                    'ready' => 'bg-purple-100 text-purple-800',
+                                    'ready' => 'bg-cyan-100 text-cyan-800',
                                 ];
                                 $statusLabels = [
                                     'pending' => 'Pendiente',
@@ -134,4 +135,3 @@
         </table>
     </div>
 </div>
-

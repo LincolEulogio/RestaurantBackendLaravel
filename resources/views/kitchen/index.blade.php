@@ -53,6 +53,12 @@
                         <option value="preparing" {{ request('status') === 'preparing' ? 'selected' : '' }}>Preparando
                         </option>
                         <option value="ready" {{ request('status') === 'ready' ? 'selected' : '' }}>Listo</option>
+                        <option value="in_transit" {{ request('status') === 'in_transit' ? 'selected' : '' }}>En Camino
+                        </option>
+                        <option value="delivered" {{ request('status') === 'delivered' ? 'selected' : '' }}>Entregado
+                        </option>
+                        <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>Cancelado
+                        </option>
                     </select>
                 </div>
 
@@ -71,7 +77,8 @@
                         class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                         onchange="this.form.submit()">
                         <option value="all"
-                            {{ request('source') === 'all' || !request('source') ? 'selected' : '' }}>Todos los orígenes
+                            {{ request('source') === 'all' || !request('source') ? 'selected' : '' }}>Todos los
+                            orígenes
                         </option>
                         <option value="waiter" {{ request('source') === 'waiter' ? 'selected' : '' }}>Mesero
                         </option>

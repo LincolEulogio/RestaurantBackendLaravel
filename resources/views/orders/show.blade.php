@@ -19,8 +19,9 @@
                     'pending' => 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
                     'confirmed' => 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
                     'preparing' => 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
-                    'ready' => 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-                    'delivered' => 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
+                    'ready' => 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400',
+                    'in_transit' => 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400',
+                    'delivered' => 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
                     default => 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
                 };
             @endphp
@@ -57,8 +58,10 @@
                             </div>
                         @else
                             <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
-                                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Nombre</p>
-                                <p class="font-semibold text-gray-900 dark:text-white">{{ $order->customer_name }}</p>
+                                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Nombres y Apellidos
+                                </p>
+                                <p class="font-semibold text-gray-900 dark:text-white">{{ $order->customer_name }}
+                                    {{ $order->customer_lastname }}</p>
                             </div>
                             <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3">
                                 <p class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Teléfono</p>
@@ -184,6 +187,8 @@
                                         Preparando</option>
                                     <option value="ready" {{ $order->status == 'ready' ? 'selected' : '' }}>Listo
                                     </option>
+                                    <option value="in_transit" {{ $order->status == 'in_transit' ? 'selected' : '' }}>
+                                        En Camino</option>
                                     <option value="delivered" {{ $order->status == 'delivered' ? 'selected' : '' }}>
                                         Entregado</option>
                                     <option value="cancelled" {{ $order->status == 'cancelled' ? 'selected' : '' }}>
@@ -270,6 +275,13 @@
                                 <span class="text-gray-500 dark:text-gray-400">Listo:</span>
                                 <span
                                     class="font-medium text-gray-900 dark:text-white">{{ formatDateTimeFull($order->ready_at) }}</span>
+                            </div>
+                        @endif
+                        @if ($order->in_transit_at)
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-500 dark:text-gray-400">En Camino:</span>
+                                <span
+                                    class="font-medium text-gray-900 dark:text-white">{{ formatDateTimeFull($order->in_transit_at) }}</span>
                             </div>
                         @endif
                         @if ($order->delivered_at)

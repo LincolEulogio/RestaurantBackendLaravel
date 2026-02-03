@@ -1,28 +1,59 @@
 @forelse($orders as $order)
     <!-- Order Card -->
+    <!-- Order Card -->
+    @php
+        $statusClasses = match ($order->status) {
+            'pending' => [
+                'border' => 'border-yellow-500',
+                'header_bg' => 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-100',
+                'text' => 'text-yellow-700 dark:text-yellow-100',
+            ],
+            'confirmed' => [
+                'border' => 'border-blue-500',
+                'header_bg' => 'bg-blue-50 dark:bg-blue-900/20 border-blue-100',
+                'text' => 'text-blue-700 dark:text-blue-100',
+            ],
+            'preparing' => [
+                'border' => 'border-orange-500',
+                'header_bg' => 'bg-orange-50 dark:bg-orange-900/20 border-orange-100',
+                'text' => 'text-orange-700 dark:text-orange-100',
+            ],
+            'ready' => [
+                'border' => 'border-cyan-500',
+                'header_bg' => 'bg-cyan-50 dark:bg-cyan-900/20 border-cyan-100',
+                'text' => 'text-cyan-700 dark:text-cyan-100',
+            ],
+            'in_transit' => [
+                'border' => 'border-pink-500',
+                'header_bg' => 'bg-pink-50 dark:bg-pink-900/20 border-pink-100',
+                'text' => 'text-pink-700 dark:text-pink-100',
+            ],
+            'delivered' => [
+                'border' => 'border-green-500',
+                'header_bg' => 'bg-green-50 dark:bg-green-900/20 border-green-100',
+                'text' => 'text-green-700 dark:text-green-100',
+            ],
+            'cancelled' => [
+                'border' => 'border-red-500',
+                'header_bg' => 'bg-red-50 dark:bg-red-900/20 border-red-100',
+                'text' => 'text-red-700 dark:text-red-100',
+            ],
+            default => [
+                'border' => 'border-gray-500',
+                'header_bg' => 'bg-gray-50 dark:bg-gray-900/20 border-gray-100',
+                'text' => 'text-gray-700 dark:text-gray-100',
+            ],
+        };
+    @endphp
+
     <div
-        class="bg-white dark:bg-gray-800 rounded-2xl border-l-4 
-        @if ($order->status == 'pending') border-orange-500
-        @elseif($order->status == 'confirmed') border-blue-500
-        @elseif($order->status == 'preparing') border-blue-600
-        @elseif($order->status == 'ready') border-green-500 @endif
-        shadow-sm overflow-hidden flex flex-col">
+        class="bg-white dark:bg-gray-800 rounded-2xl border-l-4 {{ $statusClasses['border'] }} shadow-sm overflow-hidden flex flex-col">
 
         <!-- Order Header -->
         <div
-            class="p-4 border-b dark:border-gray-700
-            @if ($order->status == 'pending') bg-orange-50 dark:bg-orange-900/20 border-orange-100
-            @elseif($order->status == 'confirmed') bg-blue-50 dark:bg-blue-900/20 border-blue-100
-            @elseif($order->status == 'preparing') bg-blue-50 dark:bg-blue-900/20 border-blue-100
-            @elseif($order->status == 'ready') bg-green-50 dark:bg-green-900/20 border-green-100 @endif
-            flex justify-between items-center">
+            class="p-4 border-b dark:border-gray-700 {{ $statusClasses['header_bg'] }} flex justify-between items-center">
             <div>
-                <span
-                    class="text-xs font-bold uppercase dark:text-gray-100
-                    @if ($order->status == 'pending') text-orange-700 dark:text-orange-100
-                    @elseif($order->status == 'confirmed') text-blue-700 dark:text-blue-100
-                    @elseif($order->status == 'preparing') text-blue-700 dark:text-blue-100
-                    @elseif($order->status == 'ready') text-green-700 dark:text-green-100 @endif">
+                <span class="text-xs font-bold uppercase {{ $statusClasses['text'] }}">
                     @if ($order->table)
                         Mesa {{ $order->table->table_number }}
                         <span class="block text-[10px] opacity-75">
@@ -109,13 +140,13 @@
                     @method('PATCH')
                     <input type="hidden" name="status" value="ready">
                     <button type="submit"
-                        class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-xl transition-all dark:bg-green-500 dark:hover:bg-green-600">
+                        class="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 rounded-xl transition-all dark:bg-cyan-500 dark:hover:bg-cyan-600">
                         Marcar Listo
                     </button>
                 </form>
             @elseif($order->status == 'ready')
                 <div class="text-center">
-                    <span class="inline-flex items-center gap-2 text-green-600 font-bold text-sm dark:text-green-400">
+                    <span class="inline-flex items-center gap-2 text-cyan-600 font-bold text-sm dark:text-cyan-400">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>

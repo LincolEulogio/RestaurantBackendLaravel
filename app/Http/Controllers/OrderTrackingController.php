@@ -18,7 +18,7 @@ class OrderTrackingController extends Controller
     {
         // Find order by number
         $order = Order::where('order_number', $orderCode)
-            ->with(['items.product'])
+            ->with(['items.product', 'statusHistory'])
             ->first();
 
         if (!$order) {
@@ -40,17 +40,19 @@ class OrderTrackingController extends Controller
                 'code' => $order->order_number,
                 'status' => $order->status,
                 'customer_name' => $order->customer_name,
+                'customer_last_name' => $order->customer_lastname,
                 'total' => (float) $order->total,
                 'created_at' => $order->created_at->format('Y-m-d H:i:s'),
                 'estimated_delivery' => $estimatedDelivery,
                 'delivery_address' => $order->delivery_address,
                 'order_type' => $order->order_type,
+                'notes' => $order->notes,
                 'timeline' => $timeline,
                 'items' => $order->items->map(function ($item) {
                     return [
                         'name' => $item->product->name ?? $item->product_name,
                         'quantity' => $item->quantity,
-                        'price' => (float) $item->price,
+                        'price' => (float) $item->unit_price,
                     ];
                 }),
             ]
@@ -65,19 +67,73 @@ class OrderTrackingController extends Controller
      */
     private function buildTimeline(Order $order): array
     {
-        $statuses = [
-            'pending' => 'Pedido Recibido',
+        // All possible statuses
+        $allStatuses = [
+            'pending' => 'Pendiente',
             'confirmed' => 'Confirmado',
             'preparing' => 'En Preparación',
             'ready' => 'Listo',
             'in_transit' => 'En Camino',
             'delivered' => 'Entregado',
+            'cancelled' => 'Cancelado',
         ];
 
         $timeline = [];
-        $currentStatusReached = false;
 
-        foreach ($statuses as $status => $label) {
+        // Get status history notes
+        $statusNotes = [];
+        foreach ($order->statusHistory as $history) {
+            if ($history->notes) {
+                $statusNotes[$history->to_status] = $history->notes;
+            }
+        }
+
+        // If order is cancelled, show only the path to cancellation
+        if ($order->status === 'cancelled') {
+            // Show all statuses up to where it was cancelled
+            foreach ($allStatuses as $status => $label) {
+                if ($status === 'cancelled') {
+                    $timeline[] = [
+                        'status' => $status,
+                        'label' => $label,
+                        'timestamp' => $order->updated_at->format('Y-m-d H:i:s'),
+                        'completed' => true,
+                        'current' => true,
+                        'notes' => $statusNotes[$status] ?? null,
+                    ];
+                    break;
+                }
+
+                // Check if this status was reached before cancellation
+                $wasReached = $this->wasStatusReached($order, $status);
+                
+                $timeline[] = [
+                    'status' => $status,
+                    'label' => $label,
+                    'timestamp' => $wasReached ? $this->getStatusTimestamp($order, $status) : null,
+                    'completed' => $wasReached,
+                    'current' => false,
+                    'notes' => $statusNotes[$status] ?? null,
+                ];
+            }
+
+            return $timeline;
+        }
+
+        // Normal flow (not cancelled)
+        $currentStatusReached = false;
+        $statusOrder = ['pending', 'confirmed', 'preparing'];
+
+        // Add ready or in_transit based on order type
+        if ($order->order_type === 'delivery') {
+            $statusOrder[] = 'in_transit';
+        } else {
+            $statusOrder[] = 'ready';
+        }
+
+        $statusOrder[] = 'delivered';
+
+        foreach ($statusOrder as $status) {
             $isCompleted = !$currentStatusReached;
             $isCurrent = $order->status === $status;
 
@@ -85,27 +141,59 @@ class OrderTrackingController extends Controller
                 $currentStatusReached = true;
             }
 
-            // Skip "in_transit" for non-delivery orders
-            if ($status === 'in_transit' && $order->order_type !== 'delivery') {
-                continue;
-            }
-
-            // Skip "ready" for delivery orders (goes straight to in_transit)
-            if ($status === 'ready' && $order->order_type === 'delivery') {
-                continue;
+            // Get timestamp from status-specific field
+            $timestamp = null;
+            if ($isCompleted || $isCurrent) {
+                $timestamp = $this->getStatusTimestamp($order, $status);
             }
 
             $timeline[] = [
                 'status' => $status,
-                'label' => $label,
-                'timestamp' => $isCompleted || $isCurrent ? $order->updated_at->format('Y-m-d H:i:s') : null,
+                'label' => $allStatuses[$status],
+                'timestamp' => $timestamp,
                 'completed' => $isCompleted,
                 'current' => $isCurrent,
+                'notes' => $statusNotes[$status] ?? null,
             ];
         }
 
         return $timeline;
     }
+
+    /**
+     * Check if a status was reached before cancellation
+     */
+    private function wasStatusReached(Order $order, string $status): bool
+    {
+        $statusOrder = ['pending', 'confirmed', 'preparing', 'ready', 'in_transit', 'delivered'];
+        $currentIndex = array_search($order->status, $statusOrder);
+        $checkIndex = array_search($status, $statusOrder);
+
+        if ($currentIndex === false || $checkIndex === false) {
+            return false;
+        }
+
+        return $checkIndex <= $currentIndex;
+    }
+
+    /**
+     * Get timestamp for a specific status
+     */
+    private function getStatusTimestamp(Order $order, string $status): ?string
+    {
+        $timestamp = match($status) {
+            'pending' => $order->created_at,
+            'confirmed' => $order->confirmed_at,
+            'ready' => $order->ready_at,
+            'in_transit' => $order->in_transit_at,
+            'delivered' => $order->delivered_at,
+            'cancelled' => $order->updated_at,
+            default => null,
+        };
+
+        return $timestamp ? $timestamp->format('Y-m-d H:i:s') : null;
+    }
+
 
     /**
      * Calculate estimated delivery time

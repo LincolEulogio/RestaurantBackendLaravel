@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\Order;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -49,6 +50,6 @@ class AppServiceProvider extends ServiceProvider
         });
 
         // Register Observers
-        \App\Models\Order::observe(\App\Observers\OrderObserver::class);
+        // Order::observe(\App\Observers\OrderObserver::class);
     }
 }

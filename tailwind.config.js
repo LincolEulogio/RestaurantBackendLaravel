@@ -31,6 +31,11 @@ export default {
             green: colors.green,
             blue: colors.blue,
             orange: colors.orange,
+            cyan: colors.cyan,
+            pink: colors.pink,
+            purple: colors.purple,
+            teal: colors.teal,
+            indigo: colors.indigo,
             // Add custom colors
             border: "hsl(var(--border))",
             input: "hsl(var(--input))",

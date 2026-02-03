@@ -4,149 +4,86 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Order extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     protected $fillable = [
         'order_number',
         'order_date',
+        'order_type',
+        'order_source',
         'customer_name',
         'customer_lastname',
-        'customer_dni',
         'customer_email',
         'customer_phone',
+        'customer_dni',
         'delivery_address',
-        'order_type',
-        'payment_method',
-        'status',
+        'delivery_district',
+        'delivery_reference',
+        'table_number',
         'subtotal',
         'tax',
         'delivery_fee',
+        'discount',
         'total',
+        'status',
+        'payment_method',
+        'payment_status',
         'notes',
         'confirmed_at',
         'ready_at',
+        'in_transit_at',
         'delivered_at',
-        'table_id',
-        'waiter_id',
-        'order_source', // online, waiter, qr_self_service
-        'session_token',
-        'payment_status',
-        'payment_method',
-        'paid_at',
     ];
 
     protected $casts = [
-        'subtotal' => 'decimal:2',
-        'tax' => 'decimal:2',
-        'delivery_fee' => 'decimal:2',
-        'total' => 'decimal:2',
         'order_date' => 'datetime',
         'confirmed_at' => 'datetime',
         'ready_at' => 'datetime',
+        'in_transit_at' => 'datetime',
         'delivered_at' => 'datetime',
-        'paid_at' => 'datetime',
+        'subtotal' => 'decimal:2',
+        'tax' => 'decimal:2',
+        'delivery_fee' => 'decimal:2',
+        'discount' => 'decimal:2',
+        'total' => 'decimal:2',
     ];
 
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($order) {
-            if (empty($order->order_number)) {
-                $order->order_number = self::generateOrderNumber();
-            }
-
-            if (empty($order->order_date)) {
-                $order->order_date = now();
-            }
-        });
-    }
-
-    // Relationships
+    /**
+     * Get the items for the order.
+     */
     public function items()
     {
         return $this->hasMany(OrderItem::class);
     }
 
-    public function table()
-    {
-        return $this->belongsTo(Table::class);
-    }
-
-    public function waiter()
-    {
-        return $this->belongsTo(User::class, 'waiter_id');
-    }
-
-    public function scopePresencial($query)
-    {
-        return $query->whereIn('order_source', ['waiter', 'qr_self_service']);
-    }
-
+    /**
+     * Get the status history for the order.
+     */
     public function statusHistory()
     {
         return $this->hasMany(OrderStatusHistory::class)->orderBy('created_at', 'desc');
     }
 
-    public function deliveryPayment()
+    /**
+     * Get the table for the order.
+     */
+    public function table()
     {
-        return $this->hasOne(DeliveryPayment::class);
+        return $this->belongsTo(Table::class);
     }
 
-    // Scopes
-    public function scopePending($query)
-    {
-        return $query->where('status', 'pending');
-    }
 
-    public function scopeConfirmed($query)
-    {
-        return $query->where('status', 'confirmed');
-    }
-
-    public function scopePreparing($query)
-    {
-        return $query->where('status', 'preparing');
-    }
-
-    public function scopeReady($query)
-    {
-        return $query->where('status', 'ready');
-    }
-
-    public function scopeDelivered($query)
-    {
-        return $query->where('status', 'delivered');
-    }
-
-    public function scopeCancelled($query)
-    {
-        return $query->where('status', 'cancelled');
-    }
-
-    public function scopePaid($query)
-    {
-        return $query->where('payment_status', 'paid');
-    }
-
-    // Methods
-    public static function generateOrderNumber()
-    {
-        $prefix = 'ORD';
-        $date = now()->format('Ymd');
-        $random = strtoupper(substr(md5(uniqid(rand(), true)), 0, 4));
-
-        return "{$prefix}-{$date}-{$random}";
-    }
-
-    public function updateStatus($newStatus, $userId = null, $notes = null)
+    /**
+     * Update the order status and log the change.
+     */
+    public function updateStatus(string $newStatus, ?int $userId = null, ?string $notes = null): void
     {
         $oldStatus = $this->status;
 
+        // Update the status
         $this->status = $newStatus;
 
         // Update timestamps based on status
@@ -154,70 +91,136 @@ class Order extends Model
             $this->confirmed_at = now();
         } elseif ($newStatus === 'ready' && ! $this->ready_at) {
             $this->ready_at = now();
+        } elseif ($newStatus === 'in_transit' && ! $this->in_transit_at) {
+            $this->in_transit_at = now();
         } elseif ($newStatus === 'delivered' && ! $this->delivered_at) {
             $this->delivered_at = now();
         }
 
         $this->save();
 
-        // Record status change in history
+        // Log the status change
         $this->statusHistory()->create([
-            'user_id' => $userId,
             'from_status' => $oldStatus,
             'to_status' => $newStatus,
+            'user_id' => $userId,
             'notes' => $notes,
         ]);
-
-        // Emit WebSocket Event
-        event(new \App\Events\OrderStatusChanged($this));
-
-        return $this;
     }
 
-    public function calculateTotal()
+    /**
+     * Generate a unique order number.
+     */
+    public static function generateOrderNumber(): string
     {
-        $this->subtotal = $this->items->sum('subtotal');
-        $this->total = $this->subtotal + $this->tax + $this->delivery_fee;
-        $this->save();
+        $date = now()->format('Ymd');
+        $random = strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 4));
 
-        return $this;
+        return "ORD-{$date}-{$random}";
     }
 
-    public function markAsPaid()
+    /**
+     * Scope a query to only include orders of a given status.
+     */
+    public function scopeStatus($query, $status)
     {
-        $this->payment_status = 'paid';
-        $this->paid_at = now();
-        $this->save();
-
-        return $this;
+        return $query->where('status', $status);
     }
 
-    // Accessors
-    public function getStatusBadgeAttribute()
+    /**
+     * Scope a query to only include orders of a given type.
+     */
+    public function scopeType($query, $type)
     {
-        $badges = [
-            'pending' => 'warning',
-            'confirmed' => 'info',
-            'preparing' => 'primary',
-            'ready' => 'success',
-            'delivered' => 'secondary',
-            'cancelled' => 'danger',
-        ];
-
-        return $badges[$this->status] ?? 'secondary';
+        return $query->where('order_type', $type);
     }
 
-    public function getStatusLabelAttribute()
+    /**
+     * Scope a query to only include orders from a given source.
+     */
+    public function scopeSource($query, $source)
     {
-        $labels = [
+        return $query->where('order_source', $source);
+    }
+
+    /**
+     * Get the order's full customer name.
+     */
+    public function getFullCustomerNameAttribute(): string
+    {
+        return trim($this->customer_name . ' ' . $this->customer_lastname);
+    }
+
+    /**
+     * Check if the order is pending.
+     */
+    public function isPending(): bool
+    {
+        return $this->status === 'pending';
+    }
+
+    /**
+     * Check if the order is confirmed.
+     */
+    public function isConfirmed(): bool
+    {
+        return $this->status === 'confirmed';
+    }
+
+    /**
+     * Check if the order is preparing.
+     */
+    public function isPreparing(): bool
+    {
+        return $this->status === 'preparing';
+    }
+
+    /**
+     * Check if the order is ready.
+     */
+    public function isReady(): bool
+    {
+        return $this->status === 'ready';
+    }
+
+    /**
+     * Check if the order is in transit.
+     */
+    public function isInTransit(): bool
+    {
+        return $this->status === 'in_transit';
+    }
+
+    /**
+     * Check if the order is delivered.
+     */
+    public function isDelivered(): bool
+    {
+        return $this->status === 'delivered';
+    }
+
+    /**
+     * Check if the order is cancelled.
+     */
+    public function isCancelled(): bool
+    {
+        return $this->status === 'cancelled';
+    }
+
+    /**
+     * Get the status label attribute.
+     */
+    public function getStatusLabelAttribute(): string
+    {
+        return match ($this->status) {
             'pending' => 'Pendiente',
             'confirmed' => 'Confirmado',
-            'preparing' => 'Preparando',
+            'preparing' => 'En Preparación',
             'ready' => 'Listo',
+            'in_transit' => 'En Camino',
             'delivered' => 'Entregado',
             'cancelled' => 'Cancelado',
-        ];
-
-        return $labels[$this->status] ?? $this->status;
+            default => 'Desconocido',
+        };
     }
 }
