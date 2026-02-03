@@ -10,10 +10,15 @@ class BillingController extends Controller
     /**
      * Display billing page with ready orders.
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Get ALL ready orders (Paid and Unpaid)
-        // Sort by Payment Status (Pending first) -> Then by Time
+        // Get filter parameters
+        $dateFilter = $request->input('date_filter', 'today');
+        $dateFrom = $request->input('date_from');
+        $dateTo = $request->input('date_to');
+        $orderTypeFilter = $request->input('order_type_filter', 'all');
+
+        // Base query
         $query = Order::with(['items.product', 'waiter', 'table'])
             ->where('status', 'ready');
 
@@ -28,6 +33,55 @@ class BillingController extends Controller
             $query->whereIn('order_source', ['web', 'online']);
         }
 
+        // Apply Date Filters
+        switch ($dateFilter) {
+            case 'today':
+                $query->whereDate('created_at', today());
+                break;
+            case 'yesterday':
+                $query->whereDate('created_at', today()->subDay());
+                break;
+            case 'this_week':
+                $query->whereBetween('created_at', [
+                    now()->startOfWeek(),
+                    now()->endOfWeek()
+                ]);
+                break;
+            case 'this_month':
+                $query->whereMonth('created_at', now()->month)
+                    ->whereYear('created_at', now()->year);
+                break;
+            case 'custom':
+                if ($dateFrom && $dateTo) {
+                    $query->whereBetween('created_at', [
+                        \Carbon\Carbon::parse($dateFrom)->startOfDay(),
+                        \Carbon\Carbon::parse($dateTo)->endOfDay()
+                    ]);
+                } elseif ($dateFrom) {
+                    $query->whereDate('created_at', '>=', $dateFrom);
+                } elseif ($dateTo) {
+                    $query->whereDate('created_at', '<=', $dateTo);
+                }
+                break;
+        }
+
+        // Apply Order Type Filters
+        switch ($orderTypeFilter) {
+            case 'delivery':
+                $query->where('order_type', 'delivery');
+                break;
+            case 'waiter':
+                $query->where(function ($q) {
+                    $q->where('order_source', 'waiter')
+                        ->orWhere('order_type', 'dine_in');
+                });
+                break;
+            case 'all':
+            default:
+                // No additional filter
+                break;
+        }
+
         // Sort by Payment Status (Pending first) -> Then by Time
         $readyOrders = $query->orderByRaw("CASE payment_status 
             WHEN 'pending' THEN 1 
@@ -38,14 +92,23 @@ class BillingController extends Controller
             ->orderBy('created_at', 'asc')
             ->get();
 
-        // Calculate statistics
+        // Calculate statistics based on filtered results
         $totalRevenue = Order::where('status', 'delivered')->sum('total');
         $todayRevenue = Order::where('status', 'delivered')
             ->whereDate('delivered_at', today())
             ->sum('total');
-        $pendingPayments = $readyOrders->sum('total');
+        $pendingPayments = $readyOrders->where('payment_status', 'pending')->sum('total');
 
-        return view('billing.index', compact('readyOrders', 'totalRevenue', 'todayRevenue', 'pendingPayments'));
+        return view('billing.index', compact(
+            'readyOrders',
+            'totalRevenue',
+            'todayRevenue',
+            'pendingPayments',
+            'dateFilter',
+            'dateFrom',
+            'dateTo',
+            'orderTypeFilter'
+        ));
     }
 
     /**

@@ -17,6 +17,120 @@
             </div>
         </div>
 
+        {{-- Professional Filter Section --}}
+        <div x-data="filterManager()"
+            class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-6">
+            <form id="filterForm" method="GET" action="{{ route('billing.index') }}" class="space-y-4">
+                <div class="grid grid-cols-1 lg:grid-cols-5 gap-4">
+                    {{-- Date Filter Preset --}}
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                            Período Rápido
+                        </label>
+                        <select name="date_filter" x-model="dateFilter" @change="autoSubmit()"
+                            class="w-full px-4 py-2.5 rounded-xl border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white font-semibold focus:ring-2 focus:ring-slate-800 focus:border-transparent">
+                            <option value="today">Hoy</option>
+                            <option value="yesterday">Ayer</option>
+                            <option value="this_week">Esta Semana</option>
+                            <option value="this_month">Este Mes</option>
+                            <option value="custom">Personalizado</option>
+                        </select>
+                    </div>
+
+                    {{-- Custom Date From (Always Visible) --}}
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                            Desde
+                        </label>
+                        <input type="date" name="date_from" value="{{ $dateFrom ?? '' }}" x-model="dateFrom"
+                            @change="handleDateChange()"
+                            class="w-full px-4 py-2.5 rounded-xl border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white font-semibold focus:ring-2 focus:ring-slate-800 focus:border-transparent">
+                    </div>
+
+                    {{-- Custom Date To (Always Visible) --}}
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                            Hasta
+                        </label>
+                        <input type="date" name="date_to" value="{{ $dateTo ?? '' }}" x-model="dateTo"
+                            @change="handleDateChange()"
+                            class="w-full px-4 py-2.5 rounded-xl border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white font-semibold focus:ring-2 focus:ring-slate-800 focus:border-transparent">
+                    </div>
+
+                    {{-- Order Type Filter --}}
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                            Tipo de Pedido
+                        </label>
+                        <select name="order_type_filter" x-model="orderTypeFilter" @change="autoSubmit()"
+                            class="w-full px-4 py-2.5 rounded-xl border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white font-semibold focus:ring-2 focus:ring-slate-800 focus:border-transparent">
+                            <option value="all">Todos</option>
+                            <option value="delivery">Delivery</option>
+                            <option value="waiter">Mesero</option>
+                        </select>
+                    </div>
+
+                    {{-- Clear Button Only --}}
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                            Limpiar Filtros
+                        </label>
+                        <a href="{{ route('billing.index') }}"
+                            class="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 px-6 py-2 rounded-xl font-bold transition-all flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                                </path>
+                            </svg>
+                            Limpiar Filtros
+                        </a>
+                    </div>
+                </div>
+
+
+
+                {{-- Active Filters Display --}}
+                @if ($dateFilter !== 'today' || $orderTypeFilter !== 'all')
+                    <div class="flex flex-wrap items-center gap-2 pt-4 border-t border-gray-100 dark:border-gray-700">
+                        <span class="text-xs font-bold text-gray-400 uppercase">Filtros activos:</span>
+
+                        @if ($dateFilter !== 'today')
+                            <span
+                                class="inline-flex items-center gap-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-3 py-1 rounded-full text-xs font-bold">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                    </path>
+                                </svg>
+                                @if ($dateFilter === 'yesterday')
+                                    Ayer
+                                @elseif($dateFilter === 'this_week')
+                                    Esta Semana
+                                @elseif($dateFilter === 'this_month')
+                                    Este Mes
+                                @elseif($dateFilter === 'custom')
+                                    {{ $dateFrom ? \Carbon\Carbon::parse($dateFrom)->format('d/m/Y') : '' }}
+                                    -
+                                    {{ $dateTo ? \Carbon\Carbon::parse($dateTo)->format('d/m/Y') : '' }}
+                                @endif
+                            </span>
+                        @endif
+
+                        @if ($orderTypeFilter !== 'all')
+                            <span
+                                class="inline-flex items-center gap-1.5 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-3 py-1 rounded-full text-xs font-bold">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                                </svg>
+                                {{ $orderTypeFilter === 'delivery' ? 'Delivery' : 'Mesero' }}
+                            </span>
+                        @endif
+                    </div>
+                @endif
+            </form>
+        </div>
+
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Order List -->
             <div class="lg:col-span-2 space-y-4">
@@ -66,7 +180,8 @@
                                         @endif
                                     </div>
                                     <p class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                         </svg>
@@ -187,7 +302,8 @@
                         class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-12 text-center">
                         <div
                             class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4">
                                 </path>
@@ -472,6 +588,32 @@
 
     <script>
         document.addEventListener('alpine:init', () => {
+            // Filter Manager Component
+            Alpine.data('filterManager', () => ({
+                dateFilter: '{{ $dateFilter ?? 'today' }}',
+                orderTypeFilter: '{{ $orderTypeFilter ?? 'all' }}',
+                dateFrom: '{{ $dateFrom ?? '' }}',
+                dateTo: '{{ $dateTo ?? '' }}',
+
+                autoSubmit() {
+                    // Auto-submit the form when any filter changes
+                    this.$nextTick(() => {
+                        document.getElementById('filterForm').submit();
+                    });
+                },
+
+                handleDateChange() {
+                    // When custom dates are changed, set filter to 'custom' and submit
+                    this.dateFilter = 'custom';
+                    this.autoSubmit();
+                },
+
+                toggleCustomDates() {
+                    // Legacy method - no longer needed but kept for compatibility
+                }
+            }));
+
+            // Billing Manager Component
             Alpine.data('billingManager', (ordersData = []) => ({
                 orders: ordersData, // Full orders objects
                 selectedOrderId: null,
