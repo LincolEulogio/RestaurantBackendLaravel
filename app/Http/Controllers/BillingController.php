@@ -19,7 +19,7 @@ class BillingController extends Controller
         $orderTypeFilter = $request->input('order_type_filter', 'all');
 
         // Base query
-        $query = Order::with(['items.product', 'waiter', 'table'])
+        $query = Order::with(['items.product', 'table'])
             ->where('status', 'ready');
 
         // Contextual Filter based on Role
