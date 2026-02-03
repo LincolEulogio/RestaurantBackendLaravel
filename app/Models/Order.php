@@ -36,6 +36,7 @@ class Order extends Model
         'session_token',
         'payment_status',
         'payment_method',
+        'paid_at',
     ];
 
     protected $casts = [
@@ -47,6 +48,7 @@ class Order extends Model
         'confirmed_at' => 'datetime',
         'ready_at' => 'datetime',
         'delivered_at' => 'datetime',
+        'paid_at' => 'datetime',
     ];
 
     protected static function boot()
@@ -90,6 +92,11 @@ class Order extends Model
         return $this->hasMany(OrderStatusHistory::class)->orderBy('created_at', 'desc');
     }
 
+    public function deliveryPayment()
+    {
+        return $this->hasOne(DeliveryPayment::class);
+    }
+
     // Scopes
     public function scopePending($query)
     {
@@ -119,6 +126,11 @@ class Order extends Model
     public function scopeCancelled($query)
     {
         return $query->where('status', 'cancelled');
+    }
+
+    public function scopePaid($query)
+    {
+        return $query->where('payment_status', 'paid');
     }
 
     // Methods
@@ -166,6 +178,15 @@ class Order extends Model
     {
         $this->subtotal = $this->items->sum('subtotal');
         $this->total = $this->subtotal + $this->tax + $this->delivery_fee;
+        $this->save();
+
+        return $this;
+    }
+
+    public function markAsPaid()
+    {
+        $this->payment_status = 'paid';
+        $this->paid_at = now();
         $this->save();
 
         return $this;

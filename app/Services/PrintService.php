@@ -38,10 +38,10 @@ class PrintService
             $ticket = "--------------------------------\n";
             $ticket .= "       RESTAURANT APP          \n";
             $ticket .= "--------------------------------\n";
-            $ticket .= "Pedido: " . $order->order_number . "\n";
-            $ticket .= "Fecha: " . $order->created_at . "\n";
-            $ticket .= "Mesa: " . ($order->table ? $order->table->name : 'N/A') . "\n";
-            $ticket .= "Mesero: " . ($order->waiter ? $order->waiter->name : 'N/A') . "\n";
+            $ticket .= "Pedido: " . ($order->order_number ?? 'N/A') . "\n";
+            $ticket .= "Fecha: " . ($order->created_at ? $order->created_at->format('Y-m-d H:i') : 'N/A') . "\n";
+            $ticket .= "Mesa: " . (isset($order->table) && is_object($order->table) && property_exists($order->table, 'name') ? $order->table->name : 'N/A') . "\n";
+            $ticket .= "Mesero: " . (isset($order->waiter) && is_object($order->waiter) && property_exists($order->waiter, 'name') ? $order->waiter->name : 'N/A') . "\n";
             $ticket .= "--------------------------------\n";
             
             foreach ($order->items as $item) {

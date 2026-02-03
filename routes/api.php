@@ -49,6 +49,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/orders', [\App\Http\Controllers\Api\WaiterOrderController::class, 'storeOrder']);
         Route::get('/my-orders', [\App\Http\Controllers\Api\WaiterOrderController::class, 'myOrders']);
     });
+
+    // Delivery Routes
+    Route::prefix('delivery')->group(function () {
+        Route::get('/orders', [\App\Http\Controllers\Api\DeliveryController::class, 'index']);
+        Route::get('/orders/{order}', [\App\Http\Controllers\Api\DeliveryController::class, 'show']);
+        Route::post('/orders/{order}/confirm-payment', [\App\Http\Controllers\Api\DeliveryController::class, 'confirmPayment']);
+    });
 });
 
 // QR Self-Service Routes

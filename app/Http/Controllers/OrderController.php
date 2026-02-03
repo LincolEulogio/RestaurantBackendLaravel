@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class OrderController extends Controller
 {
@@ -14,12 +15,12 @@ class OrderController extends Controller
     {
         // 1. Base Query with Role Restrictions
         $baseQuery = Order::query();
-        $user = auth()->user();
+        $user = Auth::user();
 
-        if ($user->hasRole('cashier')) {
+        if ($user->role === 'cashier') {    
             // Cashier: Sees everything EXCEPT Online orders
             $baseQuery->whereNotIn('order_source', ['web', 'online']);
-        } elseif ($user->hasRole('delivery')) {
+        } elseif ($user->role === 'delivery') {
             // Delivery: Only sees orders from Web/Online
             $baseQuery->whereIn('order_source', ['web', 'online']);
         }
@@ -85,7 +86,8 @@ class OrderController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        $userId = auth()->id();
+        $user = $request->user();
+        $userId = $user ? $user->getAuthIdentifier() : null;
         $order->updateStatus($request->status, $userId, $request->notes);
 
         return redirect()->route('orders.show', $order)

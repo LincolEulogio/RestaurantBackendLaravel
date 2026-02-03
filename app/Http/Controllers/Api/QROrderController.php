@@ -77,9 +77,12 @@ class QROrderController extends Controller
                 'waiter_id' => null, // Self-service
                 'order_source' => 'qr_self_service',
                 'session_token' => $sessionToken,
+                'order_type' => 'dine-in',
                 'status' => 'pending',
+                'payment_status' => 'pending',
                 'subtotal' => 0,
                 'tax' => 0,
+                'delivery_fee' => 0,
                 'total' => 0,
                 'order_date' => now(),
             ]);
