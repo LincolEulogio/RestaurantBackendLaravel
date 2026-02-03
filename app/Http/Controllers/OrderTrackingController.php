@@ -16,8 +16,8 @@ class OrderTrackingController extends Controller
      */
     public function track(string $orderCode): JsonResponse
     {
-        // Find order by code
-        $order = Order::where('order_code', $orderCode)
+        // Find order by number
+        $order = Order::where('order_number', $orderCode)
             ->with(['items.product'])
             ->first();
 
@@ -37,7 +37,7 @@ class OrderTrackingController extends Controller
         return response()->json([
             'success' => true,
             'order' => [
-                'code' => $order->order_code,
+                'code' => $order->order_number,
                 'status' => $order->status,
                 'customer_name' => $order->customer_name,
                 'total' => (float) $order->total,
