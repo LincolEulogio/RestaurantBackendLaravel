@@ -180,8 +180,7 @@
                                         @endif
                                     </div>
                                     <p class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                         </svg>
@@ -223,7 +222,7 @@
                             <div
                                 class="grid grid-cols-2 gap-4 mb-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-100 dark:border-gray-700">
                                 <div>
-                                    <p class="text-[10px] uppercase font-bold text-gray-400 mb-0.5">Ubicación</p>
+                                    <p class="text-[10px] uppercase font-bold text-gray-400 mb-0.5">Tipo de pedido</p>
                                     @if ($order->table_number)
                                         <p
                                             class="font-bold text-gray-800 dark:text-gray-200 text-sm flex items-center gap-1">
@@ -261,12 +260,144 @@
                                     @endif
                                 </div>
                                 <div>
-                                    <p class="text-[10px] uppercase font-bold text-gray-400 mb-0.5">Cliente</p>
+                                    <p class="text-[10px] uppercase font-bold text-gray-400 mb-0.5">Nombres</p>
                                     <p class="font-bold text-gray-800 dark:text-gray-200 text-sm truncate">
                                         {{ $order->customer_name ?: 'Invitado' }}
+                                        {{ $order->customer_lastname ?: '' }}
                                     </p>
                                 </div>
                             </div>
+
+                            {{-- Additional Customer Info (For Web Orders) --}}
+                            @if ($order->order_source === 'web' || $order->order_source === 'online')
+                                <div
+                                    class="mb-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800">
+                                    <div class="grid grid-cols-2 gap-3 text-xs">
+                                        {{-- Customer Contact Info --}}
+                                        @if ($order->customer_phone)
+                                            <div>
+                                                <p
+                                                    class="text-[10px] uppercase font-bold text-blue-600 dark:text-blue-400 mb-0.5 flex items-center gap-1">
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z">
+                                                        </path>
+                                                    </svg>
+                                                    Teléfono
+                                                </p>
+                                                <p class="font-semibold text-gray-800 dark:text-gray-200">
+                                                    {{ $order->customer_phone }}</p>
+                                            </div>
+                                        @endif
+
+                                        @if ($order->customer_email)
+                                            <div>
+                                                <p
+                                                    class="text-[10px] uppercase font-bold text-blue-600 dark:text-blue-400 mb-0.5 flex items-center gap-1">
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                                                        </path>
+                                                    </svg>
+                                                    Email
+                                                </p>
+                                                <p class="font-semibold text-gray-800 dark:text-gray-200 truncate"
+                                                    title="{{ $order->customer_email }}">
+                                                    {{ $order->customer_email }}
+                                                </p>
+                                            </div>
+                                        @endif
+
+                                        {{-- Delivery Address (if applicable) --}}
+                                        @if ($order->delivery_address)
+                                            <div class="col-span-2">
+                                                <p
+                                                    class="text-[10px] uppercase font-bold text-blue-600 dark:text-blue-400 mb-0.5 flex items-center gap-1">
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z">
+                                                        </path>
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z">
+                                                        </path>
+                                                    </svg>
+                                                    Dirección de Entrega
+                                                </p>
+                                                <p class="font-semibold text-gray-800 dark:text-gray-200 text-xs">
+                                                    {{ $order->delivery_address }}
+                                                </p>
+                                            </div>
+                                        @endif
+
+                                        {{-- Payment Method (Web Orders - if not paid yet) --}}
+                                        @if ($order->payment_status !== 'paid' && $order->payment_method)
+                                            <div class="col-span-2 pt-2 border-t border-blue-200 dark:border-blue-700">
+                                                <p
+                                                    class="text-[10px] uppercase font-bold text-blue-600 dark:text-blue-400 mb-0.5 flex items-center gap-1">
+                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z">
+                                                        </path>
+                                                    </svg>
+                                                    Método de Pago Elegido
+                                                </p>
+                                                <p
+                                                    class="font-bold text-gray-900 dark:text-white capitalize flex items-center gap-2">
+                                                    @if ($order->payment_method === 'card')
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                            viewBox="0 0 24 24" stroke-width="2">
+                                                            <rect x="1" y="4" width="22" height="16"
+                                                                rx="2" ry="2"></rect>
+                                                            <line x1="1" y1="10" x2="23"
+                                                                y2="10"></line>
+                                                        </svg>
+                                                        Tarjeta
+                                                    @elseif($order->payment_method === 'yape')
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                            viewBox="0 0 24 24" stroke-width="2">
+                                                            <rect x="5" y="2" width="14" height="20"
+                                                                rx="2" ry="2"></rect>
+                                                            <line x1="12" y1="18" x2="12.01"
+                                                                y2="18"></line>
+                                                        </svg>
+                                                        Yape
+                                                    @elseif($order->payment_method === 'plin')
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                            viewBox="0 0 24 24" stroke-width="2">
+                                                            <rect x="5" y="2" width="14" height="20"
+                                                                rx="2" ry="2"></rect>
+                                                            <line x1="12" y1="18" x2="12.01"
+                                                                y2="18"></line>
+                                                        </svg>
+                                                        Plin
+                                                    @elseif($order->payment_method === 'online')
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                            viewBox="0 0 24 24" stroke-width="2">
+                                                            <circle cx="12" cy="12" r="10"></circle>
+                                                            <line x1="2" y1="12" x2="22"
+                                                                y2="12"></line>
+                                                            <path
+                                                                d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z">
+                                                            </path>
+                                                        </svg>
+                                                        Pago Online
+                                                    @else
+                                                        {{ $order->payment_method }}
+                                                    @endif
+                                                </p>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endif
 
                             <!-- Bottom Row: Items Summary & Payment Info -->
                             <div class="flex items-center justify-between text-xs">
@@ -290,7 +421,17 @@
                                     <div class="text-right">
                                         <span class="text-gray-400 text-[10px] uppercase block">Pagado con</span>
                                         <span class="font-bold text-gray-700 dark:text-gray-300 capitalize">
-                                            {{ $order->payment_method === 'card' ? 'Tarjeta' : ($order->payment_method ?: 'Online') }}
+                                            @if ($order->payment_method === 'card')
+                                                💳 Tarjeta
+                                            @elseif($order->payment_method === 'yape')
+                                                📱 Yape
+                                            @elseif($order->payment_method === 'plin')
+                                                📱 Plin
+                                            @elseif($order->payment_method === 'cash')
+                                                💵 Efectivo
+                                            @else
+                                                {{ $order->payment_method ?: 'Online' }}
+                                            @endif
                                         </span>
                                     </div>
                                 @endif
@@ -495,12 +636,13 @@
                                             x-text="paymentMethod === 'card' ? 'Tarjeta Seleccionada' : paymentMethod.toUpperCase() + ' Seleccionado'"></span>
                                     </div>
 
-                                    <form :action="`/billing/${selectedOrderId}/payment`" method="POST">
+                                    <form id="paymentForm" :action="`/billing/${selectedOrderId}/payment`"
+                                        method="POST">
                                         @csrf
                                         <input type="hidden" name="payment_method" :value="paymentMethod">
                                         <input type="hidden" name="amount_received"
                                             :value="paymentMethod === 'cash' ? amountReceived : currentTotal">
-                                        <button type="submit" :disabled="!canSubmit"
+                                        <button type="button" @click="handlePayment()" :disabled="!canSubmit"
                                             :class="canSubmit ? 'bg-gray-900 hover:bg-black text-white' :
                                                 'bg-gray-300 text-gray-500 cursor-not-allowed'"
                                             class="w-full py-4 rounded-xl font-bold text-lg shadow-xl transition-all">
@@ -584,6 +726,157 @@
             </div>
         </div>
 
+        {{-- QR Payment Modal for Yape/Plin --}}
+        <div x-show="showQRModal" style="display: none;"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" x-transition>
+            <div @click.away="showQRModal = false"
+                class="bg-white dark:bg-gray-800 w-full max-w-xl rounded-3xl overflow-hidden shadow-2xl transform transition-all">
+
+                {{-- Modal Header --}}
+                <div class="bg-gradient-to-r p-6 text-center"
+                    :class="paymentMethod === 'yape' ? 'from-purple-600 to-purple-700' : 'from-blue-600 to-blue-700'">
+                    <div
+                        class="w-16 h-16 bg-white dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24" stroke-width="2">
+                            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                            <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-black text-white mb-1"
+                        x-text="paymentMethod === 'yape' ? 'Pago con Yape' : 'Pago con Plin'"></h3>
+                    <p class="text-white/90 text-sm">Escanea el código QR para pagar</p>
+                </div>
+
+                {{-- QR Code Section --}}
+                <div class="p-8">
+                    <div class="bg-white rounded-2xl p-6 shadow-inner border-4 border-dashed border-gray-200 mb-6">
+                        <div class="w-64 h-64 mx-auto bg-gray-100 rounded-xl flex items-center justify-center">
+                            {{-- Placeholder QR Code --}}
+                            <div class="text-center">
+                                <svg class="w-56 h-56 text-gray-300" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M3 11h8V3H3v8zm2-6h4v4H5V5zm-2 8h8v8H3v-8zm2 2v4h4v-4H5zm8-12v8h8V3h-8zm2 2h4v4h-4V5zm0 8h2v2h-2v-2zm2 2h2v2h-2v-2zm-2 2h2v2h-2v-2zm4-4h2v4h-2v-4zm0 6h2v2h-2v-2z" />
+                                </svg>
+                                <p class="text-xs text-gray-400 mt-2 font-bold">Código QR</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Amount Display --}}
+                    <div class="bg-gray-50 dark:bg-gray-700 rounded-xl p-4 mb-6">
+                        <p class="text-xs text-gray-500 dark:text-gray-400 uppercase font-bold mb-1">Monto a Pagar</p>
+                        <p class="text-3xl font-black text-gray-900 dark:text-white"
+                            x-text="formatMoney(currentTotal)"></p>
+                    </div>
+
+                    {{-- Instructions --}}
+                    <div class="space-y-2 mb-6">
+                        <div class="flex items-start gap-3">
+                            <div
+                                class="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <span class="text-xs font-bold text-purple-600 dark:text-purple-400">1</span>
+                            </div>
+                            <p class="text-sm text-gray-600 dark:text-gray-300">
+                                Abre tu app de <span class="font-bold"
+                                    x-text="paymentMethod === 'yape' ? 'Yape' : 'Plin'"></span>
+                            </p>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div
+                                class="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <span class="text-xs font-bold text-purple-600 dark:text-purple-400">2</span>
+                            </div>
+                            <p class="text-sm text-gray-600 dark:text-gray-300">Escanea este código QR</p>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div
+                                class="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <span class="text-xs font-bold text-purple-600 dark:text-purple-400">3</span>
+                            </div>
+                            <p class="text-sm text-gray-600 dark:text-gray-300">Confirma el pago en tu app</p>
+                        </div>
+                    </div>
+
+                    {{-- Action Buttons --}}
+                    <div class="grid grid-cols-2 gap-3">
+                        <button @click="showQRModal = false"
+                            class="px-4 py-3 rounded-xl font-bold text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-all">
+                            Cancelar
+                        </button>
+                        <button @click="confirmDigitalPayment()"
+                            class="px-4 py-3 rounded-xl font-bold text-white transition-all"
+                            :class="paymentMethod === 'yape' ? 'bg-purple-600 hover:bg-purple-700' :
+                                'bg-blue-600 hover:bg-blue-700'">
+                            Confirmar Pago
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Card Payment Info Modal (For Datáfono) --}}
+        <div x-show="showCardInfoModal" style="display: none;"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" x-transition>
+            <div @click.away="showCardInfoModal = false"
+                class="bg-white dark:bg-gray-800 w-full max-w-md rounded-3xl overflow-hidden shadow-2xl transform transition-all">
+
+                {{-- Modal Header --}}
+                <div class="bg-gradient-to-r from-gray-700 to-gray-800 p-6 text-center">
+                    <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-3">
+                        <svg class="w-8 h-8 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z">
+                            </path>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-black text-white mb-1">Pago con Tarjeta</h3>
+                    <p class="text-white/90 text-sm">Usar datáfono físico</p>
+                </div>
+
+                {{-- Content --}}
+                <div class="p-8">
+                    <div
+                        class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 mb-6 border border-blue-200 dark:border-blue-800">
+                        <div class="flex items-start gap-3">
+                            <svg class="w-6 h-6 text-blue-600 dark:text-blue-400 flex-shrink-0" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                                </path>
+                            </svg>
+                            <div>
+                                <p class="text-sm font-bold text-blue-900 dark:text-blue-100 mb-1">Instrucciones</p>
+                                <p class="text-sm text-blue-700 dark:text-blue-300">
+                                    Procesa el pago usando el <strong>datáfono físico</strong> del establecimiento.
+                                    El cliente debe insertar, deslizar o acercar su tarjeta al dispositivo.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Amount Display --}}
+                    <div class="bg-gray-50 dark:bg-gray-700 rounded-xl p-4 mb-6">
+                        <p class="text-xs text-gray-500 dark:text-gray-400 uppercase font-bold mb-1">Monto a Cobrar</p>
+                        <p class="text-3xl font-black text-gray-900 dark:text-white"
+                            x-text="formatMoney(currentTotal)"></p>
+                    </div>
+
+                    {{-- Action Buttons --}}
+                    <div class="grid grid-cols-2 gap-3">
+                        <button @click="showCardInfoModal = false"
+                            class="px-4 py-3 rounded-xl font-bold text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-all">
+                            Cancelar
+                        </button>
+                        <button @click="confirmCardPayment()"
+                            class="px-4 py-3 rounded-xl font-bold text-white bg-gray-800 hover:bg-black transition-all">
+                            Confirmar Pago
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script>
@@ -623,6 +916,8 @@
                 paymentMethod: '',
                 amountReceived: '',
                 showCardModal: false,
+                showQRModal: false,
+                showCardInfoModal: false,
 
                 selectOrder(id, status) {
                     this.selectedOrderId = id;
@@ -634,9 +929,30 @@
                     this.currentTotal = parseFloat(this.selectedOrder.total);
                     this.selectedOrderPaymentStatus = status;
 
-                    this.paymentMethod = '';
+                    // Auto-select the payment method that the customer chose
+                    // This improves cashier workflow by pre-filling the payment method
+                    if (this.selectedOrder.payment_method) {
+                        // Map the payment method to the correct format
+                        const customerMethod = this.selectedOrder.payment_method.toLowerCase();
+
+                        // If customer chose a digital method (yape, plin, card), pre-select it
+                        if (['yape', 'plin', 'card'].includes(customerMethod)) {
+                            this.paymentMethod = customerMethod;
+                        } else if (customerMethod === 'cash' || customerMethod === 'efectivo') {
+                            this.paymentMethod = 'cash';
+                        } else {
+                            // Default to empty if unknown method
+                            this.paymentMethod = '';
+                        }
+                    } else {
+                        // No payment method chosen by customer, leave empty
+                        this.paymentMethod = '';
+                    }
+
                     this.amountReceived = '';
                     this.showCardModal = false;
+                    this.showQRModal = false;
+                    this.showCardInfoModal = false;
                 },
 
                 setPaymentMethod(method) {
@@ -650,6 +966,41 @@
                 selectDigitalPayment(subMethod) {
                     this.paymentMethod = subMethod;
                     this.showCardModal = false;
+
+                    // Show appropriate modal based on payment method
+                    if (subMethod === 'yape' || subMethod === 'plin') {
+                        this.showQRModal = true;
+                    } else if (subMethod === 'card') {
+                        this.showCardInfoModal = true;
+                    }
+                },
+
+                confirmDigitalPayment() {
+                    // Close QR modal and submit payment
+                    this.showQRModal = false;
+                    // Submit the form
+                    document.getElementById('paymentForm').submit();
+                },
+
+                confirmCardPayment() {
+                    // Close card info modal and submit payment
+                    this.showCardInfoModal = false;
+                    // Submit the form
+                    document.getElementById('paymentForm').submit();
+                },
+
+                handlePayment() {
+                    // Decide which modal to show based on payment method
+                    if (this.paymentMethod === 'yape' || this.paymentMethod === 'plin') {
+                        // Show QR modal for Yape/Plin
+                        this.showQRModal = true;
+                    } else if (this.paymentMethod === 'card') {
+                        // Show datáfono info modal for Card
+                        this.showCardInfoModal = true;
+                    } else if (this.paymentMethod === 'cash') {
+                        // For cash, submit directly (no modal needed)
+                        document.getElementById('paymentForm').submit();
+                    }
                 },
 
                 get change() {
