@@ -614,42 +614,45 @@
                                 <span class="text-gray-500 dark:text-gray-400 font-bold">Total Final</span>
                                 <span class="text-4xl font-black text-gray-900 dark:text-white tabular-nums"
                                     x-text="formatMoney(currentTotal)"></span>
-                            </div>
+                                    {{-- Web Verification Section --}}
                                     <template x-if="['web', 'online'].includes(selectedOrder.order_source) && selectedOrder.payment_method">
-                                        <div class="space-y-4">
-                                            <div class="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-2xl border-2 border-purple-200 dark:border-purple-800 text-center">
-                                                <div class="flex flex-col items-center gap-2">
-                                                    <div class="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center text-white shadow-lg">
+                                        <div class="space-y-6 animate-in fade-in zoom-in duration-300">
+                                            <div class="bg-blue-50 dark:bg-blue-900/10 rounded-3xl p-6 border-2 border-blue-100 dark:border-blue-900/30">
+                                                <div class="flex items-center gap-4 mb-4 text-blue-800 dark:text-blue-400">
+                                                    <div class="bg-blue-600 rounded-2xl p-3 text-white shadow-lg">
                                                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                                         </svg>
                                                     </div>
                                                     <div>
-                                                        <p class="text-sm font-black text-purple-700 dark:text-purple-300 uppercase tracking-widest">
-                                                            Validación de Pago
-                                                        </p>
-                                                        <p class="text-xs text-purple-600 dark:text-purple-400 font-bold">
-                                                            Método Web: <span x-text="selectedOrder.payment_method.toUpperCase()"></span>
-                                                        </p>
+                                                        <p class="text-xs font-black uppercase tracking-widest opacity-70">Validación de Pago Web</p>
+                                                        <p class="text-lg font-black tracking-tight" x-text="'Metodo: ' + selectedOrder.payment_method.toUpperCase()"></p>
                                                     </div>
                                                 </div>
-                                            </div>
+                                                
+                                                <div class="bg-white dark:bg-gray-800/80 rounded-2xl p-4 border border-blue-50 dark:border-blue-900/20 text-center">
+                                                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Monto a Corroborar</p>
+                                                    <p class="text-4xl font-black text-blue-600 dark:text-blue-400 tabular-nums animate-pulse" x-text="formatMoney(selectedOrder.total)"></p>
+                                                </div>
 
-                                            <form :action="`/billing/${selectedOrderId}/payment`" method="POST">
-                                                @csrf
-                                                <input type="hidden" name="payment_method" :value="selectedOrder.payment_method">
-                                                <input type="hidden" name="amount_received" :value="currentTotal">
-                                                <button type="submit" 
-                                                    class="w-full py-5 bg-purple-600 hover:bg-purple-700 text-white rounded-2xl font-black text-xl shadow-xl shadow-purple-500/20 transition-all active:scale-95 flex items-center justify-center gap-3">
-                                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 12l2 2 4-4" />
-                                                    </svg>
-                                                    Verificar Pago
-                                                </button>
-                                                <p class="text-[10px] text-center text-gray-400 mt-3 font-medium uppercase tracking-tighter">
-                                                    Al confirmar, se generará la Boleta/Factura automáticamente
-                                                </p>
-                                            </form>
+                                                <div class="mt-4 flex flex-col gap-2">
+                                                    <button type="button" 
+                                                        @click="confirmVerifyWebPayment()"
+                                                        class="w-full bg-blue-600 hover:bg-black text-white font-black py-4 rounded-2xl shadow-xl shadow-blue-500/20 transition-all active:scale-95 flex items-center justify-center gap-2">
+                                                        <span>Verificar Pago Recibido</span>
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="flex items-center gap-2 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700">
+                                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                </svg>
+                                                <p class="text-[11px] font-bold text-gray-500">Valida en tu dispositivo el ingreso del monto exacto antes de marcar como verificado.</p>
+                                            </div>
                                         </div>
                                     </template>
 
@@ -748,145 +751,130 @@
             </div>
         </div>
 
-        <!-- Digital Payment Modal (Unchanged logic, just ensure existing) -->
+        <!-- Digital Payment Modal (Improved UI) -->
         <div x-show="showCardModal" style="display: none;"
-            class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" x-transition>
-            <!-- ... Modal content matches previous design ... -->
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md" x-transition>
             <div @click.away="showCardModal = false"
-                class="bg-white dark:bg-gray-800 w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl transform transition-all p-8 text-center">
-                <h3 class="text-2xl font-black text-gray-900 dark:text-white mb-6">Elige Medio de Pago</h3>
-                <div class="grid grid-cols-2 gap-4">
+                class="bg-white dark:bg-gray-900 w-full max-w-lg rounded-[2.5rem] overflow-hidden shadow-2xl transform transition-all p-10">
+                <div class="text-center mb-8">
+                    <h3 class="text-3xl font-black text-gray-900 dark:text-white tracking-tight">Seleccionar Medio</h3>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm font-medium mt-1">Elige cómo desea pagar el cliente</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-5">
                     <button @click="selectDigitalPayment('yape')"
-                        class="group p-6 rounded-2xl border-2 border-purple-100 hover:border-purple-500 hover:bg-purple-50 transition-all flex flex-col items-center gap-3">
-                        <div
-                            class="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center text-purple-600 group-hover:scale-110 transition-transform">
-                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 17h.01M9 17h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M9 8h.01M15 8h.01M9 5h.01M15 5h.01">
-                                </path>
+                        class="group relative p-6 rounded-[2rem] border-2 border-purple-100 dark:border-purple-900/30 hover:border-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/10 transition-all flex flex-col items-center gap-4 active:scale-95">
+                        <div class="w-20 h-20 bg-purple-600 rounded-3xl flex items-center justify-center text-white shadow-xl shadow-purple-200 dark:shadow-none group-hover:rotate-6 transition-transform">
+                            <svg class="w-10 h-10" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z" />
                             </svg>
                         </div>
-                        <span class="font-bold text-gray-700 group-hover:text-purple-700 text-lg">YAPE</span>
+                        <span class="font-black text-purple-700 dark:text-purple-400 tracking-wider">YAPE</span>
                     </button>
+
                     <button @click="selectDigitalPayment('plin')"
-                        class="group p-6 rounded-2xl border-2 border-cyan-100 hover:border-cyan-500 hover:bg-cyan-50 transition-all flex flex-col items-center gap-3">
-                        <div
-                            class="w-16 h-16 bg-cyan-100 rounded-2xl flex items-center justify-center text-cyan-600 group-hover:scale-110 transition-transform">
-                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 17h.01M9 17h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M9 8h.01M15 8h.01M9 5h.01M15 5h.01">
-                                </path>
+                        class="group relative p-6 rounded-[2rem] border-2 border-cyan-100 dark:border-cyan-900/30 hover:border-cyan-500 hover:bg-cyan-50 dark:hover:bg-cyan-900/10 transition-all flex flex-col items-center gap-4 active:scale-95">
+                        <div class="w-20 h-20 bg-cyan-500 rounded-3xl flex items-center justify-center text-white shadow-xl shadow-cyan-200 dark:shadow-none group-hover:-rotate-6 transition-transform">
+                            <svg class="w-10 h-10" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z" />
                             </svg>
                         </div>
-                        <span class="font-bold text-gray-700 group-hover:text-cyan-700 text-lg">PLIN</span>
+                        <span class="font-black text-cyan-700 dark:text-cyan-400 tracking-wider">PLIN</span>
                     </button>
+
                     <button @click="selectDigitalPayment('card')"
-                        class="col-span-2 group p-6 rounded-2xl border-2 border-blue-100 hover:border-blue-500 hover:bg-blue-50 transition-all flex items-center justify-center gap-4">
-                        <div
-                            class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z">
-                                </path>
-                            </svg>
+                        class="col-span-2 group p-6 rounded-[2.5rem] bg-gray-50 dark:bg-gray-800/50 border-2 border-blue-50 dark:border-blue-900/20 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-all flex items-center justify-between px-10 active:scale-95">
+                        <div class="flex items-center gap-5 font-black">
+                            <div class="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-200 dark:shadow-none">
+                                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                                </svg>
+                            </div>
+                            <div class="text-left">
+                                <span class="block text-xl text-blue-800 dark:text-blue-400">Tarjeta</span>
+                                <span class="text-xs text-blue-400 uppercase tracking-widest font-bold">Datáfono Físico</span>
+                            </div>
                         </div>
-                        <div class="text-left">
-                            <span
-                                class="block font-bold text-gray-700 group-hover:text-blue-700 text-lg">Tarjeta</span>
-                            <span class="text-xs text-gray-400">Visa, Mastercard</span>
-                        </div>
+                        <svg class="w-6 h-6 text-blue-300 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7" />
+                        </svg>
                     </button>
                 </div>
-                <div class="mt-8">
+                <div class="mt-8 text-center">
                     <button @click="showCardModal = false"
-                        class="text-gray-400 hover:text-gray-600 font-bold">Cancelar</button>
+                        class="text-gray-400 hover:text-gray-900 dark:hover:text-white font-black text-sm uppercase tracking-widest transition-colors">Volver a Caja</button>
                 </div>
             </div>
         </div>
 
-        {{-- QR Payment Modal for Yape/Plin --}}
+        {{-- Improved QR Payment Modal --}}
         <div x-show="showQRModal" style="display: none;"
-            class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" x-transition>
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md" x-transition>
             <div @click.away="showQRModal = false"
-                class="bg-white dark:bg-gray-800 w-full max-w-xl rounded-3xl overflow-hidden shadow-2xl transform transition-all">
+                class="bg-white dark:bg-gray-900 w-full max-w-lg rounded-[3rem] overflow-hidden shadow-2xl transform transition-all">
 
-                {{-- Modal Header --}}
-                <div class="bg-gradient-to-r p-6 text-center"
-                    :class="paymentMethod === 'yape' ? 'from-purple-600 to-purple-700' : 'from-blue-600 to-blue-700'">
-                    <div
-                        class="w-16 h-16 bg-white dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24" stroke-width="2">
-                            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
-                            <line x1="12" y1="18" x2="12.01" y2="18"></line>
-                        </svg>
+                {{-- Header Decor --}}
+                <div class="h-2 w-full" :class="paymentMethod === 'yape' ? 'bg-purple-600' : 'bg-cyan-500'"></div>
+
+                <div class="p-10">
+                    <div class="text-center mb-8">
+                        <div class="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-[10px] font-black tracking-[0.2em] text-gray-400 uppercase mb-4">
+                            Transacción Digital
+                        </div>
+                        <h3 class="text-3xl font-black text-gray-900 dark:text-white"
+                            x-text="paymentMethod === 'yape' ? 'Pago con Yape' : 'Pago con Plin'"></h3>
+                        <p class="text-gray-500 text-sm font-medium mt-1">Escanea el código para procesar el cobro</p>
                     </div>
-                    <h3 class="text-2xl font-black text-white mb-1"
-                        x-text="paymentMethod === 'yape' ? 'Pago con Yape' : 'Pago con Plin'"></h3>
-                    <p class="text-white/90 text-sm">Escanea el código QR para pagar</p>
-                </div>
 
-                {{-- QR Code Section --}}
-                <div class="p-8">
-                    <div class="bg-white rounded-2xl p-6 shadow-inner border-4 border-dashed border-gray-200 mb-6">
-                        <div class="w-64 h-64 mx-auto bg-gray-100 rounded-xl flex items-center justify-center">
-                            {{-- Placeholder QR Code --}}
-                            <div class="text-center">
-                                <svg class="w-56 h-56 text-gray-300" fill="currentColor" viewBox="0 0 24 24">
-                                    <path
-                                        d="M3 11h8V3H3v8zm2-6h4v4H5V5zm-2 8h8v8H3v-8zm2 2v4h4v-4H5zm8-12v8h8V3h-8zm2 2h4v4h-4V5zm0 8h2v2h-2v-2zm2 2h2v2h-2v-2zm-2 2h2v2h-2v-2zm4-4h2v4h-2v-4zm0 6h2v2h-2v-2z" />
-                                </svg>
-                                <p class="text-xs text-gray-400 mt-2 font-bold">Código QR</p>
+                    {{-- Dynamic QR Container --}}
+                    <div class="relative group mb-8">
+                        <div class="absolute -inset-4 bg-gradient-to-tr rounded-[3rem] opacity-20 blur-2xl transition-opacity"
+                             :class="paymentMethod === 'yape' ? 'from-purple-600 to-fuchsia-500' : 'from-cyan-500 to-blue-400'"></div>
+                        <div class="relative bg-white p-4 rounded-[2.5rem] shadow-2xl border-4 flex flex-col items-center"
+                             :class="paymentMethod === 'yape' ? 'border-purple-600' : 'border-cyan-500'">
+                            
+                            <template x-if="paymentMethod === 'yape'">
+                                <img src="/img/yape-qr.png" alt="QR Yape" class="h-64 w-64 object-contain rounded-2xl">
+                            </template>
+                            
+                            <template x-if="paymentMethod === 'plin'">
+                                <div class="h-64 w-64 bg-gray-50 rounded-2xl flex flex-col items-center justify-center border-2 border-dashed border-cyan-200">
+                                    <svg class="w-20 h-20 text-cyan-200" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M3 11h8V3H3v8zm2-6h4v4H5V5zm-2 8h8v8H3v-8zm2 2v4h4v-4H5zm8-12v8h8V3h-8zm2 2h4v4h-4V5zm0 8h2v2h-2v-2zm2 2h2v2h-2v-2zm-2 2h2v2h-2v-2zm4-4h2v4h-2v-4zm0 6h2v2h-2v-2z" />
+                                    </svg>
+                                    <p class="text-[10px] font-black text-cyan-500 mt-2">QR PLIN PENDIENTE</p>
+                                </div>
+                            </template>
+
+                            <div class="mt-4 text-center">
+                                <p class="text-xs font-black uppercase tracking-widest"
+                                   :class="paymentMethod === 'yape' ? 'text-purple-600' : 'text-cyan-600'">
+                                   Lincol Eulogio Huanca
+                                </p>
                             </div>
                         </div>
                     </div>
 
                     {{-- Amount Display --}}
-                    <div class="bg-gray-50 dark:bg-gray-700 rounded-xl p-4 mb-6">
-                        <p class="text-xs text-gray-500 dark:text-gray-400 uppercase font-bold mb-1">Monto a Pagar</p>
-                        <p class="text-3xl font-black text-gray-900 dark:text-white"
+                    <div class="bg-gray-50 dark:bg-gray-800/50 rounded-3xl p-6 mb-8 border border-gray-100 dark:border-gray-800 text-center">
+                        <p class="text-[10px] text-gray-400 uppercase font-black tracking-widest mb-1">Total a recibir</p>
+                        <p class="text-4xl font-black text-gray-900 dark:text-white tabular-nums"
                             x-text="formatMoney(currentTotal)"></p>
                     </div>
 
-                    {{-- Instructions --}}
-                    <div class="space-y-2 mb-6">
-                        <div class="flex items-start gap-3">
-                            <div
-                                class="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                <span class="text-xs font-bold text-purple-600 dark:text-purple-400">1</span>
-                            </div>
-                            <p class="text-sm text-gray-600 dark:text-gray-300">
-                                Abre tu app de <span class="font-bold"
-                                    x-text="paymentMethod === 'yape' ? 'Yape' : 'Plin'"></span>
-                            </p>
-                        </div>
-                        <div class="flex items-start gap-3">
-                            <div
-                                class="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                <span class="text-xs font-bold text-purple-600 dark:text-purple-400">2</span>
-                            </div>
-                            <p class="text-sm text-gray-600 dark:text-gray-300">Escanea este código QR</p>
-                        </div>
-                        <div class="flex items-start gap-3">
-                            <div
-                                class="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                <span class="text-xs font-bold text-purple-600 dark:text-purple-400">3</span>
-                            </div>
-                            <p class="text-sm text-gray-600 dark:text-gray-300">Confirma el pago en tu app</p>
-                        </div>
-                    </div>
-
                     {{-- Action Buttons --}}
-                    <div class="grid grid-cols-2 gap-3">
-                        <button @click="showQRModal = false"
-                            class="px-4 py-3 rounded-xl font-bold text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-all">
-                            Cancelar
-                        </button>
+                    <div class="flex flex-col gap-3">
                         <button @click="confirmDigitalPayment()"
-                            class="px-4 py-3 rounded-xl font-bold text-white transition-all"
-                            :class="paymentMethod === 'yape' ? 'bg-purple-600 hover:bg-purple-700' :
-                                'bg-blue-600 hover:bg-blue-700'">
-                            Confirmar Pago
+                            class="w-full py-5 rounded-2xl font-black text-xl text-white shadow-2xl transition-all active:scale-95 flex items-center justify-center gap-3"
+                            :class="paymentMethod === 'yape' ? 'bg-purple-600 hover:bg-purple-700 shadow-purple-500/30' : 'bg-cyan-500 hover:bg-cyan-600 shadow-cyan-500/30'">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                            Confirmar Cobro
+                        </button>
+                        <button @click="showQRModal = false"
+                            class="w-full py-3 rounded-xl font-black text-xs text-gray-400 uppercase tracking-widest hover:text-gray-900 dark:hover:text-white transition-colors">
+                            Volver a Medios
                         </button>
                     </div>
                 </div>
@@ -1057,14 +1045,14 @@
                     // Close QR modal and submit payment
                     this.showQRModal = false;
                     // Submit the form
-                    document.getElementById('paymentForm').submit();
+                    this.submitPayment();
                 },
 
                 confirmCardPayment() {
                     // Close card info modal and submit payment
                     this.showCardInfoModal = false;
                     // Submit the form
-                    document.getElementById('paymentForm').submit();
+                    this.submitPayment();
                 },
 
                 handlePayment() {
@@ -1077,6 +1065,53 @@
                         this.showCardInfoModal = true;
                     } else if (this.paymentMethod === 'cash') {
                         // For cash, submit directly (no modal needed)
+                        this.submitPayment();
+                    }
+                },
+
+                // Action: Confirm verify web payment with visual check
+                confirmVerifyWebPayment() {
+                    if (!this.selectedOrder) return;
+
+                    const total = this.formatMoney(this.selectedOrder.total);
+                    const method = this.selectedOrder.payment_method.toUpperCase();
+
+                    Swal.fire({
+                        title: '<span class="font-black text-2xl uppercase tracking-tighter">¿Monto recibido?</span>',
+                        html: `
+                            <div class="py-4 font-bold text-gray-600 dark:text-gray-300">
+                                <p class="mb-4">Por favor, confirma que has recibido el monto exacto en tu app de ${method}:</p>
+                                <div class="bg-emerald-50 dark:bg-emerald-900/30 p-6 rounded-[2rem] border-2 border-emerald-100 dark:border-emerald-800">
+                                    <p class="text-[10px] text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">Monto Esperado</p>
+                                    <p class="text-4xl font-black text-emerald-700 dark:text-emerald-300 tabular-nums">${total}</p>
+                                </div>
+                            </div>
+                        `,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Sí, recibido correctamente',
+                        cancelButtonText: 'Aún no',
+                        background: document.documentElement.classList.contains('dark') ? '#111827' : '#FFFFFF',
+                        color: document.documentElement.classList.contains('dark') ? '#FFFFFF' : '#111827',
+                        confirmButtonColor: '#059669',
+                        cancelButtonColor: '#EF4444',
+                        customClass: {
+                            popup: 'rounded-[3rem] border-none shadow-2xl overflow-hidden',
+                            confirmButton: 'rounded-2xl px-6 py-3 font-black text-sm uppercase tracking-widest shadow-lg shadow-emerald-500/20 active:scale-95 transition-all outline-none',
+                            cancelButton: 'rounded-2xl px-6 py-3 font-black text-sm uppercase tracking-widest shadow-lg shadow-red-500/20 active:scale-95 transition-all outline-none border-none'
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            this.paymentMethod = this.selectedOrder.payment_method;
+                            this.amountReceived = this.selectedOrder.total;
+                            this.submitPayment();
+                        }
+                    });
+                },
+
+                // Logic: Submit payment to backend
+                submitPayment() {
+                    if (this.canSubmit) {
                         document.getElementById('paymentForm').submit();
                     }
                 },
