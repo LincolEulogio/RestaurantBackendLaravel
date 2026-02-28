@@ -4,165 +4,87 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
-use Culqi\Culqi;
+use App\Services\PaymentService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class PaymentController extends Controller
 {
-    protected $culqi;
+    protected $paymentService;
 
-    public function __construct()
+    public function __construct(PaymentService $paymentService)
     {
-        $this->culqi = new Culqi([
-            'api_key' => config('services.culqi.secret_key')
-        ]);
+        $this->paymentService = $paymentService;
     }
 
     /**
-     * Process a card payment using a Culqi token.
+     * POST /api/payment/process-card
+     * Matching useCartSidebar flow
      */
     public function processCardPayment(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'order_id' => 'required|exists:orders,id',
             'token' => 'required|string',
             'email' => 'required|email',
         ]);
 
-        $order = Order::findOrFail($request->order_id);
-
-        try {
-            // Create a charge in Culqi
-            $charge = $this->culqi->Charges->create([
-                "amount" => $order->total * 100, // Amount in cents
-                "currency_code" => "PEN",
-                "email" => $request->email,
-                "source_id" => $request->token,
-                "description" => "Pago de pedido #" . $order->order_number,
-                "antifraud_details" => [
-                    "first_name" => $order->customer_name,
-                    "last_name" => $order->customer_lastname ?? 'N/A',
-                    "phone_number" => $order->customer_phone ?? '999999999'
-                ],
-                "metadata" => [
-                    "order_id" => $order->id,
-                    "order_number" => $order->order_number
-                ]
-            ]);
-
-            if (isset($charge->id)) {
-                $order->update([
-                    'culqi_charge_id' => $charge->id,
-                    'payment_status' => 'paid',
-                    'status' => 'confirmed' // Or specific paid status
-                ]);
-
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Pago procesado correctamente',
-                    'charge_id' => $charge->id
-                ]);
-            }
-
-            return response()->json([
-                'success' => false,
-                'message' => 'No se pudo procesar el pago'
-            ], 400);
-
-        } catch (\Exception $e) {
-            Log::error('Culqi Charge Error: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al procesar el pago: ' . $e->getMessage()
-            ], 500);
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
         }
+
+        $order = Order::findOrFail($request->order_id);
+        
+        $result = $this->paymentService->processPayment($order, [
+            'token' => $request->token,
+            'email' => $request->email
+        ]);
+
+        return response()->json($result);
     }
 
     /**
-     * Create a Culqi Order for Yape/Plin/PagoEfectivo.
+     * POST /api/payment/create-order
+     * Simulates creating a Culqi Order for Yape/Plin
      */
     public function createCulqiOrder(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'order_id' => 'required|exists:orders,id',
         ]);
 
-        $order = Order::findOrFail($request->order_id);
-
-        try {
-            // Create a Culqi Order
-            $culqiOrder = $this->culqi->Orders->create([
-                "amount" => $order->total * 100,
-                "currency_code" => "PEN",
-                "description" => "Pedido #" . $order->order_number,
-                "order_number" => $order->order_number,
-                "client_details" => [
-                    "first_name" => $order->customer_name,
-                    "last_name" => $order->customer_lastname ?? 'N/A',
-                    "email" => $order->customer_email ?? 'customer@example.com',
-                    "phone_number" => $order->customer_phone ?? '999999999'
-                ],
-                "expiration_date" => time() + (24 * 60 * 60), // 24 hours
-                "confirm" => false
-            ]);
-
-            if (isset($culqiOrder->id)) {
-                $order->update([
-                    'culqi_order_id' => $culqiOrder->id,
-                    'payment_status' => 'pending'
-                ]);
-
-                return response()->json([
-                    'success' => true,
-                    'order_id' => $culqiOrder->id
-                ]);
-            }
-
-            return response()->json([
-                'success' => false,
-                'message' => 'No se pudo crear la orden de pago'
-            ], 400);
-
-        } catch (\Exception $e) {
-            Log::error('Culqi Order Error: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Error al crear la orden: ' . $e->getMessage()
-            ], 500);
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
         }
+
+        return response()->json([
+            'success' => true,
+            'order_id' => 'ord_test_' . uniqid(), // Dummy Culqi Order ID
+            'message' => 'Simulación de orden de pago Culqi'
+        ]);
     }
 
     /**
-     * Webhook for payment status updates.
+     * POST /api/payment/process-manual
+     * New endpoint for direct operation number submission (Yape/Plin)
      */
-    public function webhook(Request $request)
+    public function processManual(Request $request)
     {
-        // Culqi usually sends a POST request with the event data
-        $data = $request->all();
-        
-        Log::info('Culqi Webhook Received', $data);
+        $validator = Validator::make($request->all(), [
+            'order_id' => 'required|exists:orders,id',
+            'operation_number' => 'required|string|max:50',
+        ]);
 
-        // Verification logic (secret key check) should be here
-        
-        $object = $data['data'] ?? null;
-        if (!$object) return response()->json(['status' => 'error'], 400);
-
-        if ($data['type'] === 'order.status.changed') {
-            if ($object['state'] === 'paid') {
-                $orderId = $object['metadata']['order_id'] ?? null;
-                if ($orderId) {
-                    $order = Order::find($orderId);
-                    if ($order) {
-                        $order->update([
-                            'payment_status' => 'paid',
-                            'status' => 'confirmed'
-                        ]);
-                    }
-                }
-            }
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
         }
 
-        return response()->json(['status' => 'ok']);
+        $order = Order::findOrFail($request->order_id);
+        
+        $result = $this->paymentService->processPayment($order, [
+            'operation_number' => $request->operation_number
+        ]);
+
+        return response()->json($result);
     }
 }

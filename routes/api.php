@@ -73,5 +73,6 @@ Route::prefix('qr')->group(function () {
 Route::prefix('payment')->group(function () {
     Route::post('/process-card', [\App\Http\Controllers\Api\PaymentController::class, 'processCardPayment']);
     Route::post('/create-order', [\App\Http\Controllers\Api\PaymentController::class, 'createCulqiOrder']);
+    Route::post('/process-manual', [\App\Http\Controllers\Api\PaymentController::class, 'processManual']);
     Route::post('/webhook', [\App\Http\Controllers\Api\PaymentController::class, 'webhook']);
 });

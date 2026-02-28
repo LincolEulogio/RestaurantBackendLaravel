@@ -169,8 +169,8 @@
                                             </span>
                                         @elseif($order->order_source === 'web' || $order->order_source === 'online')
                                             <span
-                                                class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
-                                                Web
+                                                class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-blue-600 text-white shadow-sm ring-1 ring-blue-400">
+                                                WEB
                                             </span>
                                         @else
                                             <span
@@ -206,13 +206,14 @@
                                         </span>
                                     @else
                                         <span
-                                            class="inline-flex items-center gap-1 text-xs font-bold text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30 px-2 py-1 rounded-full">
+                                            class="inline-flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full 
+                                            {{ ($order->order_source === 'web' || $order->order_source === 'online') ? 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30' : 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30' }}">
                                             <svg class="w-3 h-3" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                             </svg>
-                                            POR COBRAR
+                                            {{ ($order->order_source === 'web' || $order->order_source === 'online') ? 'POR VERIFICAR' : 'POR COBRAR' }}
                                         </span>
                                     @endif
                                 </div>
@@ -527,6 +528,46 @@
                                 </div>
                             </template>
 
+                            <!-- Billing Data Display -->
+                            <template x-if="selectedOrder && selectedOrder.billing_type">
+                                <div class="bg-gray-50 dark:bg-gray-700/50 border border-gray-100 dark:border-gray-700 rounded-xl p-4 space-y-3">
+                                    <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                        Datos de Facturación
+                                    </h4>
+                                    <div class="grid grid-cols-2 gap-4 text-sm">
+                                        <div>
+                                            <p class="text-[10px] text-gray-400 uppercase font-black">Tipo</p>
+                                            <p class="font-bold text-gray-800 dark:text-gray-200 capitalize" x-text="selectedOrder.billing_type"></p>
+                                        </div>
+                                        <template x-if="selectedOrder.billing_type === 'factura'">
+                                            <div>
+                                                <p class="text-[10px] text-gray-400 uppercase font-black">RUC</p>
+                                                <p class="font-bold text-gray-800 dark:text-gray-200" x-text="selectedOrder.ruc"></p>
+                                            </div>
+                                        </template>
+                                        <template x-if="selectedOrder.billing_type === 'factura'">
+                                        <div class="col-span-2">
+                                            <p class="text-[10px] text-gray-400 uppercase font-black">Razón Social</p>
+                                            <p class="font-bold text-gray-800 dark:text-gray-200" x-text="selectedOrder.business_name"></p>
+                                        </div>
+                                        </template>
+                                        <template x-if="selectedOrder.billing_type === 'factura'">
+                                        <div class="col-span-2">
+                                            <p class="text-[10px] text-gray-400 uppercase font-black">Dirección Fiscal</p>
+                                            <p class="font-bold text-gray-800 dark:text-gray-200 text-xs" x-text="selectedOrder.fiscal_address"></p>
+                                        </div>
+                                        </template>
+                                        <template x-if="selectedOrder.billing_type === 'boleta'">
+                                            <div class="col-span-2">
+                                                <p class="text-[10px] text-gray-400 uppercase font-black">DNI</p>
+                                                <p class="font-bold text-gray-800 dark:text-gray-200" x-text="selectedOrder.customer_dni || 'No proporcionado'"></p>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </template>
+
                             <!-- Items List (Always visible logic) -->
                             <!-- Note: We need the full order object in Alpine to show items.
                                  Refactoring slightly to pass full order object to selectOrder would be ideal.
@@ -574,95 +615,132 @@
                                 <span class="text-4xl font-black text-gray-900 dark:text-white tabular-nums"
                                     x-text="formatMoney(currentTotal)"></span>
                             </div>
-
-                            <!-- If Pending: Show Payment Form -->
-                            <template x-if="selectedOrderPaymentStatus !== 'paid'">
-                                <div>
-                                    <label
-                                        class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Seleccionar
-                                        Método</label>
-                                    <div class="grid grid-cols-2 gap-3 mb-4">
-                                        <button @click="paymentMethod = 'cash'"
-                                            :class="paymentMethod === 'cash' ?
-                                                'bg-green-600 text-white shadow-lg shadow-green-200 ring-2 ring-green-600 ring-offset-2' :
-                                                'bg-gray-100 text-gray-600 hover:bg-gray-200'"
-                                            class="flex flex-col items-center justify-center p-3 rounded-xl transition-all font-bold">
-                                            <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor"
-                                                viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z">
-                                                </path>
-                                            </svg>
-                                            Efectivo
-                                        </button>
-                                        <button @click="openCardModal()"
-                                            :class="['card', 'yape', 'plin'].includes(paymentMethod) ?
-                                                'bg-blue-600 text-white shadow-lg shadow-blue-200 ring-2 ring-blue-600 ring-offset-2' :
-                                                'bg-gray-100 text-gray-600 hover:bg-gray-200'"
-                                            class="flex flex-col items-center justify-center p-3 rounded-xl transition-all font-bold">
-                                            <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor"
-                                                viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z">
-                                                </path>
-                                            </svg>
-                                            Digital
-                                        </button>
-                                    </div>
-
-                                    <!-- Cash Inputs -->
-                                    <div x-show="paymentMethod === 'cash'" x-transition
-                                        class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl mb-4 border border-gray-100 dark:border-gray-600">
-                                        <div class="flex justify-between mb-2">
-                                            <label
-                                                class="text-sm font-bold text-gray-700 dark:text-gray-300">Recibido</label>
-                                            <div x-show="change > 0" class="text-green-600 font-bold text-sm">Vuelto:
-                                                <span x-text="formatMoney(change)"></span>
+                                    <template x-if="['web', 'online'].includes(selectedOrder.order_source) && selectedOrder.payment_method">
+                                        <div class="space-y-4">
+                                            <div class="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-2xl border-2 border-purple-200 dark:border-purple-800 text-center">
+                                                <div class="flex flex-col items-center gap-2">
+                                                    <div class="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center text-white shadow-lg">
+                                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                        </svg>
+                                                    </div>
+                                                    <div>
+                                                        <p class="text-sm font-black text-purple-700 dark:text-purple-300 uppercase tracking-widest">
+                                                            Validación de Pago
+                                                        </p>
+                                                        <p class="text-xs text-purple-600 dark:text-purple-400 font-bold">
+                                                            Método Web: <span x-text="selectedOrder.payment_method.toUpperCase()"></span>
+                                                        </p>
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="relative">
-                                            <span
-                                                class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold">S/</span>
-                                            <input type="number" x-model.number="amountReceived" step="0.10"
-                                                class="w-full pl-8 pr-4 py-2 rounded-lg border-gray-200 font-bold text-gray-900 bg-white"
-                                                placeholder="0.00">
-                                        </div>
-                                    </div>
 
-                                    <!-- Digital Selection Info -->
-                                    <div x-show="['yape', 'plin', 'card'].includes(paymentMethod)"
-                                        class="bg-blue-50 text-blue-800 p-3 rounded-xl mb-4 text-center text-sm font-bold border border-blue-100">
-                                        <span
-                                            x-text="paymentMethod === 'card' ? 'Tarjeta Seleccionada' : paymentMethod.toUpperCase() + ' Seleccionado'"></span>
-                                    </div>
+                                            <form :action="`/billing/${selectedOrderId}/payment`" method="POST">
+                                                @csrf
+                                                <input type="hidden" name="payment_method" :value="selectedOrder.payment_method">
+                                                <input type="hidden" name="amount_received" :value="currentTotal">
+                                                <button type="submit" 
+                                                    class="w-full py-5 bg-purple-600 hover:bg-purple-700 text-white rounded-2xl font-black text-xl shadow-xl shadow-purple-500/20 transition-all active:scale-95 flex items-center justify-center gap-3">
+                                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 12l2 2 4-4" />
+                                                    </svg>
+                                                    Verificar Pago
+                                                </button>
+                                                <p class="text-[10px] text-center text-gray-400 mt-3 font-medium uppercase tracking-tighter">
+                                                    Al confirmar, se generará la Boleta/Factura automáticamente
+                                                </p>
+                                            </form>
+                                        </div>
+                                    </template>
 
-                                    <form id="paymentForm" :action="`/billing/${selectedOrderId}/payment`"
-                                        method="POST">
-                                        @csrf
-                                        <input type="hidden" name="payment_method" :value="paymentMethod">
-                                        <input type="hidden" name="amount_received"
-                                            :value="paymentMethod === 'cash' ? amountReceived : currentTotal">
-                                        <button type="button" @click="handlePayment()" :disabled="!canSubmit"
-                                            :class="canSubmit ? 'bg-gray-900 hover:bg-black text-white' :
-                                                'bg-gray-300 text-gray-500 cursor-not-allowed'"
-                                            class="w-full py-4 rounded-xl font-bold text-lg shadow-xl transition-all">
-                                            Cobrar
-                                        </button>
-                                    </form>
-                                </div>
-                            </template>
+                                    {{-- OLD Logic: Only for In-Person or Orders without pre-set method --}}
+                                    <template x-if="!['web', 'online'].includes(selectedOrder.order_source) || !selectedOrder.payment_method">
+                                        <div>
+                                            <label
+                                                class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Seleccionar
+                                                Método</label>
+                                            <div class="grid grid-cols-2 gap-3 mb-4">
+                                                <button @click="paymentMethod = 'cash'"
+                                                    :class="paymentMethod === 'cash' ?
+                                                        'bg-green-600 text-white shadow-lg shadow-green-200 ring-2 ring-green-600 ring-offset-2' :
+                                                        'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+                                                    class="flex flex-col items-center justify-center p-3 rounded-xl transition-all font-bold">
+                                                    <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                            d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z">
+                                                        </path>
+                                                    </svg>
+                                                    Efectivo
+                                                </button>
+                                                <button @click="openCardModal()"
+                                                    :class="['card', 'yape', 'plin'].includes(paymentMethod) ?
+                                                        'bg-blue-600 text-white shadow-lg shadow-blue-200 ring-2 ring-blue-600 ring-offset-2' :
+                                                        'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+                                                    class="flex flex-col items-center justify-center p-3 rounded-xl transition-all font-bold">
+                                                    <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                            d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z">
+                                                        </path>
+                                                    </svg>
+                                                    Digital
+                                                </button>
+                                            </div>
+
+                                            <!-- Cash Inputs -->
+                                            <div x-show="paymentMethod === 'cash'" x-transition
+                                                class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl mb-4 border border-gray-100 dark:border-gray-600">
+                                                <div class="flex justify-between mb-2">
+                                                    <label
+                                                        class="text-sm font-bold text-gray-700 dark:text-gray-300">Recibido</label>
+                                                    <div x-show="change > 0" class="text-green-600 font-bold text-sm">Vuelto:
+                                                        <span x-text="formatMoney(change)"></span>
+                                                    </div>
+                                                </div>
+                                                <div class="relative">
+                                                    <span
+                                                        class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold">S/</span>
+                                                    <input type="number" x-model.number="amountReceived" step="0.10"
+                                                        class="w-full pl-8 pr-4 py-2 rounded-lg border-gray-200 font-bold text-gray-900 bg-white"
+                                                        placeholder="0.00">
+                                                </div>
+                                            </div>
+
+                                            <!-- Digital Selection Info -->
+                                            <div x-show="['yape', 'plin', 'card'].includes(paymentMethod)"
+                                                class="bg-blue-50 text-blue-800 p-3 rounded-xl mb-4 text-center text-sm font-bold border border-blue-100">
+                                                <span
+                                                    x-text="paymentMethod === 'card' ? 'Tarjeta Seleccionada' : paymentMethod.toUpperCase() + ' Seleccionado'"></span>
+                                            </div>
+
+                                            <form id="paymentForm" :action="`/billing/${selectedOrderId}/payment`"
+                                                method="POST">
+                                                @csrf
+                                                <input type="hidden" name="payment_method" :value="paymentMethod">
+                                                <input type="hidden" name="amount_received"
+                                                    :value="paymentMethod === 'cash' ? amountReceived : currentTotal">
+                                                <button type="button" @click="handlePayment()" :disabled="!canSubmit"
+                                                    :class="canSubmit ? 'bg-gray-900 hover:bg-black text-white' :
+                                                        'bg-gray-300 text-gray-500 cursor-not-allowed'"
+                                                    class="w-full py-4 rounded-xl font-bold text-lg shadow-xl transition-all">
+                                                    Cobrar
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </template>
 
                             <!-- If Paid: Print Receipt Button -->
                             <template x-if="selectedOrderPaymentStatus === 'paid'">
-                                <button type="button"
+                                <a :href="`/billing/${selectedOrderId}/download-invoice`" target="_blank"
                                     class="w-full bg-gray-900 hover:bg-black text-white py-4 rounded-xl font-bold text-lg shadow-xl transition-all flex items-center justify-center gap-2">
                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z">
                                         </path>
                                     </svg>
-                                    Imprimir Comprobante
-                                </button>
+                                    Ver Comprobante PDF
+                                </a>
                             </template>
                         </div>
                     </div>

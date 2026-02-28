@@ -129,6 +129,10 @@ class OrderController extends Controller
             'delivery_address' => 'nullable|string',
             'order_type' => 'required|in:delivery,pickup,dine-in,online',
             'payment_method' => 'nullable|in:card,yape,plin,cash',
+            'billing_type' => 'nullable|in:boleta,factura',
+            'business_name' => 'nullable|string|max:255',
+            'ruc' => 'nullable|string|size:11',
+            'fiscal_address' => 'nullable|string|max:255',
             'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity' => 'required|integer|min:1',
@@ -148,6 +152,8 @@ class OrderController extends Controller
 
             // Create order (public API = online/web)
             $order = Order::create([
+                'order_number' => Order::generateOrderNumber(),
+                'order_date' => now(),
                 'customer_name' => $request->customer_name,
                 'customer_lastname' => $request->customer_lastname,
                 'customer_dni' => $request->customer_dni,
@@ -156,6 +162,10 @@ class OrderController extends Controller
                 'delivery_address' => $request->delivery_address,
                 'order_type' => $request->order_type,
                 'payment_method' => $request->payment_method,
+                'billing_type' => $request->billing_type ?? 'boleta',
+                'business_name' => $request->business_name,
+                'ruc' => $request->ruc,
+                'fiscal_address' => $request->fiscal_address,
                 'notes' => $request->notes,
                 'status' => 'pending',
                 'payment_status' => 'pending',

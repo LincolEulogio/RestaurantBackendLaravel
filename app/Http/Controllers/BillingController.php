@@ -3,7 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\Invoice;
+use App\Models\Setting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OrderInvoiceMail;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class BillingController extends Controller
 {
@@ -18,18 +24,28 @@ class BillingController extends Controller
         $dateTo = $request->input('date_to');
         $orderTypeFilter = $request->input('order_type_filter', 'all');
 
-        // Base query
+        // Base query - Only show orders that are 'ready' or need a bill
         $query = Order::with(['items.product', 'table'])
             ->where('status', 'ready');
 
-        // Contextual Filter based on Role
-        $user = auth()->user();
+        // Logic: Online orders that are already PAID (Card) should NOT show up here
+        // as they are already processed automatically.
+        // We only show:
+        // 1. All Waiter/QR orders (needs payment)
+        // 2. Online orders that are PENDING payment (Cash, Yape, Plin verification)
+        $query->where(function ($q) {
+            $q->whereIn('order_source', ['waiter', 'qr', 'web_pos']) // In-person sources
+              ->orWhere(function ($sub) {
+                  $sub->whereIn('order_source', ['web', 'online'])
+                      ->where('payment_status', '!=', 'paid'); // Online but still needs money or verification
+              });
+        });
 
+        // Contextual Filter based on Role (Keep restrictions if any)
+        $user = auth()->user();
         if ($user->hasRole('cashier')) {
-            // Cashier: Sees everything EXCEPT Online orders (so they see Waiter, QR, Null, etc.)
             $query->whereNotIn('order_source', ['web', 'online']);
         } elseif ($user->hasRole('delivery')) {
-            // Delivery: Only sees orders from Web/Online
             $query->whereIn('order_source', ['web', 'online']);
         }
 
@@ -131,38 +147,71 @@ class BillingController extends Controller
             return back()->with('error', 'El monto recibido es insuficiente');
         }
 
-        // Update order status and payment status
-        $userId = auth()->id();
-        $order->payment_status = 'paid';
-        $order->save();
+        // Update order status and payment status using the centralized model method
+        DB::beginTransaction();
+        try {
+            $invoice = $order->finalizeAndInvoice();
 
-        $order->updateStatus('delivered', $userId, "Pagado con {$request->payment_method}");
+            // Automation: Release table and close session if it's a dine-in/waiter order
+            if ($order->table_id && $order->table) {
+                $table = $order->table;
+                
+                if ($table->currentSession) {
+                    $table->currentSession->update([
+                        'status' => 'completed',
+                        'completed_at' => now(),
+                    ]);
+                }
 
-        // Automation: Release table and close session if it's a dine-in/waiter order
-        if ($order->table_id && $order->table) {
-            $table = $order->table;
-            
-            // Close session
-            if ($table->currentSession) {
-                $table->currentSession->update([
-                    'status' => 'completed',
-                    'completed_at' => now(),
+                $table->update([
+                    'status' => 'available',
+                    'current_session_id' => null,
                 ]);
             }
 
-            // Free table
-            $table->update([
-                'status' => 'available',
-                'current_session_id' => null,
-            ]);
+            DB::commit();
+
+            // Calculate change
+            $change = $request->amount_received - $order->total;
+
+            return redirect()->route('billing.index')
+                ->with('success', "Pago procesado exitosamente. Comprobante {$invoice->invoice_number} generado.")
+                ->with('change', $change);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Error al procesar el pago: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Download or view the current invoice as PDF.
+     */
+    public function downloadInvoice(Order $order)
+    {
+        $invoice = Invoice::where('order_id', $order->id)->first();
+        if (!$invoice) {
+            return back()->with('error', 'No se ha generado un comprobante para este pedido aún.');
         }
 
-        // Calculate change
-        $change = $request->amount_received - $order->total;
+        $order->load(['items.product']);
+        $settings = Setting::pluck('value', 'key')->all();
 
-        return redirect()->route('billing.index')
-            ->with('success', 'Pago procesado exitosamente y mesa liberada')
-            ->with('change', $change);
+        $pdf = Pdf::loadView('billing.invoice_pdf', [
+            'invoice_type' => $invoice->invoice_type,
+            'invoice_number' => $invoice->invoice_number,
+            'date' => $invoice->created_at->format('d/m/Y H:i'),
+            'customer_name' => $invoice->customer_name,
+            'customer_document' => $invoice->customer_document_number,
+            'customer_address' => $invoice->customer_address,
+            'items' => $order->items,
+            'subtotal' => $invoice->subtotal,
+            'tax' => $order->tax ?: ($order->total / 1.18 * 0.18),
+            'total' => $invoice->total,
+            'settings' => $settings,
+        ]);
+
+        return $pdf->stream("{$invoice->invoice_number}.pdf");
     }
 
     /**
