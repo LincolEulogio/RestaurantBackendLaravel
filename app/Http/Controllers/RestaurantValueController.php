@@ -18,10 +18,10 @@ class RestaurantValueController extends Controller
             'is_active' => 'boolean',
         ]);
 
-        RestaurantValue::create($validated);
+        $value = RestaurantValue::create($validated);
         Cache::forget('landing_content');
 
-        return response()->json(['success' => true]);
+        return response()->json(['success' => true, 'data' => $value]);
     }
 
     public function update(Request $request, $id)

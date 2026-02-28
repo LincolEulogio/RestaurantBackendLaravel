@@ -28,10 +28,10 @@ class GalleryController extends Controller
             $validated['image_public_id'] = $image['public_id'];
         }
 
-        GalleryItem::create($validated);
+        $gallery = GalleryItem::create($validated);
         Cache::forget('landing_content');
 
-        return response()->json(['success' => true]);
+        return response()->json(['success' => true, 'data' => $gallery]);
     }
 
     public function update(Request $request, $id)

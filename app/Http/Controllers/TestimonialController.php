@@ -31,10 +31,10 @@ class TestimonialController extends Controller
             $validated['image_public_id'] = $image['public_id'];
         }
 
-        Testimonial::create($validated);
+        $testimonial = Testimonial::create($validated);
         Cache::forget('landing_content');
 
-        return response()->json(['success' => true]);
+        return response()->json(['success' => true, 'data' => $testimonial]);
     }
 
     public function update(Request $request, $id)

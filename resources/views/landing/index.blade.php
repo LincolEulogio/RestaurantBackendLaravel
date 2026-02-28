@@ -153,6 +153,7 @@
                 <table class="w-full text-left text-sm">
                     <thead class="bg-gray-50 dark:bg-gray-700 text-xs uppercase text-gray-700 dark:text-gray-200">
                         <tr>
+                            <th class="px-6 py-4">ID</th>
                             <th class="px-6 py-4">Cliente</th>
                             <th class="px-6 py-4">Calificación</th>
                             <th class="px-6 py-4">Texto</th>
@@ -162,6 +163,7 @@
                     <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                         <template x-for="t in testimonials" :key="t.id">
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                <td class="px-6 py-4 font-mono text-xs text-gray-400" x-text="'#' + t.id"></td>
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-3">
                                         <img :src="t.image_url || 'https://ui-avatars.com/api/?name='+t.name" class="w-10 h-10 rounded-full object-cover">
@@ -182,11 +184,12 @@
                                 </td>
                                 <td class="px-6 py-4 max-w-xs truncate" x-text="t.text"></td>
                                 <td class="px-6 py-4 text-right">
-                                    <div class="flex justify-end gap-2">
-                                        <button @click="editTestimonial(t)" class="p-2 text-gray-400 hover:text-blue-600"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
-                                        <button @click="deleteTestimonial(t.id)" class="p-2 text-gray-400 hover:text-rose-600"><i data-lucide="trash" class="w-4 h-4"></i></button>
-                                    </div>
-                                </td>
+                                     <div class="flex justify-end gap-2">
+                                         <button @click="viewTestimonial(t)" class="p-2 text-gray-400 hover:text-blue-600" title="Ver detalle"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                                         <button @click="editTestimonial(t)" class="p-2 text-gray-400 hover:text-blue-600" title="Editar"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                         <button @click="deleteTestimonial(t.id)" class="p-2 text-gray-400 hover:text-rose-600" title="Eliminar"><i data-lucide="trash" class="w-4 h-4"></i></button>
+                                     </div>
+                                 </td>
                             </tr>
                         </template>
                     </tbody>

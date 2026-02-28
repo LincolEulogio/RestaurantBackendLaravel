@@ -8,9 +8,10 @@ export default () => ({
     gallery: window.landingData?.gallery || [],
     values: window.landingData?.values || [],
 
-    testimonialForm: { id: null, name: '', role: '', rating: 5, text: '', platform: 'Google Reviews', date_literal: 'Reciente', image: null },
-    galleryForm: { id: null, title: '', span_type: 'col-span-1 row-span-1', order: 0, image: null },
+    testimonialForm: { id: null, name: '', role: '', rating: 5, text: '', platform: 'Google Reviews', date_literal: 'Reciente', image: null, image_url: null },
+    galleryForm: { id: null, title: '', span_type: 'col-span-1 row-span-1', order: 0, image: null, image_url: null },
     valueForm: { id: null, title: '', description: '', icon: 'Heart', order: 0 },
+    modalMode: 'create', // create, edit, view
 
     init() {
         this.$watch('activeTab', (val) => {
@@ -22,6 +23,7 @@ export default () => ({
     openCreateModal(type) {
         this.modalType = type;
         this.isEdit = false;
+        this.modalMode = 'create';
         this.resetForms();
         this.openModal = true;
     },
@@ -32,8 +34,8 @@ export default () => ({
     },
 
     resetForms() {
-        this.testimonialForm = { id: null, name: '', role: '', rating: 5, text: '', platform: 'Google Reviews', date_literal: 'Reciente', image: null };
-        this.galleryForm = { id: null, title: '', span_type: 'col-span-1 row-span-1', order: 0, image: null };
+        this.testimonialForm = { id: null, name: '', role: '', rating: 5, text: '', platform: 'Google Reviews', date_literal: 'Reciente', image: null, image_url: null };
+        this.galleryForm = { id: null, title: '', span_type: 'col-span-1 row-span-1', order: 0, image: null, image_url: null };
         this.valueForm = { id: null, title: '', description: '', icon: 'Heart', order: 0 };
     },
 
@@ -84,6 +86,7 @@ export default () => ({
     editValue(val) {
         this.valueForm = { ...val };
         this.isEdit = true;
+        this.modalMode = 'edit';
         this.modalType = 'value';
         this.openModal = true;
     },
@@ -93,14 +96,24 @@ export default () => ({
             const { id, ...data } = this.valueForm;
             const url = this.isEdit ? `/landing-values/${id}` : '/landing-values';
             
+            let response;
             if (this.isEdit) {
-                await axios.post(url, { ...data, _method: 'PUT' });
+                response = await axios.post(url, { ...data, _method: 'PUT' });
+                // Update local list
+                this.values = this.values.map(v => v.id === id ? { ...v, ...data } : v);
             } else {
-                await axios.post(url, data);
+                response = await axios.post(url, data);
+                // We'd ideally need the ID from response for full local update without reload
+                // For simplicity now, if ID is needed for further edits, we can push the response data
+                if (response.data.data) {
+                    this.values.push(response.data.data);
+                }
             }
             
             this.showSuccess('Valor guardado con éxito');
-            setTimeout(() => location.reload(), 1000);
+            this.closeModal();
+            // Re-init lucide if icons changed
+            this.$nextTick(() => { if(typeof lucide !== 'undefined') lucide.createIcons(); });
         } catch (error) {
             this.handleError(error, 'Error al guardar valor');
         }
@@ -122,20 +135,23 @@ export default () => ({
             if (result.isConfirmed) {
                 try {
                     await axios.delete(`/landing-values/${id}`);
+                    this.values = this.values.filter(v => v.id !== id);
                     this.showSuccess('Valor eliminado');
-                    setTimeout(() => location.reload(), 1000);
                 } catch (error) {
                     this.handleError(error, 'Error al eliminar');
                 }
-            }
-        } else {
-            if (confirm('¿Eliminar este valor?')) {
-                // fallback
             }
         }
     },
 
     // TESTIMONIALS CRUD
+    viewTestimonial(t) {
+        this.testimonialForm = { ...t, image: null };
+        this.modalMode = 'view';
+        this.modalType = 'testimonial';
+        this.openModal = true;
+    },
+
     editTestimonial(t) {
         this.testimonialForm = { 
             id: t.id,
@@ -145,9 +161,11 @@ export default () => ({
             text: t.text,
             platform: t.platform || 'Google Reviews',
             date_literal: t.date_literal || 'Reciente',
-            image: null 
+            image: null,
+            image_url: t.image_url
         };
         this.isEdit = true;
+        this.modalMode = 'edit';
         this.modalType = 'testimonial';
         this.openModal = true;
     },
@@ -155,8 +173,6 @@ export default () => ({
     async saveTestimonial() {
         try {
             const formData = new FormData();
-            
-            // Campos básicos
             const fields = ['name', 'role', 'rating', 'text', 'platform', 'date_literal'];
             fields.forEach(f => {
                 if (this.testimonialForm[f] !== null && this.testimonialForm[f] !== undefined) {
@@ -164,22 +180,27 @@ export default () => ({
                 }
             });
 
-            // Archivo
             if (this.testimonialForm.image instanceof File) {
                 formData.append('image', this.testimonialForm.image);
             }
             
-            if (this.isEdit) {
-                formData.append('_method', 'PUT');
-            }
+            if (this.isEdit) formData.append('_method', 'PUT');
             
             const url = this.isEdit ? `/landing-testimonials/${this.testimonialForm.id}` : '/landing-testimonials';
-            await axios.post(url, formData, { 
+            const response = await axios.post(url, formData, { 
                 headers: { 'Content-Type': 'multipart/form-data' } 
             });
             
+            const updatedData = response.data.data;
+            if (this.isEdit) {
+                this.testimonials = this.testimonials.map(t => t.id === updatedData.id ? updatedData : t);
+            } else {
+                this.testimonials.push(updatedData);
+            }
+
             this.showSuccess('Testimonio guardado con éxito');
-            setTimeout(() => location.reload(), 1000);
+            this.closeModal();
+            this.$nextTick(() => { if(typeof lucide !== 'undefined') lucide.createIcons(); });
         } catch (error) {
             this.handleError(error, 'Error al guardar testimonio');
         }
@@ -201,8 +222,8 @@ export default () => ({
             if (result.isConfirmed) {
                 try {
                     await axios.delete(`/landing-testimonials/${id}`);
+                    this.testimonials = this.testimonials.filter(t => t.id !== id);
                     this.showSuccess('Testimonio eliminado');
-                    setTimeout(() => location.reload(), 1000);
                 } catch (error) {
                     this.handleError(error, 'Error al eliminar');
                 }
@@ -217,9 +238,11 @@ export default () => ({
             title: item.title,
             span_type: item.span_type,
             order: item.order,
-            image: null 
+            image: null,
+            image_url: item.image_url
         };
         this.isEdit = true;
+        this.modalMode = 'edit';
         this.modalType = 'gallery';
         this.openModal = true;
     },
@@ -235,17 +258,23 @@ export default () => ({
                 formData.append('image', this.galleryForm.image);
             }
             
-            if (this.isEdit) {
-                formData.append('_method', 'PUT');
-            }
+            if (this.isEdit) formData.append('_method', 'PUT');
             
             const url = this.isEdit ? `/landing-gallery/${this.galleryForm.id}` : '/landing-gallery';
-            await axios.post(url, formData, { 
+            const response = await axios.post(url, formData, { 
                 headers: { 'Content-Type': 'multipart/form-data' } 
             });
             
+            const updatedData = response.data.data;
+            if (this.isEdit) {
+                this.gallery = this.gallery.map(item => item.id === updatedData.id ? updatedData : item);
+            } else {
+                this.gallery.push(updatedData);
+            }
+
             this.showSuccess('Imagen guardada con éxito');
-            setTimeout(() => location.reload(), 1000);
+            this.closeModal();
+            this.$nextTick(() => { if(typeof lucide !== 'undefined') lucide.createIcons(); });
         } catch (error) {
             this.handleError(error, 'Error al guardar imagen');
         }
@@ -267,8 +296,8 @@ export default () => ({
             if (result.isConfirmed) {
                 try {
                     await axios.delete(`/landing-gallery/${id}`);
+                    this.gallery = this.gallery.filter(item => item.id !== id);
                     this.showSuccess('Imagen eliminada');
-                    setTimeout(() => location.reload(), 1000);
                 } catch (error) {
                     this.handleError(error, 'Error al eliminar');
                 }
