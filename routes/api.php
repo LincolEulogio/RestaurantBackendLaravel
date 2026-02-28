@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\AIMenuController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -76,3 +77,6 @@ Route::prefix('payment')->group(function () {
     Route::post('/process-manual', [\App\Http\Controllers\Api\PaymentController::class, 'processManual']);
     Route::post('/webhook', [\App\Http\Controllers\Api\PaymentController::class, 'webhook']);
 });
+
+// AI Assistant Route
+Route::post('/ai/ask', [AIMenuController::class, 'ask']);
