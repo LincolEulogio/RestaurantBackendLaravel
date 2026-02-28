@@ -739,8 +739,7 @@
                                                 method="POST">
                                                 @csrf
                                                 <input type="hidden" name="payment_method" :value="paymentMethod">
-                                                <input type="hidden" name="amount_received"
-                                                    :value="paymentMethod === 'cash' ? amountReceived : currentTotal">
+                                                <input type="hidden" name="amount_received" :value="amountReceived">
                                                 <button type="button" @click="handlePayment()" :disabled="!canSubmit"
                                                     :class="canSubmit ? 'bg-gray-900 hover:bg-black text-white' :
                                                         'bg-gray-300 text-gray-500 cursor-not-allowed'"
@@ -1138,13 +1137,37 @@
                         }
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            // Notify via WhatsApp
-                            const msg = `¡Hola ${customerName}! Hemos verificado tu pago de ${total} por tu pedido ${orderNum}. Tu pedido ya está en preparación y pronto estará en camino. ¡Gracias por tu compra!`;
-                            this.sendWhatsApp(this.selectedOrder.customer_phone, msg);
+                            // 1. Prepare data
+                            const method = this.selectedOrder.payment_method;
+                            const total = this.selectedOrder.total;
                             
-                            this.paymentMethod = this.selectedOrder.payment_method;
-                            this.amountReceived = this.selectedOrder.total;
-                            this.submitPayment();
+                            // 2. Notify via WhatsApp
+                            const msg = `¡Hola ${customerName}! Hemos verificado tu pago de ${this.formatMoney(total)} por tu pedido ${orderNum}. Tu pedido ya está en preparación y pronto estará en camino. ¡Gracias por tu compra!`;
+                            this.sendWhatsApp(this.selectedOrder.customer_phone, msg);
+
+                            // 3. Process via AJAX (Reliable)
+                            fetch(`/billing/${this.selectedOrderId}/payment`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                                },
+                                body: JSON.stringify({
+                                    payment_method: method,
+                                    amount_received: total
+                                })
+                            })
+                            .then(response => {
+                                if (response.ok) {
+                                    window.location.reload();
+                                } else {
+                                    Swal.fire('Error', 'No se pudo procesar el pago en el servidor.', 'error');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                Swal.fire('Error', 'Fallo de conexión.', 'error');
+                            });
                         }
                     });
                 },

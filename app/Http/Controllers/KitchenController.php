@@ -50,6 +50,15 @@ class KitchenController extends Controller
         } else {
             $query->whereIn('status', ['pending', 'confirmed', 'preparing', 'ready']);
         }
+
+        // SECURITY: For Web/Online orders, ONLY show if they are PAID
+        $query->where(function($q) {
+            $q->whereNotIn('order_source', ['web', 'online'])
+              ->orWhere(function($sub) {
+                  $sub->whereIn('order_source', ['web', 'online'])
+                      ->where('payment_status', 'paid');
+              });
+        });
         
         // Filter by table
         if ($request->has('table_id') && $request->table_id) {
@@ -101,6 +110,15 @@ class KitchenController extends Controller
         } else {
             $query->whereIn('status', ['pending', 'confirmed', 'preparing', 'ready']);
         }
+
+        // SECURITY: For Web/Online orders, ONLY show if they are PAID
+        $query->where(function($q) {
+            $q->whereNotIn('order_source', ['web', 'online'])
+              ->orWhere(function($sub) {
+                  $sub->whereIn('order_source', ['web', 'online'])
+                      ->where('payment_status', 'paid');
+              });
+        });
         
         // Filter by table
         if ($request->has('table_id') && $request->table_id) {

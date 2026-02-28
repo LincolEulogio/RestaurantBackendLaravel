@@ -24,28 +24,27 @@ class BillingController extends Controller
         $dateTo = $request->input('date_to');
         $orderTypeFilter = $request->input('order_type_filter', 'all');
 
-        // Base query - Only show orders that are 'ready' or need a bill
+        // Base query - Show:
+        // 1. Orders that are 'ready' (Kitchen finished them, needs collection/payment)
+        // 2. Web orders that are 'pending' or 'confirmed' but NOT yet paid (Needs verification BEFORE kitchen)
         $query = Order::with(['items.product', 'table'])
-            ->where('status', 'ready');
+            ->where(function($q) {
+                // 1. Ready orders that still need to be PAID (Mental: in-person orders)
+                $q->where('status', 'ready')
+                  ->where('payment_status', '!=', 'paid')
+                  // 2. Web orders waiting for initial verification
+                  ->orWhere(function($sub) {
+                      $sub->whereIn('order_source', ['web', 'online'])
+                          ->where('payment_status', '!=', 'paid')
+                          ->whereIn('status', ['pending', 'confirmed', 'preparing', 'ready']);
+                  });
+            });
 
-        // Logic: Online orders that are already PAID (Card) should NOT show up here
-        // as they are already processed automatically.
-        // We only show:
-        // 1. All Waiter/QR orders (needs payment)
-        // 2. Online orders that are PENDING payment (Cash, Yape, Plin verification)
-        $query->where(function ($q) {
-            $q->whereIn('order_source', ['waiter', 'qr', 'web_pos']) // In-person sources
-              ->orWhere(function ($sub) {
-                  $sub->whereIn('order_source', ['web', 'online'])
-                      ->where('payment_status', '!=', 'paid'); // Online but still needs money or verification
-              });
-        });
-
-        // Contextual Filter based on Role (Keep restrictions if any)
+        // Contextual Filter based on Role:
+        // Cashiers should see EVERYTHING that needs verification or is ready to be closed.
+        // Delivery should only see Web/Online orders that are Ready.
         $user = auth()->user();
-        if ($user->hasRole('cashier')) {
-            $query->whereNotIn('order_source', ['web', 'online']);
-        } elseif ($user->hasRole('delivery')) {
+        if ($user->hasRole('delivery')) {
             $query->whereIn('order_source', ['web', 'online']);
         }
 
@@ -133,23 +132,55 @@ class BillingController extends Controller
     public function processPayment(Request $request, Order $order)
     {
         $request->validate([
-            'payment_method' => 'required|in:cash,card,yape,plin,transfer,online',
-            'amount_received' => 'required|numeric|min:0',
+            'payment_method' => 'required',
+            'amount_received' => 'nullable|numeric|min:0',
         ]);
 
-        // Verify order is ready for payment
-        if ($order->status !== 'ready') {
-            return back()->with('error', 'Este pedido no está listo para cobrar');
-        }
-
-        // Verify amount received is sufficient
-        if ($request->amount_received < $order->total) {
-            return back()->with('error', 'El monto recibido es insuficiente');
-        }
-
-        // Update order status and payment status using the centralized model method
+        // Logic: Process Payment / Verification
         DB::beginTransaction();
         try {
+            // WEB ORDER LOGIC: Direct verification BEFORE kitchen
+            if (in_array($order->order_source, ['web', 'online']) && $order->payment_status !== 'paid') {
+                // Generate Invoice first (but keeping status under control)
+                $order->billing_type = $order->billing_type ?: 'boleta';
+                $invoiceType = $order->billing_type;
+                $prefix = ($invoiceType === 'factura' ? 'F' : 'B');
+                $count = Invoice::where('invoice_type', $invoiceType)->count() + 1;
+                $invoiceNumber = $prefix . sprintf('%03d', 1) . '-' . sprintf('%06d', $count);
+
+                $invoice = Invoice::create([
+                    'order_id' => $order->id,
+                    'invoice_number' => $invoiceNumber,
+                    'invoice_type' => $invoiceType,
+                    'customer_name' => $order->customer_name . ' ' . $order->customer_lastname,
+                    'customer_document_type' => $invoiceType === 'factura' ? 'RUC' : 'DNI',
+                    'customer_document_number' => $invoiceType === 'factura' ? $order->ruc : $order->customer_dni,
+                    'customer_address' => $order->fiscal_address ?: $order->delivery_address,
+                    'subtotal' => $order->subtotal,
+                    'tax' => $order->tax,
+                    'total' => $order->total,
+                    'status' => 'issued',
+                ]);
+
+                $order->update([
+                    'payment_status' => 'paid',
+                    'paid_at' => now(),
+                    'status' => 'confirmed' // Send to Kitchen
+                ]);
+                
+                // Track status history
+                $order->statusHistory()->create([
+                    'from_status' => 'pending',
+                    'to_status' => 'confirmed',
+                    'user_id' => auth()->id(),
+                    'notes' => "Pago web verificado. Boleta {$invoice->invoice_number} generada. Enviado a cocina."
+                ]);
+
+                DB::commit();
+                return redirect()->route('billing.index')->with('success', "Pago verificado. Boleta {$invoice->invoice_number} generada y pedido enviado a cocina.");
+            }
+
+            // REGULAR ORDER LOGIC: Collection of 'ready' orders
             $invoice = $order->finalizeAndInvoice();
 
             // Automation: Release table and close session if it's a dine-in/waiter order
