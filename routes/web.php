@@ -21,6 +21,10 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\TableController;
+use App\Http\Controllers\LandingController;
+use App\Http\Controllers\TestimonialController;
+use App\Http\Controllers\GalleryController;
+use App\Http\Controllers\RestaurantValueController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -113,6 +117,13 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
         Route::put('/settings', [SettingController::class, 'update'])->name('settings.update');
+
+        // Landing Page CMS
+        Route::get('/landing-page', [LandingController::class, 'index'])->name('landing-page.index');
+        Route::post('/landing-page/general', [LandingController::class, 'updateGeneral'])->name('landing-page.update-general');
+        Route::resource('landing-testimonials', TestimonialController::class);
+        Route::resource('landing-gallery', GalleryController::class);
+        Route::resource('landing-values', RestaurantValueController::class);
 
         // Payment Methods
         Route::post('/payment-methods', [PaymentMethodController::class, 'store'])->name('payment-methods.store');

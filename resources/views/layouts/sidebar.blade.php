@@ -111,6 +111,14 @@
                 </a>
             @endpermission
 
+            @permission('settings')
+                <a href="{{ route('landing-page.index') }}"
+                    class="flex items-center px-4 py-3 {{ request()->routeIs('landing-page.index') ? 'text-white bg-blue-600' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white' }} rounded-lg group">
+                    <i data-lucide="layout-template" class="w-5 h-5 mr-3"></i>
+                    Página de Inicio
+                </a>
+            @endpermission
+
             {{-- SECCIÓN: GESTIÓN --}}
             <div class="pt-4 pb-2">
                 <p class="px-4 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Gestión
@@ -265,6 +273,14 @@
                     class="flex items-center px-4 py-3 {{ request()->routeIs('blogs.*') ? 'text-white bg-blue-600' : 'text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:text-white dark:hover:text-white' }} rounded-lg group">
                     <i data-lucide="newspaper" class="w-5 h-5 mr-3"></i>
                     Blogs
+                </a>
+            @endpermission
+
+            @permission('settings')
+                <a href="{{ route('landing-page.index') }}"
+                    class="flex items-center px-4 py-3 {{ request()->routeIs('landing-page.index') ? 'text-white bg-blue-600' : 'text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:text-white dark:hover:text-white' }} rounded-lg group">
+                    <i data-lucide="layout-template" class="w-5 h-5 mr-3"></i>
+                    Página de Inicio
                 </a>
             @endpermission
 

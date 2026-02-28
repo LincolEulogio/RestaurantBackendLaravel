@@ -20,6 +20,7 @@ import billingManager from "./components/billing-manager";
 import reportsManager from "./components/reports-manager";
 import settingsManager from "./components/settings-manager";
 import tablesManager from "./components/tables-manager";
+import landingManager from "./components/landing-manager";
 
 window.Chart = Chart;
 window.Alpine = Alpine;
@@ -48,6 +49,7 @@ Alpine.data("reportsManager", reportsManager);
 Alpine.data("promotionsManager", promotionsManager);
 Alpine.data("settingsManager", settingsManager);
 Alpine.data("tablesManager", tablesManager);
+Alpine.data("landingManager", landingManager);
 
 Alpine.start();
 

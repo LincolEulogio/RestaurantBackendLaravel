@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Route;
 // Public API routes for frontend
 Route::get('/products', [ProductController::class, 'apiIndex']);
 Route::get('/categories', [CategoryController::class, 'apiIndex']);
+Route::get('/landing/content', [\App\Http\Controllers\Api\LandingContentController::class, 'index']);
 
 Route::post('/login', [\App\Http\Controllers\Api\AuthController::class, 'login']);
 
