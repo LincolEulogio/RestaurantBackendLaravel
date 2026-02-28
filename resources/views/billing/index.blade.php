@@ -609,52 +609,61 @@
                         <div
                             class="p-6 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] z-10">
 
-                            <!-- Total Row -->
-                            <div class="flex justify-between items-end mb-6">
-                                <span class="text-gray-500 dark:text-gray-400 font-bold">Total Final</span>
-                                <span class="text-4xl font-black text-gray-900 dark:text-white tabular-nums"
-                                    x-text="formatMoney(currentTotal)"></span>
-                                    {{-- Web Verification Section --}}
-                                    <template x-if="['web', 'online'].includes(selectedOrder.order_source) && selectedOrder.payment_method">
-                                        <div class="space-y-6 animate-in fade-in zoom-in duration-300">
-                                            <div class="bg-blue-50 dark:bg-blue-900/10 rounded-3xl p-6 border-2 border-blue-100 dark:border-blue-900/30">
-                                                <div class="flex items-center gap-4 mb-4 text-blue-800 dark:text-blue-400">
-                                                    <div class="bg-blue-600 rounded-2xl p-3 text-white shadow-lg">
-                                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                                        </svg>
-                                                    </div>
-                                                    <div>
-                                                        <p class="text-xs font-black uppercase tracking-widest opacity-70">Validación de Pago Web</p>
-                                                        <p class="text-lg font-black tracking-tight" x-text="'Metodo: ' + selectedOrder.payment_method.toUpperCase()"></p>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div class="bg-white dark:bg-gray-800/80 rounded-2xl p-4 border border-blue-50 dark:border-blue-900/20 text-center">
-                                                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Monto a Corroborar</p>
-                                                    <p class="text-4xl font-black text-blue-600 dark:text-blue-400 tabular-nums animate-pulse" x-text="formatMoney(selectedOrder.total)"></p>
-                                                </div>
+                            <!-- Total Row & Web Verification -->
+                            <div class="space-y-4">
+                                {{-- Regular Total Row (Hidden for web orders with pre-set payment) --}}
+                                <template x-if="!(['web', 'online'].includes(selectedOrder.order_source) && selectedOrder.payment_method)">
+                                    <div class="flex justify-between items-end mb-4">
+                                        <span class="text-gray-500 dark:text-gray-400 font-bold">Total Final</span>
+                                        <span class="text-4xl font-black text-gray-900 dark:text-white tabular-nums"
+                                            x-text="formatMoney(currentTotal)"></span>
+                                    </div>
+                                </template>
 
-                                                <div class="mt-4 flex flex-col gap-2">
-                                                    <button type="button" 
-                                                        @click="confirmVerifyWebPayment()"
-                                                        class="w-full bg-blue-600 hover:bg-black text-white font-black py-4 rounded-2xl shadow-xl shadow-blue-500/20 transition-all active:scale-95 flex items-center justify-center gap-2">
-                                                        <span>Verificar Pago Recibido</span>
-                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-                                                        </svg>
-                                                    </button>
+                                {{-- Web Verification Section (Dedicated Flow) --}}
+                                <template x-if="['web', 'online'].includes(selectedOrder.order_source) && selectedOrder.payment_method">
+                                    <div class="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                        <div class="bg-blue-50 dark:bg-blue-900/10 rounded-[2.5rem] p-8 border-2 border-blue-100 dark:border-blue-900/30">
+                                            <div class="flex items-center gap-5 mb-6">
+                                                <div class="bg-blue-600 rounded-2xl p-4 text-white shadow-xl shadow-blue-500/30">
+                                                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                    </svg>
+                                                </div>
+                                                <div>
+                                                    <p class="text-[10px] font-black uppercase tracking-widest text-blue-600/60 dark:text-blue-400/60 mb-1">Validación Requerida</p>
+                                                    <p class="text-xl font-black text-blue-900 dark:text-blue-100" x-text="'Metodo: ' + selectedOrder.payment_method.toUpperCase()"></p>
                                                 </div>
                                             </div>
                                             
-                                            <div class="flex items-center gap-2 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700">
-                                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                                </svg>
-                                                <p class="text-[11px] font-bold text-gray-500">Valida en tu dispositivo el ingreso del monto exacto antes de marcar como verificado.</p>
+                                            <div class="bg-white dark:bg-gray-800/80 rounded-3xl p-6 border border-blue-100 dark:border-blue-900/20 shadow-inner text-center">
+                                                <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-2">Total a Cobrar</p>
+                                                <p class="text-5xl font-black text-blue-600 dark:text-blue-400 tabular-nums tracking-tighter" x-text="formatMoney(selectedOrder.total)"></p>
+                                            </div>
+
+                                            <div class="mt-8">
+                                                <button type="button" 
+                                                    @click="confirmVerifyWebPayment()"
+                                                    class="w-full bg-blue-600 hover:bg-black text-white font-black py-5 rounded-[2rem] shadow-2xl shadow-blue-600/30 transition-all hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-3">
+                                                    <span class="text-lg">Verificar y Generar Boleta</span>
+                                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                                    </svg>
+                                                </button>
                                             </div>
                                         </div>
-                                    </template>
+                                        
+                                        <div class="flex items-center gap-3 p-5 bg-gray-50 dark:bg-gray-800/50 rounded-3xl border border-dashed border-gray-200 dark:border-gray-700">
+                                            <div class="bg-gray-200 dark:bg-gray-700 p-2 rounded-full">
+                                                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                </svg>
+                                            </div>
+                                            <p class="text-[11px] font-bold text-gray-500 leading-relaxed">Confirma en tu app el ingreso exacto antes de continuar. El pedido se marcará como pagado.</p>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
 
                                     {{-- OLD Logic: Only for In-Person or Orders without pre-set method --}}
                                     <template x-if="!['web', 'online'].includes(selectedOrder.order_source) || !selectedOrder.payment_method">
