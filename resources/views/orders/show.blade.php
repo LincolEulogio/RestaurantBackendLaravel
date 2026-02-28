@@ -296,4 +296,30 @@
             </div>
         </div>
     </div>
+
+    @if(session('trigger_whatsapp'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const data = @json(session('trigger_whatsapp'));
+            let phone = data.phone.replace(/\D/g, '');
+            if (phone.length === 9) phone = '51' + phone;
+            
+            const encodedMsg = encodeURIComponent(data.message);
+            const waUrl = `https://wa.me/${phone}?text=${encodedMsg}`;
+            
+            Swal.fire({
+                title: '¿Enviar notificación?',
+                text: "Se abrirá WhatsApp para notificar al cliente.",
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, enviar',
+                cancelButtonText: 'Ahora no'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.open(waUrl, '_blank');
+                }
+            });
+        });
+    </script>
+    @endif
 </x-app-layout>

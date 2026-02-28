@@ -330,4 +330,35 @@ class Order extends Model
 
         return $invoice;
     }
+
+    /**
+     * Generate WhatsApp message for status updates
+     */
+    public function getWhatsAppMessageForStatus(string $status): ?string
+    {
+        $trackingUrl = "http://localhost:3000/track?code={$this->order_number}";
+        $customerName = $this->customer_name ?: 'Cliente';
+
+        return match ($status) {
+            'in_transit' => "¡Buenas noticias, *{$customerName}*! 🛵\n\nTu pedido *{$this->order_number}* ya está en camino. El repartidor llegará pronto a tu ubicación.\n\nSigue el recorrido en tiempo real aquí:\n{$trackingUrl}\n\n¡Gracias por tu preferencia! 🍕",
+            'delivered' => "¡Pedido Entregado! 🎉\n\nHola *{$customerName}*, esperamos que hayas disfrutado tu comida. Nos encantaría saber tu opinión.\n\n¿Qué tal estuvo todo? (1-5 ⭐)\n\nTu opinión nos ayuda a mejorar. ¡Regresa pronto! 🍕",
+            default => null,
+        };
+    }
+
+    /**
+     * Deduct order items ingredients from inventory
+     */
+    public function deductFromInventory(): void
+    {
+        foreach ($this->items as $item) {
+            $product = $item->product;
+            if ($product && $product->ingredients) {
+                foreach ($product->ingredients as $ingredient) {
+                    $quantityToDeduct = $ingredient->pivot->quantity * $item->quantity;
+                    $ingredient->decrement('stock_current', $quantityToDeduct);
+                }
+            }
+        }
+    }
 }

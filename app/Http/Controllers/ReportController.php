@@ -255,6 +255,9 @@ class ReportController extends Controller
 
         $cashRevenue = $paymentMethods->where('payment_method', 'cash')->sum('revenue');
         $cardRevenue = $paymentMethods->where('payment_method', 'card')->sum('revenue');
+        $yapeRevenue = $paymentMethods->where('payment_method', 'yape')->sum('revenue');
+        $plinRevenue = $paymentMethods->where('payment_method', 'plin')->sum('revenue');
+        
         $dineInOrders = $orderTypes->where('order_type', 'dine_in')->first()->count ?? 0;
         $takeawayOrders = $orderTypes->where('order_type', 'takeaway')->first()->count ?? 0;
         $deliveryOrders = $orderTypes->where('order_type', 'delivery')->first()->count ?? 0;
@@ -280,6 +283,8 @@ class ReportController extends Controller
             'peakHours' => $peakHours,
             'cashRevenue' => $cashRevenue,
             'cardRevenue' => $cardRevenue,
+            'yapeRevenue' => $yapeRevenue,
+            'plinRevenue' => $plinRevenue,
             'dineInOrders' => $dineInOrders,
             'takeawayOrders' => $takeawayOrders,
             'deliveryOrders' => $deliveryOrders,

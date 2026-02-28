@@ -102,6 +102,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/billing/{order}/reject-payment', [BillingController::class, 'rejectPayment'])->name('billing.reject-payment');
         Route::get('/billing/{order}/download-invoice', [BillingController::class, 'downloadInvoice'])->name('billing.download-invoice');
         Route::get('/billing/{order}/details', [BillingController::class, 'getOrderDetails'])->name('billing.order-details');
+        Route::get('/billing/lookup-ruc/{ruc}', [BillingController::class, 'lookupRuc'])->name('billing.lookup-ruc');
     });
 
     // SETTINGS - Requires 'settings' permission

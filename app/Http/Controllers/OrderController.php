@@ -90,8 +90,20 @@ class OrderController extends Controller
         $userId = $user ? $user->getAuthIdentifier() : null;
         $order->updateStatus($request->status, $userId, $request->notes);
 
-        return redirect()->route('orders.show', $order)
+        // Professional Notification Logic
+        $waMessage = $order->getWhatsAppMessageForStatus($request->status);
+        
+        $redirect = redirect()->route('orders.show', $order)
             ->with('success', 'Estado del pedido actualizado correctamente');
+
+        if ($waMessage && $order->customer_phone) {
+            $redirect->with('trigger_whatsapp', [
+                'phone' => $order->customer_phone,
+                'message' => $waMessage
+            ]);
+        }
+
+        return $redirect;
     }
 
     /**

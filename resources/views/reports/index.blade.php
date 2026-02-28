@@ -246,6 +246,43 @@
             </x-ui.card>
         </div>
 
+        <!-- Z-REPORT / ARQUEO DE CAJA (NEW) -->
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white mt-8 mb-4 flex items-center gap-2">
+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+            </svg>
+            Arqueo de Caja (Z-Report)
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Cash -->
+            <x-ui.card class="p-6 border-l-4 border-green-500">
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Efectivo</p>
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mt-2">{{ formatMoney($cashRevenue) }}</h3>
+                <div class="mt-2 text-xs text-green-600 font-semibold bg-green-50 inline-block px-2 py-1 rounded">Dinero en Caja</div>
+            </x-ui.card>
+
+            <!-- Yape -->
+            <x-ui.card class="p-6 border-l-4 border-purple-600">
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Yape</p>
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mt-2">{{ formatMoney($yapeRevenue) }}</h3>
+                <div class="mt-2 text-xs text-purple-600 font-semibold bg-purple-50 inline-block px-2 py-1 rounded">Billetera Digital</div>
+            </x-ui.card>
+
+            <!-- Plin -->
+            <x-ui.card class="p-6 border-l-4 border-cyan-400">
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Plin</p>
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mt-2">{{ formatMoney($plinRevenue) }}</h3>
+                <div class="mt-2 text-xs text-cyan-600 font-semibold bg-cyan-50 inline-block px-2 py-1 rounded">Billetera Digital</div>
+            </x-ui.card>
+
+            <!-- Card -->
+            <x-ui.card class="p-6 border-l-4 border-blue-500">
+                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Tarjeta</p>
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mt-2">{{ formatMoney($cardRevenue) }}</h3>
+                <div class="mt-2 text-xs text-blue-600 font-semibold bg-blue-50 inline-block px-2 py-1 rounded">POS / Online</div>
+            </x-ui.card>
+        </div>
+
         <!-- Operational Metrics - Row 3 (NEW) -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <!-- Metric 9: Net Profit -->

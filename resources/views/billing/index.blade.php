@@ -1249,6 +1249,40 @@
                     return true;
                 },
 
+                lookupRucData() {
+                    const ruc = this.selectedOrder.ruc;
+                    if (!ruc || ruc.length !== 11) {
+                        Swal.fire('Error', 'El RUC debe tener 11 dígitos', 'error');
+                        return;
+                    }
+
+                    this.loadingRuc = true;
+                    fetch(`/billing/lookup-ruc/${ruc}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                this.selectedOrder.business_name = data.data.business_name;
+                                this.selectedOrder.fiscal_address = data.data.address;
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Datos encontrados',
+                                    text: `Razón Social: ${data.data.business_name}`,
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                });
+                            } else {
+                                Swal.fire('Error', data.message || 'RUC no encontrado', 'error');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error lookup RUC:', error);
+                            Swal.fire('Error', 'No se pudo conectar con el servicio de SUNAT', 'error');
+                        })
+                        .finally(() => {
+                            this.loadingRuc = false;
+                        });
+                },
+
                 formatMoney(amount) {
                     return 'S/ ' + parseFloat(amount).toFixed(2);
                 }

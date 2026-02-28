@@ -167,6 +167,15 @@ class KitchenController extends Controller
         $userId = auth()->id();
         $order->updateStatus($request->status, $userId);
 
+        // Auto-deduct inventory if status is READY
+        if ($request->status === 'ready') {
+            try {
+                $order->deductFromInventory();
+            } catch (\Exception $e) {
+                \Log::error("Inventory deduction failed for order {$order->id}: " . $e->getMessage());
+            }
+        }
+
         return redirect()->route('kitchen.index')
             ->with('success', 'Estado del pedido actualizado');
     }
