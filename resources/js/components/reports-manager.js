@@ -13,6 +13,36 @@ export default () => ({
         new URLSearchParams(window.location.search).get("end_date") ||
         new Date().toISOString().split("T")[0],
 
+    // AI Analysis State
+    aiAnalysis: "",
+    aiPrompt: "",
+    loadingAI: false,
+
+    async getAIAnalysis() {
+        this.loadingAI = true;
+        const currentPrompt = this.aiPrompt;
+        this.aiAnalysis = "";
+        
+        try {
+            const response = await fetch(
+                `/reports/ai-analysis?start_date=${this.startDate}&end_date=${this.endDate}&prompt=${encodeURIComponent(currentPrompt)}`
+            );
+            const data = await response.json();
+            if (data.success) {
+                this.aiAnalysis = data.analysis;
+                this.aiPrompt = ""; // Clear after success
+            } else {
+                this.aiAnalysis = "Error: No se pudo generar el análisis.";
+            }
+        } catch (error) {
+            console.error("AI Analysis Error:", error);
+            this.aiAnalysis =
+                "Error de conexión. Por favor, intente más tarde.";
+        } finally {
+            this.loadingAI = false;
+        }
+    },
+
     updateDates() {
         // Optional: validate dates here
     },

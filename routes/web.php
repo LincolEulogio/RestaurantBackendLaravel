@@ -86,6 +86,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/reports/export/excel', [ReportController::class, 'exportExcel'])->name('reports.export.excel');
         Route::get('/reports/export/pdf', [ReportController::class, 'exportPdf'])->name('reports.export.pdf');
         Route::get('/reports/print', [ReportController::class, 'print'])->name('reports.print');
+        Route::get('/reports/ai-analysis', [ReportController::class, 'getAIAnalysis'])->name('reports.ai-analysis');
     });
 
     // KITCHEN/KDS - Requires 'kitchen' permission

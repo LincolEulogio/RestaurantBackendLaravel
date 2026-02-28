@@ -246,6 +246,80 @@
             </x-ui.card>
         </div>
 
+        <!-- AI INSIGHTS CARD (INTERACTIVE CHAT) -->
+        <x-ui.card class="overflow-hidden border-none shadow-lg bg-gradient-to-br from-indigo-950 via-blue-900 to-indigo-900 text-white">
+            <div class="p-6 md:p-8">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 bg-white/20 rounded-lg backdrop-blur-md">
+                                <svg class="w-6 h-6 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                            </div>
+                            <h2 class="text-2xl font-bold">Asistente de Negocios IA</h2>
+                        </div>
+                        <p class="text-blue-100 text-sm max-w-xl">
+                            Pregúntame sobre tus ventas, qué platos promocionar o cómo mejorar tus métricas del periodo seleccionado.
+                        </p>
+                    </div>
+                    <button @click="getAIAnalysis()" 
+                            :disabled="loadingAI"
+                            class="hidden md:inline-flex items-center px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm transition-all">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                        Análisis Automático
+                    </button>
+                </div>
+
+                <!-- Interactive Prompt Area -->
+                <div class="relative mb-6">
+                    <input type="text" 
+                           x-model="aiPrompt" 
+                           @keydown.enter="getAIAnalysis()"
+                           placeholder="Escribe aquí tu consulta (ej. ¿Qué plato debería poner en oferta?) ..." 
+                           class="w-full bg-white/10 border border-white/20 rounded-2xl px-6 py-4 text-white placeholder-blue-200/50 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all backdrop-blur-sm shadow-inner"
+                           :disabled="loadingAI">
+                    <button @click="getAIAnalysis()" 
+                            :disabled="loadingAI || !aiPrompt.trim()"
+                            class="absolute right-2 top-2 bottom-2 bg-blue-500 hover:bg-blue-400 disabled:opacity-50 text-white px-6 rounded-xl transition-all flex items-center gap-2 shadow-lg">
+                        <span x-show="!loadingAI">Preguntar</span>
+                        <svg x-show="loadingAI" class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- AI Response Bubble -->
+                <div x-show="aiAnalysis || loadingAI" 
+                     x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter-start="opacity-0 transform translate-y-4"
+                     x-transition:enter-end="opacity-100 transform translate-y-0"
+                     class="relative">
+                    
+                    <div class="p-6 bg-white rounded-2xl shadow-2xl text-gray-800 border border-blue-100 overflow-hidden">
+                        <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0 w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold">IA</div>
+                            <div class="flex-1">
+                                <template x-if="loadingAI">
+                                    <div class="space-y-3 animate-pulse">
+                                        <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                                        <div class="h-4 bg-gray-200 rounded w-full"></div>
+                                        <div class="h-4 bg-gray-200 rounded w-5/6"></div>
+                                    </div>
+                                </template>
+                                <div x-show="!loadingAI" class="prose prose-sm max-w-none text-gray-700 leading-relaxed whitespace-pre-wrap" x-text="aiAnalysis"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Decorative peak -->
+                    <div class="absolute -top-3 left-10 w-6 h-6 bg-white transform rotate-45 border-l border-t border-blue-100"></div>
+                </div>
+            </div>
+        </x-ui.card>
+
         <!-- Z-REPORT / ARQUEO DE CAJA (NEW) -->
         <h2 class="text-xl font-bold text-gray-900 dark:text-white mt-8 mb-4 flex items-center gap-2">
             <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

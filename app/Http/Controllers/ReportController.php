@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exports\ReportsExport;
 use App\Models\Category;
 use App\Models\Order;
+use App\Services\AIService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -13,6 +14,13 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class ReportController extends Controller
 {
+    protected $ai;
+
+    public function __construct(AIService $ai)
+    {
+        $this->ai = $ai;
+    }
+
     /**
      * Display the reports dashboard.
      */
@@ -43,6 +51,42 @@ class ReportController extends Controller
         $data = $this->getReportData($request);
 
         return view('reports.print', $data);
+    }
+
+    /**
+     * Get AI Analysis using Gemini
+     */
+    public function getAIAnalysis(Request $request)
+    {
+        $data = $this->getReportData($request);
+        $userPrompt = $request->input('prompt', '');
+
+        // Prepare a context for Gemini with clinical data
+        $topProductsSummary = $data['topProducts']->map(fn($p) => "{$p->name} ({$p->total_quantity} sold)")->implode(', ');
+        $revenue = number_format($data['totalRevenue'], 2);
+        
+        $context = "CONTEXTO DEL RESTAURANTE (Periodo: {$data['startDate']} al {$data['endDate']}):
+        - Ventas: S/ {$revenue}
+        - Pedidos: {$data['completedOrders']}
+        - Cancelados: {$data['cancelledOrders']} (S/ " . number_format($data['cancelledAmount'], 2) . ")
+        - Ticket Promedio: S/ " . number_format($data['averageTicket'], 2) . "
+        - Top Ventas: {$topProductsSummary}
+        - Tendencia: " . ($data['revenueChange'] >= 0 ? '+' : '') . round($data['revenueChange'], 1) . "%";
+
+        if (empty($userPrompt)) {
+            $basePrompt = "Actúa como un Consultor experto. Proporciona: 1. Resumen corto, 2. Tres hallazgos clave, 3. Tres recomendaciones accionables. Usa emojis y Markdown.";
+        } else {
+            $basePrompt = "Responde a la siguiente CONSULTA DEL USUARIO usando el CONTEXTO anterior: \"{$userPrompt}\". Sé profesional y directo.";
+        }
+
+        $finalPrompt = "{$context}\n\nINSTUCCIÓN: {$basePrompt}";
+
+        $analysis = $this->ai->generateInsights($finalPrompt);
+
+        return response()->json([
+            'success' => true,
+            'analysis' => $analysis
+        ]);
     }
 
     private function getReportData(Request $request): array
