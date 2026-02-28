@@ -1007,15 +1007,11 @@
                         console.error("No phone number available for this order");
                         return;
                     }
-                    // Clean phone: remove non-numeric
                     let cleanPhone = phone.replace(/\D/g, '');
-                    // For Peru, if starts with 9 and length 9, add 51
-                    if (cleanPhone.length === 9 && cleanPhone.startsWith('9')) {
-                        cleanPhone = '51' + cleanPhone;
-                    }
+                    if (cleanPhone.length === 9) cleanPhone = '51' + cleanPhone;
                     
-                    const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
-                    window.open(url, '_blank');
+                    const encodedMsg = encodeURIComponent(message);
+                    window.open(`https://wa.me/${cleanPhone}?text=${encodedMsg}`, '_blank');
                 },
 
                 selectOrder(id, status) {
@@ -1142,7 +1138,8 @@
                             const total = this.selectedOrder.total;
                             
                             // 2. Notify via WhatsApp
-                            const msg = `¡Hola ${customerName}! Hemos verificado tu pago de ${this.formatMoney(total)} por tu pedido ${orderNum}. Tu pedido ya está en preparación y pronto estará en camino. ¡Gracias por tu compra!`;
+                            const trackingUrl = `http://localhost:3000/track?code=${orderNum}`;
+                            const msg = `¡Hola ${customerName}! 🍕\n\nHemos verificado tu pago de ${this.formatMoney(total)} por tu pedido *${orderNum}*.\n\nTu pedido ya está en preparación y pronto estará en camino. ✅\n\nPuedes seguir tu pedido en tiempo real aquí:\n${trackingUrl}\n\n¡Gracias por tu compra!`;
                             this.sendWhatsApp(this.selectedOrder.customer_phone, msg);
 
                             // 3. Process via AJAX (Reliable)
