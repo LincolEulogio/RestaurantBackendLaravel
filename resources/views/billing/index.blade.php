@@ -1044,7 +1044,7 @@
                         this.paymentMethod = '';
                     }
 
-                    this.amountReceived = '';
+                    this.amountReceived = this.currentTotal;
                     this.showCardModal = false;
                     this.showQRModal = false;
                     this.showCardInfoModal = false;

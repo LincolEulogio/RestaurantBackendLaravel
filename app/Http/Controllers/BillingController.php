@@ -202,8 +202,16 @@ class BillingController extends Controller
 
             DB::commit();
 
-            // Calculate change
-            $change = $request->amount_received - $order->total;
+            // Calculate change safely
+            $received = floatval($request->input('amount_received', $order->total));
+            $total = floatval($order->total);
+            
+            // Logic: If it's a digital payment and $received is empty, assume full payment
+            if ($request->payment_method !== 'cash' && (!$request->amount_received || floatval($request->amount_received) <= 0)) {
+                $received = $total;
+            }
+
+            $change = max(0, $received - $total);
 
             return redirect()->route('billing.index')
                 ->with('success', "Pago procesado exitosamente. Comprobante {$invoice->invoice_number} generado.")
