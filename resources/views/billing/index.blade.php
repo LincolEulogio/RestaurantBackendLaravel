@@ -998,6 +998,7 @@
                 selectedOrderPaymentStatus: '',
                 paymentMethod: 'cash',
                 amountReceived: 0,
+                frontendUrl: "{{ rtrim(env('FRONTEND_URL', 'http://localhost:3000'), '/') }}",
                 showQRModal: false,
                 showCardInfoModal: false,
 
@@ -1138,7 +1139,7 @@
                             const total = this.selectedOrder.total;
                             
                             // 2. Notify via WhatsApp
-                            const trackingUrl = `http://localhost:3000/track?code=${orderNum}`;
+                            const trackingUrl = `${this.frontendUrl}/track?code=${orderNum}`;
                             const msg = `¡Hola ${customerName}! 🍕\n\nHemos verificado tu pago de ${this.formatMoney(total)} por tu pedido *${orderNum}*.\n\nTu pedido ya está en preparación y pronto estará en camino. ✅\n\nPuedes seguir tu pedido en tiempo real aquí:\n${trackingUrl}\n\n¡Gracias por tu compra!`;
                             this.sendWhatsApp(this.selectedOrder.customer_phone, msg);
 

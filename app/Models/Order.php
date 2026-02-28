@@ -336,7 +336,8 @@ class Order extends Model
      */
     public function getWhatsAppMessageForStatus(string $status): ?string
     {
-        $trackingUrl = "http://localhost:3000/track?code={$this->order_number}";
+        $frontendUrl = rtrim(env('FRONTEND_URL', 'http://localhost:3000'), '/');
+        $trackingUrl = "{$frontendUrl}/track?code={$this->order_number}";
         $customerName = $this->customer_name ?: 'Cliente';
 
         return match ($status) {
