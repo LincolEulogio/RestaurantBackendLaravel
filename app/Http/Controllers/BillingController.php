@@ -178,9 +178,38 @@ class BillingController extends Controller
                 ->with('success', "Pago procesado exitosamente. Comprobante {$invoice->invoice_number} generado.")
                 ->with('change', $change);
 
-        } catch (\Exception $e) {
+    } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Error al procesar el pago: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Reject or report an issue with the payment.
+     */
+    public function rejectPayment(Request $request, Order $order)
+    {
+        $request->validate([
+            'reason' => 'required|string|max:500',
+        ]);
+
+        try {
+            DB::beginTransaction();
+            
+            // Append reason to notes
+            $newNotes = ($order->notes ? $order->notes . "\n" : "") . "--- PAGO RECHAZADO ---\nMotivo: " . $request->reason;
+            
+            $order->update([
+                'payment_status' => 'failed',
+                'notes' => $newNotes
+            ]);
+
+            DB::commit();
+
+            return response()->json(['success' => true, 'message' => 'Problema de pago reportado']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 

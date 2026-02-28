@@ -641,7 +641,7 @@
                                                 <p class="text-5xl font-black text-blue-600 dark:text-blue-400 tabular-nums tracking-tighter" x-text="formatMoney(selectedOrder.total)"></p>
                                             </div>
 
-                                            <div class="mt-8">
+                                            <div class="mt-8 flex flex-col gap-3">
                                                 <button type="button" 
                                                     @click="confirmVerifyWebPayment()"
                                                     class="w-full bg-blue-600 hover:bg-black text-white font-black py-5 rounded-[2rem] shadow-2xl shadow-blue-600/30 transition-all hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-3">
@@ -649,6 +649,15 @@
                                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                                                     </svg>
+                                                </button>
+
+                                                <button type="button"
+                                                    @click="reportPaymentProblem()"
+                                                    class="w-full bg-red-50 hover:bg-red-100 text-red-600 font-black py-4 rounded-2xl transition-all active:scale-95 flex items-center justify-center gap-2 border-2 border-red-100">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                                    </svg>
+                                                    Reportar Inconsistencia
                                                 </button>
                                             </div>
                                         </div>
@@ -988,11 +997,27 @@
                 selectedOrder: null, // Holds the full order object
                 currentTotal: 0,
                 selectedOrderPaymentStatus: '',
-                paymentMethod: '',
-                amountReceived: '',
-                showCardModal: false,
+                paymentMethod: 'cash',
+                amountReceived: 0,
                 showQRModal: false,
                 showCardInfoModal: false,
+
+                // Helper: Format and Send WhatsApp
+                sendWhatsApp(phone, message) {
+                    if (!phone) {
+                        console.error("No phone number available for this order");
+                        return;
+                    }
+                    // Clean phone: remove non-numeric
+                    let cleanPhone = phone.replace(/\D/g, '');
+                    // For Peru, if starts with 9 and length 9, add 51
+                    if (cleanPhone.length === 9 && cleanPhone.startsWith('9')) {
+                        cleanPhone = '51' + cleanPhone;
+                    }
+                    
+                    const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+                    window.open(url, '_blank');
+                },
 
                 selectOrder(id, status) {
                     this.selectedOrderId = id;
@@ -1084,6 +1109,8 @@
 
                     const total = this.formatMoney(this.selectedOrder.total);
                     const method = this.selectedOrder.payment_method.toUpperCase();
+                    const customerName = this.selectedOrder.customer_name || 'Cliente';
+                    const orderNum = this.selectedOrder.order_number;
 
                     Swal.fire({
                         title: '<span class="font-black text-2xl uppercase tracking-tighter">¿Monto recibido?</span>',
@@ -1111,9 +1138,70 @@
                         }
                     }).then((result) => {
                         if (result.isConfirmed) {
+                            // Notify via WhatsApp
+                            const msg = `¡Hola ${customerName}! Hemos verificado tu pago de ${total} por tu pedido ${orderNum}. Tu pedido ya está en preparación y pronto estará en camino. ¡Gracias por tu compra!`;
+                            this.sendWhatsApp(this.selectedOrder.customer_phone, msg);
+                            
                             this.paymentMethod = this.selectedOrder.payment_method;
                             this.amountReceived = this.selectedOrder.total;
                             this.submitPayment();
+                        }
+                    });
+                },
+
+                // Action: Report problem with payment
+                reportPaymentProblem() {
+                    if (!this.selectedOrder) return;
+
+                    const customerName = this.selectedOrder.customer_name || 'Cliente';
+                    const orderNum = this.selectedOrder.order_number;
+
+                    Swal.fire({
+                        title: '<span class="font-black text-xl uppercase text-red-600">Reportar Problema</span>',
+                        text: 'Describe el inconveniente (ej. Monto incompleto, no figura en app):',
+                        input: 'textarea',
+                        inputPlaceholder: 'Escribe aquí el motivo...',
+                        showCancelButton: true,
+                        confirmButtonText: 'Reportar Problema',
+                        cancelButtonText: 'Cancelar',
+                        confirmButtonColor: '#EF4444',
+                        background: document.documentElement.classList.contains('dark') ? '#111827' : '#FFFFFF',
+                        color: document.documentElement.classList.contains('dark') ? '#FFFFFF' : '#111827',
+                        customClass: {
+                            popup: 'rounded-[2.5rem]',
+                            confirmButton: 'rounded-xl px-6 py-3 font-bold',
+                            cancelButton: 'rounded-xl px-6 py-3 font-bold'
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed && result.value) {
+                            const reason = result.value;
+                            
+                            fetch(`/billing/${this.selectedOrderId}/reject-payment`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                                },
+                                body: JSON.stringify({ reason: reason })
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    // Notify via WhatsApp
+                                    const msg = `Hola ${customerName}, te saludamos de nuestro restaurante. Tenemos un inconveniente con el pago de tu pedido ${orderNum}. Motivo: ${reason}. Por favor comunícate con nosotros para regularizarlo. Gracias.`;
+                                    this.sendWhatsApp(this.selectedOrder.customer_phone, msg);
+
+                                    Swal.fire({
+                                        title: 'Reportado',
+                                        text: 'Inconsistencia reportada y cliente notificado.',
+                                        icon: 'success',
+                                        confirmButtonColor: '#3B82F6',
+                                        customClass: { popup: 'rounded-3xl' }
+                                    }).then(() => {
+                                        window.location.reload();
+                                    });
+                                }
+                            });
                         }
                     });
                 },

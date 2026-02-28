@@ -99,6 +99,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('permission:billing')->group(function () {
         Route::get('/billing', [BillingController::class, 'index'])->name('billing.index');
         Route::post('/billing/{order}/payment', [BillingController::class, 'processPayment'])->name('billing.process-payment');
+        Route::post('/billing/{order}/reject-payment', [BillingController::class, 'rejectPayment'])->name('billing.reject-payment');
         Route::get('/billing/{order}/download-invoice', [BillingController::class, 'downloadInvoice'])->name('billing.download-invoice');
         Route::get('/billing/{order}/details', [BillingController::class, 'getOrderDetails'])->name('billing.order-details');
     });
