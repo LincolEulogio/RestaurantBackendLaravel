@@ -12,7 +12,7 @@ class BlogSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-    public function run(): void
+    public function run()
     {
         $faker = Faker::create('es_ES'); // Use Spanish locale for realistic data
 
@@ -42,10 +42,13 @@ class BlogSeeder extends Seeder
 
         foreach ($topics as $index => $topic) {
             $isPublished = $faker->boolean(80); // 80% chance of being published
+            $slug = Str::slug($topic).'-'.($index + 1);
 
-            Blog::create([
+            Blog::updateOrCreate([
+                'slug' => $slug,
+            ], [
                 'title' => $topic,
-                'slug' => Str::slug($topic).'-'.($index + 1), // Ensure unique slug
+                'slug' => $slug,
                 'content' => $this->generateContent($faker),
                 'image' => null, // We leave image null or could use a placeholder URL if requested
                 'status' => $isPublished ? 'published' : 'draft',

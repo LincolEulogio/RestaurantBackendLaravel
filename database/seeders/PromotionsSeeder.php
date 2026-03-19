@@ -12,7 +12,7 @@ class PromotionsSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-    public function run(): void
+    public function run()
     {
         // Ensure we have some products
         $products = Product::all();
@@ -24,7 +24,9 @@ class PromotionsSeeder extends Seeder
         }
 
         // 1. Combo Familiar (20% off)
-        $promo1 = Promotion::create([
+        $promo1 = Promotion::updateOrCreate([
+            'title' => 'Combo Familiar',
+        ], [
             'title' => 'Combo Familiar',
             'description' => 'Disfruta de una cena completa con nuestra selección especial.',
             'discount_percent' => 20,
@@ -36,10 +38,12 @@ class PromotionsSeeder extends Seeder
         ]);
 
         // Attach random products (take 2)
-        $promo1->products()->attach($products->random(min(3, $products->count()))->pluck('id'));
+        $promo1->products()->sync($products->random(min(3, $products->count()))->pluck('id')->all());
 
         // 2. Oferta Fin de Semana (15% off)
-        $promo2 = Promotion::create([
+        $promo2 = Promotion::updateOrCreate([
+            'title' => 'Oferta Fin de Semana',
+        ], [
             'title' => 'Oferta Fin de Semana',
             'description' => 'Todo lo que necesitas para tu reunión.',
             'discount_percent' => 15,
@@ -51,10 +55,12 @@ class PromotionsSeeder extends Seeder
         ]);
 
         // Attach random products (take 3 different ones)
-        $promo2->products()->attach($products->random(min(4, $products->count()))->pluck('id'));
+        $promo2->products()->sync($products->random(min(4, $products->count()))->pluck('id')->all());
 
         // 3. Lunch Special (10% off) - Expiring soon
-        $promo3 = Promotion::create([
+        $promo3 = Promotion::updateOrCreate([
+            'title' => 'Almuerzo Ejecutivo',
+        ], [
             'title' => 'Almuerzo Ejecutivo',
             'description' => 'La mejor opción para tu break del mediodía.',
             'discount_percent' => 10,
@@ -65,6 +71,6 @@ class PromotionsSeeder extends Seeder
             'end_date' => Carbon::now()->addDays(2),
         ]);
 
-        $promo3->products()->attach($products->random(min(2, $products->count()))->pluck('id'));
+        $promo3->products()->sync($products->random(min(2, $products->count()))->pluck('id')->all());
     }
 }

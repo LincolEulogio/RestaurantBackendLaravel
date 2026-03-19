@@ -43,12 +43,16 @@ class CategorySeeder extends Seeder
         ];
 
         foreach ($categories as $categoryName) {
-            Category::create([
-                'name' => $categoryName,
-                'slug' => Str::slug($categoryName),
-                'description' => 'Deliciosa selección de '.strtolower($categoryName).' preparados con los mejores ingredientes.',
-                'is_active' => true,
-            ]);
+            $slug = Str::slug($categoryName);
+
+            Category::updateOrCreate(
+                ['slug' => $slug],
+                [
+                    'name' => $categoryName,
+                    'description' => 'Deliciosa selección de '.strtolower($categoryName).' preparados con los mejores ingredientes.',
+                    'is_active' => true,
+                ]
+            );
         }
 
         $this->command->info('20 Categorías creadas exitosamente.');

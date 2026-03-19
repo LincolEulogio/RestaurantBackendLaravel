@@ -9,7 +9,7 @@ class SettingsSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-    public function run(): void
+    public function run()
     {
         $settings = [
             // General
@@ -37,7 +37,7 @@ class SettingsSeeder extends Seeder
                 $setting['key'],
                 $setting['value'],
                 $setting['group'],
-                $setting['type'] ?? 'string'
+                isset($setting['type']) ? $setting['type'] : 'string'
             );
         }
     }

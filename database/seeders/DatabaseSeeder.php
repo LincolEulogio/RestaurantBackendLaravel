@@ -13,7 +13,7 @@ class DatabaseSeeder extends Seeder
     /**
      * Seed the application's database.
      */
-    public function run(): void
+    public function run()
     {
         $this->command->info('🌱 Seeding database...');
 
@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             StaffSeeder::class,
             SettingsSeeder::class,
+            PaymentMethodSeeder::class,
             CategorySeeder::class,
             ProductSeeder::class,
             PromotionsSeeder::class,
@@ -35,6 +36,9 @@ class DatabaseSeeder extends Seeder
             InventorySeeder::class,
             TableSeeder::class,
             FillReservationsSeeder::class,
+            CustomerSeeder::class,
+            OrderSeeder::class,
+            WebsiteContentSeeder::class,
         ]);
 
         $this->command->info('✅ Database seeded successfully!');

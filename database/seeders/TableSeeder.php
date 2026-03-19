@@ -10,7 +10,7 @@ class TableSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-    public function run(): void
+    public function run()
     {
         // Indoor Tables
         $tables = [
@@ -26,7 +26,10 @@ class TableSeeder extends Seeder
         ];
 
         foreach ($tables as $table) {
-            Table::create($table);
+            Table::updateOrCreate(
+                ['table_number' => $table['table_number']],
+                $table
+            );
         }
     }
 }

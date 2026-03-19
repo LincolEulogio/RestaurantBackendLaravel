@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 
 class RoleSeeder extends Seeder
 {
-    public function run(): void
+    public function run()
     {
         $roles = [
             [
@@ -101,7 +101,7 @@ class RoleSeeder extends Seeder
 
         // Delete existing roles first
         DB::table('roles')->truncate();
-        
+
         DB::table('roles')->insert($roles);
     }
 }

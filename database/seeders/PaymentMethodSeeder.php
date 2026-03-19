@@ -7,7 +7,7 @@ use Illuminate\Database\Seeder;
 
 class PaymentMethodSeeder extends Seeder
 {
-    public function run(): void
+    public function run()
     {
         $paymentMethods = [
             [
@@ -44,7 +44,10 @@ class PaymentMethodSeeder extends Seeder
         ];
 
         foreach ($paymentMethods as $method) {
-            PaymentMethod::create($method);
+            PaymentMethod::updateOrCreate(
+                ['type' => $method['type']],
+                $method
+            );
         }
     }
 }

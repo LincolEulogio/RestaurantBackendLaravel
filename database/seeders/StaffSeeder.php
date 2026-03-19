@@ -11,7 +11,7 @@ class StaffSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-    public function run(): void
+    public function run()
     {
         // 1. Super Admin
         User::updateOrCreate(
